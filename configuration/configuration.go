@@ -7,13 +7,20 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Strategy struct {
-}
-
-//Configuration is the YAML structure representation
+//Configuration generated from https://mengzhuo.github.io/yaml-to-go/
 type Configuration struct {
-	APIVersion string    `yaml:"APIVersion"`
-	Strategy   *Strategy `yaml:"Strategy"`
+	APIVersion string `yaml:"APIVersion"`
+	Strategy   []struct {
+		Deployment struct {
+			Name   string `yaml:"Name"`
+			Git    string `yaml:"Git"`
+			Action []struct {
+				Execute struct {
+					Shell string `yaml:"shell"`
+				} `yaml:"Execute"`
+			} `yaml:"Action"`
+		} `yaml:"Deployment"`
+	} `yaml:"Strategy"`
 }
 
 //NewConfiguration creates a deserialised yaml object

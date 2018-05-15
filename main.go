@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/AlexsJones/asana/configuration"
+	"github.com/AlexsJones/ashara/configuration"
+	"github.com/fatih/color"
 )
 
 func main() {
@@ -19,5 +19,8 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	log.Println(conf)
+
+	for _, d := range conf.Strategy {
+		color.Yellow(fmt.Sprintf("Attempting to fetch %s\n", d.Deployment.Name))
+	}
 }

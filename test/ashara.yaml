@@ -1,0 +1,18 @@
+APIVersion: "v1"
+Strategy:
+  - Deployment:
+     Name: "kubernetes-nifi-cluster"
+     Git: "github.com/AlexsJones/kubernetes-nifi-cluster.git"
+     Action:
+      - Execute:
+         shell: -|
+          ./build_environment.sh default
+          kubectl create -f deployment/
+  - Deployment:
+      Name: kubernetes-zookeeper-cluster
+      Git: github.com/AlexsJones/kubernetes-zookeeper-cluster.git
+      Action:
+       - Execute:
+          shell: -|
+           ./build_environment.sh default
+           kubectl create -f deployment/
