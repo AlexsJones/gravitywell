@@ -12,11 +12,15 @@ type Configuration struct {
 	APIVersion string `yaml:"APIVersion"`
 	Strategy   []struct {
 		Deployment struct {
-			Name   string `yaml:"Name"`
-			Git    string `yaml:"Git"`
-			Action []struct {
+			Cluster string `yaml:"Cluster"`
+			Name    string `yaml:"Name"`
+			Git     string `yaml:"Git"`
+			Action  []struct {
 				Execute struct {
-					Shell string `yaml:"shell"`
+					Shell   string `yaml:"shell"`
+					Kubectl struct {
+						Create string `yaml:"create"`
+					} `yaml:"kubectl"`
 				} `yaml:"Execute"`
 			} `yaml:"Action"`
 		} `yaml:"Deployment"`

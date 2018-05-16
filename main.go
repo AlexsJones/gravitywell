@@ -9,6 +9,10 @@ import (
 	"github.com/fatih/color"
 )
 
+const (
+	defaultvcs = "git"
+)
+
 func main() {
 	_ = flag.Bool("parallel", false, "Run deployments in parallel")
 	config := flag.String("config", "", "Configuration path")
@@ -22,5 +26,6 @@ func main() {
 
 	for _, d := range conf.Strategy {
 		color.Yellow(fmt.Sprintf("Attempting to fetch %s\n", d.Deployment.Name))
+
 	}
 }
