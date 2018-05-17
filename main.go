@@ -6,11 +6,13 @@ import (
 	"os"
 
 	"github.com/AlexsJones/ashara/configuration"
+	"github.com/AlexsJones/ashara/scheduler"
 	"github.com/fatih/color"
 )
 
 const (
 	defaultvcs = "git"
+	supportAPI = "v1"
 )
 
 func main() {
@@ -23,9 +25,19 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-
-	for _, d := range conf.Strategy {
-		color.Yellow(fmt.Sprintf("Attempting to fetch %s\n", d.Deployment.Name))
-
+	if conf.APIVersion != supportAPI {
+		color.Red(fmt.Sprintf("Manifest is not supported by the current API: %s\n", supportAPI))
+		os.Exit(1)
 	}
+	sh, err := scheduler.NewScheduler(conf)
+	if err != nil {
+		color.Red(err.Error())
+		os.Exit(1)
+	}
+
+	if err := sh.Design(); err != nil {
+		color.Red(err.Error())
+		os.Exit(1)
+	}
+
 }
