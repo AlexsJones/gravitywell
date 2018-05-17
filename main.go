@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/AlexsJones/ashara/configuration"
-	"github.com/AlexsJones/ashara/scheduler"
+	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/platform"
+	"github.com/AlexsJones/gravitywell/scheduler"
 	"github.com/fatih/color"
 )
 
 const (
 	defaultvcs = "git"
 	supportAPI = "v1"
+	masterurl  = ""
+	incluster  = false
 )
 
 func main() {
@@ -35,7 +38,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := sh.Design(); err != nil {
+	kubernetes, err := platform.NewKubernetes(masterurl, incluster)
+	if err != nil {
+		color.Red(err.Error())
+		os.Exit(1)
+	}
+
+	if err := sh.Run(kubernetes); err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}
