@@ -8,6 +8,11 @@ Pull all your Kubernetes deployment configuration into one place.
 Run one command and one manifest to switch clusters, deploy services and be the boss of your infrastructure.
 
 ## Example overview Manifest
+
+Example command: `gravitywell -config deploy-nifi.yaml`
+
+Lets look at the deploy-nifi.yaml...
+
 ```
 APIVersion: "v1"
 Strategy:
@@ -34,6 +39,5 @@ Strategy:
                   create: deployment
 
 ````
-
 
 Cool eh?
