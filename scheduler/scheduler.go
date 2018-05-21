@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
+//Options ...
 type Options struct {
 	VCS         string
 	TempVCSPath string
@@ -70,8 +71,13 @@ func (s *Scheduler) Run(opt Options) error {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
+			//---------------------------------
+			for _, a := range deployment.Deployment.Action {
+				if a.Execute.Shell != "" {
+					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, deployment.Deployment.Name), false)
+				}
+			}
 		}
-		//---------------------------------
 
 	}
 

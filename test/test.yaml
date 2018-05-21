@@ -8,8 +8,7 @@ Strategy:
            Git: "https://github.com/AlexsJones/kubernetes-nifi-cluster.git"
            Action:
             - Execute:
-               shell: -|
-                ./build_environment.sh default
+               Shell: "ls -la"
                kubectl:
                  create: deployment
         - Deployment:
@@ -17,7 +16,6 @@ Strategy:
             Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
-                shell: -|
-                 ./build_environment.sh default
+                Shell: "ls -la"
                 kubectl:
                   create: deployment
