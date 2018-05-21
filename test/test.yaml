@@ -13,7 +13,7 @@ Strategy:
                  Command: replace
                  Type: statefulset
                  Path: statefulset
-        - Deployments:
+        - Deployment:
             Name: "kubernetes-zookeeper-cluster"
             Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
