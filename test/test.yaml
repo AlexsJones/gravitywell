@@ -5,7 +5,7 @@ Strategy:
       Deployments:
         - Deployment:
            Name: "kubernetes-nifi-cluster"
-           Git: "github.com/AlexsJones/kubernetes-nifi-cluster.git"
+           Git: "https://github.com/AlexsJones/kubernetes-nifi-cluster.git"
            Action:
             - Execute:
                shell: -|
@@ -13,8 +13,8 @@ Strategy:
                kubectl:
                  create: deployment
         - Deployment:
-            Name: kubernetes-zookeeper-cluster
-            Git: github.com/AlexsJones/kubernetes-zookeeper-cluster.git
+            Name: "kubernetes-zookeeper-cluster"
+            Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
                 shell: -|

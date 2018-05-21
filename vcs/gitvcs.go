@@ -1,11 +1,21 @@
 package vcs
 
-import "errors"
+import (
+	"os"
 
+	git "gopkg.in/src-d/go-git.v4"
+)
+
+//GitVCS ...
 type GitVCS struct {
 }
 
-func (g *GitVCS) Fetch(v IVCS, remote string) (string, error) {
+//Fetch ...
+func (g *GitVCS) Fetch(localpath string, remote string) (string, error) {
 
-	return "", errors.New("Fetch failure")
+	_, err := git.PlainClone(localpath, false, &git.CloneOptions{
+		URL:      remote,
+		Progress: os.Stdout,
+	})
+	return "", err
 }
