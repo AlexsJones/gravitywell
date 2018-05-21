@@ -3,12 +3,13 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/AlexsJones/kubebuilder/src/data"
+	appsbetav1 "k8s.io/api/apps/v1beta1"
+	v1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/api/core/v1"
+	apibetav1 "k8s.io/api/extensions/v1beta1"
 	beta "k8s.io/api/extensions/v1beta1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -21,48 +22,43 @@ import (
 	//This is required for gcp auth provider scope
 )
 
-//Kubernetes ...
-type Kubernetes struct {
-	clientset *kubernetes.Clientset
-	config    *rest.Config
+// GetKubeClient creates a Kubernetes config and client for a given kubeconfig context.
+func GetKubeClient(context string) (*rest.Config, kubernetes.Interface, error) {
+	config, err := configForContext(context)
+	if err != nil {
+		return nil, nil, err
+	}
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get Kubernetes client: %s", err)
+	}
+	return config, client, nil
 }
 
-//NewKubernetes object
-func NewKubernetes(masterURL string, inclusterConfig bool) (*Kubernetes, error) {
-
-	//InCluster...
-	var config *rest.Config
-	var err error
-	if inclusterConfig {
-		fmt.Println("Using in cluster configuration")
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		fmt.Println("Using out of cluster configuration")
-		kubeconfig := filepath.Join(func() string {
-			if h := os.Getenv("HOME"); h != "" {
-				return h
-			}
-			return os.Getenv("USERPROFILE")
-		}(), ".kube", "config")
-		// use the current context in kubeconfig
-		config, err = clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
+// configForContext creates a Kubernetes REST client configuration for a given kubeconfig context.
+func configForContext(context string) (*rest.Config, error) {
+	config, err := getConfig(context).ClientConfig()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not get Kubernetes config for context %q: %s", context, err)
 	}
-	return &Kubernetes{clientset: clientset, config: config}, nil
+	return config, nil
+}
+
+// getConfig returns a Kubernetes client config for a given context.
+func getConfig(context string) clientcmd.ClientConfig {
+	rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	rules.DefaultClientConfig = &clientcmd.DefaultClientConfig
+
+	overrides := &clientcmd.ConfigOverrides{ClusterDefaults: clientcmd.ClusterDefaults}
+
+	if context != "" {
+		overrides.CurrentContext = context
+	}
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
 
 //ValidateService from deserialisation of YAML
-func (k *Kubernetes) ValidateService(build *data.BuildDefinition) (bool, error) {
+func ValidateService(build *data.BuildDefinition) (bool, error) {
 
 	//TODO: NEEDS some proper checks here not just deserialisation
 	fmt.Println("Attempting deserialisation of YAML")
@@ -78,7 +74,7 @@ func (k *Kubernetes) ValidateService(build *data.BuildDefinition) (bool, error) 
 }
 
 //ValidateDeployment from deserialisation of YAML
-func (k *Kubernetes) ValidateDeployment(build *data.BuildDefinition) (bool, error) {
+func ValidateDeployment(k kubernetes.Interface, build *data.BuildDefinition) (bool, error) {
 	//TODO: NEEDS some proper checks here not just deserialisation
 	fmt.Println("Attempting deserialisation of YAML")
 
@@ -93,7 +89,7 @@ func (k *Kubernetes) ValidateDeployment(build *data.BuildDefinition) (bool, erro
 }
 
 //ValidateIngress from deserialisation of YAML
-func (k *Kubernetes) ValidateIngress(build *data.BuildDefinition) (bool, error) {
+func ValidateIngress(k kubernetes.Interface, build *data.BuildDefinition) (bool, error) {
 	//TODO: NEEDS some proper checks here not just deserialisation
 	fmt.Println("Attempting deserialisation of YAML")
 
@@ -108,28 +104,27 @@ func (k *Kubernetes) ValidateIngress(build *data.BuildDefinition) (bool, error) 
 }
 
 //CreateNamespace within kubernetes
-func (k *Kubernetes) CreateNamespace(namespace string) (*v1.Namespace, error) {
-	if ns, err := k.GetNamespace(namespace); err == nil {
+func CreateNamespace(k kubernetes.Interface, namespace string) (*v1.Namespace, error) {
+	if ns, err := GetNamespace(k, namespace); err == nil {
 		fmt.Println("Found existing namespace")
 		return ns, err
 	}
 	ns := &v1.Namespace{}
 
 	ns.SetName(namespace)
-
-	ns, err := k.clientset.CoreV1().Namespaces().Create(ns)
+	ns, err := k.CoreV1().Namespaces().Create(ns)
 	return ns, err
 }
 
 //GetNamespace within kubernetes
-func (k *Kubernetes) GetNamespace(namespace string) (*v1.Namespace, error) {
+func GetNamespace(k kubernetes.Interface, namespace string) (*v1.Namespace, error) {
 
-	ns, err := k.clientset.CoreV1().Namespaces().Get(namespace, meta.GetOptions{})
+	ns, err := k.CoreV1().Namespaces().Get(namespace, meta.GetOptions{})
 	return ns, err
 }
 
 //CreateDeployment ...
-func (k *Kubernetes) CreateDeployment(build *data.BuildDefinition) (*beta.Deployment, error) {
+func CreateDeployment(k kubernetes.Interface, build *data.BuildDefinition) (*beta.Deployment, error) {
 
 	deserializer := serializer.NewCodecFactory(clientsetscheme.Scheme).UniversalDeserializer()
 	obj, _, err := deserializer.Decode([]byte(build.Kubernetes.Deployment), nil, nil)
@@ -139,7 +134,7 @@ func (k *Kubernetes) CreateDeployment(build *data.BuildDefinition) (*beta.Deploy
 		return nil, err
 	}
 
-	deploymentClient := k.clientset.ExtensionsV1beta1().Deployments(build.Kubernetes.Namespace)
+	deploymentClient := k.ExtensionsV1beta1().Deployments(build.Kubernetes.Namespace)
 
 	deployment, err := deploymentClient.Create(obj.(*beta.Deployment))
 	if err != nil {
@@ -157,7 +152,7 @@ func (k *Kubernetes) CreateDeployment(build *data.BuildDefinition) (*beta.Deploy
 }
 
 //CreateService ...
-func (k *Kubernetes) CreateService(build *data.BuildDefinition) (*v1.Service, error) {
+func CreateService(k kubernetes.Interface, build *data.BuildDefinition) (*v1.Service, error) {
 
 	deserializer := serializer.NewCodecFactory(clientsetscheme.Scheme).UniversalDeserializer()
 	obj, _, err := deserializer.Decode([]byte(build.Kubernetes.Service), nil, nil)
@@ -167,7 +162,7 @@ func (k *Kubernetes) CreateService(build *data.BuildDefinition) (*v1.Service, er
 		return nil, err
 	}
 
-	serviceClient := k.clientset.CoreV1().Services(build.Kubernetes.Namespace)
+	serviceClient := k.CoreV1().Services(build.Kubernetes.Namespace)
 
 	service, err := serviceClient.Create(obj.(*v1.Service))
 	if err != nil {
@@ -186,7 +181,7 @@ func (k *Kubernetes) CreateService(build *data.BuildDefinition) (*v1.Service, er
 }
 
 //CreateIngress ...
-func (k *Kubernetes) CreateIngress(build *data.BuildDefinition) (*beta.Ingress, error) {
+func CreateIngress(k kubernetes.Interface, build *data.BuildDefinition) (*beta.Ingress, error) {
 
 	deserializer := serializer.NewCodecFactory(clientsetscheme.Scheme).UniversalDeserializer()
 	obj, _, err := deserializer.Decode([]byte(build.Kubernetes.Ingress), nil, nil)
@@ -196,7 +191,7 @@ func (k *Kubernetes) CreateIngress(build *data.BuildDefinition) (*beta.Ingress, 
 		return nil, err
 	}
 
-	ingressClient := k.clientset.ExtensionsV1beta1().Ingresses(build.Kubernetes.Namespace)
+	ingressClient := k.ExtensionsV1beta1().Ingresses(build.Kubernetes.Namespace)
 
 	ingress, err := ingressClient.Create(obj.(*beta.Ingress))
 	if err != nil {
@@ -214,7 +209,7 @@ func (k *Kubernetes) CreateIngress(build *data.BuildDefinition) (*beta.Ingress, 
 }
 
 //GetIngressLoadBalancerIPAddress ...
-func (k *Kubernetes) GetIngressLoadBalancerIPAddress(ingress *beta.Ingress, t time.Duration) (string, error) {
+func GetIngressLoadBalancerIPAddress(k kubernetes.Interface, ingress *beta.Ingress, t time.Duration) (string, error) {
 
 	start := time.Now()
 	for {
@@ -231,4 +226,48 @@ func (k *Kubernetes) GetIngressLoadBalancerIPAddress(ingress *beta.Ingress, t ti
 		time.Sleep(time.Second)
 		fmt.Println("Waiting...")
 	}
+}
+
+//GetNamespaces within kubernetes
+func GetNamespaces(k kubernetes.Interface) (*v1.NamespaceList, error) {
+
+	nl, err := k.CoreV1().Namespaces().List(meta.ListOptions{})
+
+	return nl, err
+}
+
+//GetPods within kubernetes
+func GetPods(k kubernetes.Interface, namespace string) (*v1.PodList, error) {
+
+	nl, err := k.CoreV1().Pods(namespace).List(meta.ListOptions{})
+
+	return nl, err
+}
+
+//GetServices within kubernetes
+func GetServices(k kubernetes.Interface, namespace string) (*v1.ServiceList, error) {
+
+	nl, err := k.CoreV1().Services(namespace).List(meta.ListOptions{})
+
+	return nl, err
+}
+
+//GetDeployments within kubernetes
+func GetDeployments(k kubernetes.Interface, namespace string) (*apibetav1.DeploymentList, error) {
+
+	nl, err := k.ExtensionsV1beta1().Deployments(namespace).List(meta.ListOptions{})
+
+	return nl, err
+}
+
+//GetStatefulSets within kubernetes
+func GetStatefulSets(k kubernetes.Interface, namespace string) (*appsbetav1.StatefulSetList, error) {
+	nl, err := k.AppsV1beta1().StatefulSets(namespace).List(meta.ListOptions{})
+	return nl, err
+}
+
+//GetCronJobs within kubernetes
+func GetCronJobs(k kubernetes.Interface, namespace string) (*v1beta.CronJobList, error) {
+	nl, err := k.BatchV1beta1().CronJobs(namespace).List(meta.ListOptions{})
+	return nl, err
 }
