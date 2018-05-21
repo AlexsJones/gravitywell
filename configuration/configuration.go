@@ -19,10 +19,12 @@ type Configuration struct {
 					Git    string `yaml:"Git"`
 					Action []struct {
 						Execute struct {
-							Shell   string `yaml:"shell"`
+							Shell   string `yaml:"Shell"`
 							Kubectl struct {
-								Create string `yaml:"create"`
-							} `yaml:"kubectl"`
+								Path    string `yaml:"Path"`
+								Type    string `yaml:"Type"`
+								Command string `yaml:"Command"`
+							} `yaml:"Kubectl"`
 						} `yaml:"Execute"`
 					} `yaml:"Action"`
 				} `yaml:"Deployment"`

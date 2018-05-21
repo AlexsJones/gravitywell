@@ -74,8 +74,16 @@ func (s *Scheduler) Run(opt Options) error {
 			//---------------------------------
 			for _, a := range deployment.Deployment.Action {
 				if a.Execute.Shell != "" {
-					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, deployment.Deployment.Name), false)
+					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, cluster.Cluster.Name), false)
 				}
+				//---------------------------------
+				if a.Execute.Kubectl.Command == "" {
+					color.Red("No Kubernetes create action to run")
+					continue
+				}
+				//A very temporary command whilst I fix the real API
+				ShellCommand(fmt.Sprintf("kubectl %s -f %s --context=%s", a.Execute.Kubectl.Command, a.Execute.Kubectl.Path, cluster.Cluster.Name), path.Join(opt.TempVCSPath, deployment.Deployment.Name), false)
+
 			}
 		}
 
