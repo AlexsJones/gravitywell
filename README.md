@@ -43,4 +43,9 @@ Strategy:
                   Command: replace
 ````
 
-Cool eh?
+### Roadmap
+
+- Parallel cluster Deployments
+- Rationalise back into native API for manifest parsing
+- Expand to deploy from in-memory git repo
+- Support additional VCS (SVN etc.)
