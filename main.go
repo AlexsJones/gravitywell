@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	_ = flag.Bool("parallel", false, "Run deployments in parallel")
+	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel")
 	config := flag.String("config", "", "Configuration path")
 	flag.Parse()
 
@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1"}); err != nil {
+	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", Parallel: *parallel}); err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}

@@ -17,6 +17,7 @@ type Options struct {
 	VCS         string
 	TempVCSPath string
 	APIVersion  string
+	Parallel    bool
 }
 
 //Scheduler object ...
@@ -56,7 +57,9 @@ func (s *Scheduler) Run(opt Options) error {
 			color.Red(err.Error())
 			os.Exit(1)
 		}
-
+		if opt.Parallel {
+			color.Blue("Parallel cluster runs not implemented yet.")
+		}
 		for _, deployment := range cluster.Cluster.Deployments {
 			//---------------------------------
 			color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", deployment.Deployment.Name, path.Join(opt.TempVCSPath, deployment.Deployment.Name)))
@@ -82,7 +85,7 @@ func (s *Scheduler) Run(opt Options) error {
 					continue
 				}
 				//A very temporary command whilst I fix the real API
-				ShellCommand(fmt.Sprintf("kubectl %s -f %s --context=%s", a.Execute.Kubectl.Command, a.Execute.Kubectl.Path, cluster.Cluster.Name), path.Join(opt.TempVCSPath, deployment.Deployment.Name), false)
+				ShellCommand(fmt.Sprintf("kubectl %s -f %s --context=%s", a.Execute.Kubectl.Command, a.Execute.Kubectl.Path, cluster.Cluster.Name), path.Join(opt.TempVCSPath, deployment.Deployment.Name), true)
 
 			}
 		}
