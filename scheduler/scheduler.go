@@ -78,12 +78,12 @@ func (s *Scheduler) Run(opt Options) error {
 			//---------------------------------
 			for _, a := range deployment.Deployment.Action {
 				if a.Execute.Shell != "" {
-					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, cluster.Cluster.Name), false)
+					color.Yellow("Running shell command")
+					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, cluster.Cluster.Name), true)
 				}
 				//---------------------------------
 				if a.Execute.Kubectl.Command == "" {
 					color.Red("No Kubernetes create action to run")
-					continue
 				}
 				//---------------------------------
 				fileList := []string{}
@@ -95,7 +95,7 @@ func (s *Scheduler) Run(opt Options) error {
 
 				if err != nil {
 					color.Red(err.Error())
-					os.Exit(1)
+
 				}
 				for _, file := range fileList {
 					color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
@@ -109,7 +109,6 @@ func (s *Scheduler) Run(opt Options) error {
 
 					if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace); err != nil {
 						color.Red(err.Error())
-						return err
 					}
 				}
 				//---------------------------------

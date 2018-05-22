@@ -19,7 +19,7 @@ Strategy:
             Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
-                Shell: "ls -la"
+                Shell: "./build_environment.sh small"
                 Kubectl:
-                  Path: micro
+                  Path: deployment
                   Command: replace
