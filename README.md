@@ -30,7 +30,6 @@ Strategy:
                Shell: "ls -la"
                Kubectl:
                  Command: replace
-                 Type: statefulset
                  Path: statefulset
         - Deployment:
             Name: "kubernetes-zookeeper-cluster"
@@ -38,10 +37,9 @@ Strategy:
             Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
-                Shell: "ls -la"
+                Shell: "./build_environment.sh small"
                 Kubectl:
-                  Path: micro
-                  Type: statefulset
+                  Path: deployment
                   Command: replace
 ````
 

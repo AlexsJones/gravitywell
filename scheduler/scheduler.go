@@ -78,8 +78,10 @@ func (s *Scheduler) Run(opt Options) error {
 			//---------------------------------
 			for _, a := range deployment.Deployment.Action {
 				if a.Execute.Shell != "" {
-					color.Yellow("Running shell command")
-					ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, cluster.Cluster.Name), true)
+					color.Yellow(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
+					if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, deployment.Deployment.Name), true); err != nil {
+						color.Red(err.Error())
+					}
 				}
 				//---------------------------------
 				if a.Execute.Kubectl.Command == "" {
