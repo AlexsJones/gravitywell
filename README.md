@@ -49,9 +49,19 @@ Strategy:
                   Command: replace
 ````
 
+### Support APIResource types
+
+[X] ConfigMap
+[X] StatefulSet
+[X] Deployment
+[X] Service
+[ ] CronJob
+[ ] PersistantVolume
+[ ] PersistantVolumeClaim
+
 ### Roadmap
 
- - [ ] Parallel cluster Deployments
- - [x] Rationalise back into native API for manifest parsing
- - [ ] Expand to deploy from in-memory git repo
- - [ ] Support additional VCS (SVN etc.)
+[ ] Parallel cluster Deployments
+[X] Rationalise back into native API for manifest parsing
+[ ] Expand to deploy from in-memory git repo
+[ ] Support additional VCS (SVN etc.)
