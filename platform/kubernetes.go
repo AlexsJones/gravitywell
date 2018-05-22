@@ -73,7 +73,12 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {
 			color.Blue("Deployment already exists")
-
+			_, err := deploymentClient.Update(objdep)
+			if err != nil {
+				color.Red("Deployment could not be updated")
+				return err
+			}
+			color.Blue("Deployment updated")
 		}
 	case *v1beta1.StatefulSet:
 		color.Blue("Found statefulset resource")
@@ -82,6 +87,12 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		_, err := stsclient.Create(sts)
 		if err != nil {
 			color.Blue("Statefulset already exists")
+			_, err := stsclient.UpdateStatus(sts)
+			if err != nil {
+				color.Red("Could not update Statefulset")
+				return err
+			}
+			color.Blue("Statefulset updated")
 		}
 	case *v1.Service:
 		color.Blue("Found service resource")
@@ -90,14 +101,26 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		_, err := ssclient.Create(ss)
 		if err != nil {
 			color.Blue("Service already exists")
+			_, err := ssclient.Update(ss)
+			if err != nil {
+				color.Red("Could not update service")
+				return err
+			}
+			color.Blue("Service updated")
 		}
 	case *v1.ConfigMap:
 		color.Blue("Found Configmap resource")
 		cm := obj.(*v1.ConfigMap)
-		cmlicnet := k.CoreV1().ConfigMaps(namespace)
-		_, err := cmlicnet.Create(cm)
+		cmclient := k.CoreV1().ConfigMaps(namespace)
+		_, err := cmclient.Create(cm)
 		if err != nil {
 			color.Blue("Configmap already exists")
+			_, err := cmclient.Update(cm)
+			if err != nil {
+				color.Red("Configmap could not be updated")
+				return err
+			}
+			color.Blue("Configmap updated")
 		}
 	default:
 		color.Red("Unable to convert API resource")
