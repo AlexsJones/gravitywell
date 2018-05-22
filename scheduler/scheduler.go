@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform"
@@ -84,8 +85,25 @@ func (s *Scheduler) Run(opt Options) error {
 					color.Red("No Kubernetes create action to run")
 					continue
 				}
-				//A very temporary command whilst I fix the real API
-				ShellCommand(fmt.Sprintf("kubectl %s -f %s --context=%s", a.Execute.Kubectl.Command, a.Execute.Kubectl.Path, cluster.Cluster.Name), path.Join(opt.TempVCSPath, deployment.Deployment.Name), true)
+				//---------------------------------
+				fileList := []string{}
+				err := filepath.Walk(path.Join(opt.TempVCSPath, deployment.Deployment.Name, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
+					if f.IsDir() {
+						return nil
+					}
+					fileList = append(fileList, path)
+					return nil
+				})
+				if err != nil {
+					color.Red(err.Error())
+					os.Exit(1)
+				}
+				for _, file := range fileList {
+					color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
+					ShellCommand(fmt.Sprintf("kubectl %s -f ./%s --context=%s", a.Execute.Kubectl.Command, file, cluster.Cluster.Name), "", true)
+
+				}
+				//---------------------------------
 
 			}
 		}
