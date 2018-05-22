@@ -72,7 +72,6 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) er
 	restmapper := discovery.NewRESTMapper(apigroups, meta.InterfacesForUnstructured)
 
 	for {
-		// https://github.com/kubernetes/apimachinery/blob/master/pkg/runtime/types.go
 		ext := runtime.RawExtension{}
 		if err := d.Decode(&ext); err != nil {
 			if err == io.EOF {
@@ -82,11 +81,8 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) er
 		}
 		fmt.Println("raw: ", string(ext.Raw))
 		versions := &runtime.VersionedObjects{}
-		//_, gvk, err := objectdecoder.Decode(ext.Raw,nil,versions)
 		obj, gvk, err := unstructured.UnstructuredJSONScheme.Decode(ext.Raw, nil, versions)
 		fmt.Println("obj: ", obj)
-
-		// https://github.com/kubernetes/apimachinery/blob/master/pkg/api/meta/interfaces.go
 		mapping, err := restmapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
 			log.Fatal(err)
@@ -100,8 +96,6 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) er
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// https://github.com/kubernetes/client-go/blob/master/discovery/discovery_client.go
 		apiresourcelist, err := dd.ServerResources()
 		if err != nil {
 			log.Fatal(err)
@@ -110,8 +104,6 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) er
 		for _, apiresourcegroup := range apiresourcelist {
 			if apiresourcegroup.GroupVersion == mapping.GroupVersionKind.Version {
 				for _, apiresource := range apiresourcegroup.APIResources {
-					//fmt.Println(apiresource)
-
 					if apiresource.Name == mapping.Resource && apiresource.Kind == mapping.GroupVersionKind.Kind {
 						myapiresource = apiresource
 					}
@@ -119,13 +111,11 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) er
 			}
 		}
 		fmt.Println(myapiresource)
-		// https://github.com/kubernetes/client-go/blob/master/dynamic/client.go
-
 		var unstruct unstructured.Unstructured
 		unstruct.Object = make(map[string]interface{})
 		var blob interface{}
-		if err := json.Unmarshal(ext.Raw, &blob); err != nil {
-			log.Fatal(err)
+		if a := json.Unmarshal(ext.Raw, &blob); err != nil {
+			color.Red(a.Error())
 		}
 		unstruct.Object = blob.(map[string]interface{})
 		fmt.Println("unstruct:", unstruct)
