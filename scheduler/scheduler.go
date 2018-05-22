@@ -88,19 +88,25 @@ func (s *Scheduler) Run(opt Options) error {
 				//---------------------------------
 				fileList := []string{}
 				err := filepath.Walk(path.Join(opt.TempVCSPath, deployment.Deployment.Name, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
-					if f.IsDir() {
-						return nil
-					}
+
 					fileList = append(fileList, path)
 					return nil
 				})
+
 				if err != nil {
 					color.Red(err.Error())
 					os.Exit(1)
 				}
 				for _, file := range fileList {
 					color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
-					//ShellCommand(fmt.Sprintf("kubectl %s -f ./%s --context=%s", a.Execute.Kubectl.Command, file, cluster.Cluster.Name), "", true)
+					if _, err := os.Stat(file); os.IsNotExist(err) {
+						continue
+
+					}
+					if sa, _ := os.Stat(file); sa.IsDir() {
+						continue
+					}
+
 					if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace); err != nil {
 						color.Red(err.Error())
 						return err

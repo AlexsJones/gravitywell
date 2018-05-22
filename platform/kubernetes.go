@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
-
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -81,8 +81,23 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		stsclient := k.AppsV1beta1().StatefulSets(namespace)
 		_, err := stsclient.Create(sts)
 		if err != nil {
-			color.Blue("Deployment already exists")
-
+			color.Blue("Statefulset already exists")
+		}
+	case *v1.Service:
+		color.Blue("Found service resource")
+		ss := obj.(*v1.Service)
+		ssclient := k.CoreV1().Services(namespace)
+		_, err := ssclient.Create(ss)
+		if err != nil {
+			color.Blue("Service already exists")
+		}
+	case *v1.ConfigMap:
+		color.Blue("Found Configmap resource")
+		cm := obj.(*v1.ConfigMap)
+		cmlicnet := k.CoreV1().ConfigMaps(namespace)
+		_, err := cmlicnet.Create(cm)
+		if err != nil {
+			color.Blue("Configmap already exists")
 		}
 	default:
 		color.Red("Unable to convert API resource")
