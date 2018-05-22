@@ -7,7 +7,13 @@ Pull all your Kubernetes deployment configuration into one place.
 
 Run one command and one manifest to switch clusters, deploy services and be the boss of your infrastructure.
 
+_It's a bit like docker-compose for Kubernetes deployments across clusters!_
+
 ![example](resources/output.gif)
+
+## Requirements
+
+`go get github.com/AlexsJones/vortex`
 
 ## Example overview Manifest
 
@@ -45,7 +51,7 @@ Strategy:
 
 ### Roadmap
 
-- [] Parallel cluster Deployments
-- [] Rationalise back into native API for manifest parsing
-- [] Expand to deploy from in-memory git repo
-- [] Support additional VCS (SVN etc.)
+[ ] Parallel cluster Deployments
+[X] Rationalise back into native API for manifest parsing
+[ ] Expand to deploy from in-memory git repo
+[ ] Support additional VCS (SVN etc.)
