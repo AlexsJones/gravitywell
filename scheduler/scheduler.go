@@ -101,7 +101,7 @@ func (s *Scheduler) Run(opt Options) error {
 				for _, file := range fileList {
 					color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
 					//ShellCommand(fmt.Sprintf("kubectl %s -f ./%s --context=%s", a.Execute.Kubectl.Command, file, cluster.Cluster.Name), "", true)
-					if err := platform.DeployFromFile(restclient, k8siface, file); err != nil {
+					if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace); err != nil {
 						color.Red(err.Error())
 						return err
 					}

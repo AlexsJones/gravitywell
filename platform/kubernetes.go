@@ -1,23 +1,15 @@
 package platform
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
+	"io/ioutil"
 	"os"
 
 	"github.com/fatih/color"
-	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/yaml"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
+	"k8s.io/api/apps/v1beta1"
+
 	"k8s.io/client-go/kubernetes"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	//This is required for gcp auth provider scope
@@ -58,82 +50,43 @@ func getConfig(context string) clientcmd.ClientConfig {
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
 
-func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string) error {
+//DeployFromFile ...
+func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
-	d := yaml.NewYAMLOrJSONDecoder(f, 4096)
-	dd := k.Discovery()
-	apigroups, err := discovery.GetAPIGroupResources(dd)
+	raw, err := ioutil.ReadAll(f)
 	if err != nil {
 		return err
 	}
-	restmapper := discovery.NewRESTMapper(apigroups, meta.InterfacesForUnstructured)
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	obj, _, _ := decode(raw, nil, nil)
 
-	for {
-		ext := runtime.RawExtension{}
-		if err := d.Decode(&ext); err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Fatal(err)
-		}
-		fmt.Println("raw: ", string(ext.Raw))
-		versions := &runtime.VersionedObjects{}
-		obj, gvk, err := unstructured.UnstructuredJSONScheme.Decode(ext.Raw, nil, versions)
-		fmt.Println("obj: ", obj)
-		mapping, err := restmapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-		if err != nil {
-			log.Fatal(err)
-		}
-		restconfig := config
-		restconfig.GroupVersion = &schema.GroupVersion{
-			Group:   mapping.GroupVersionKind.Group,
-			Version: mapping.GroupVersionKind.Version,
-		}
-		dclient, err := dynamic.NewClient(restconfig)
-		if err != nil {
-			log.Fatal(err)
-		}
-		apiresourcelist, err := dd.ServerResources()
-		if err != nil {
-			log.Fatal(err)
-		}
-		var myapiresource metav1.APIResource
-		for _, apiresourcegroup := range apiresourcelist {
-			if apiresourcegroup.GroupVersion == mapping.GroupVersionKind.Version {
-				for _, apiresource := range apiresourcegroup.APIResources {
-					if apiresource.Name == mapping.Resource && apiresource.Kind == mapping.GroupVersionKind.Kind {
-						myapiresource = apiresource
-					}
-				}
-			}
-		}
-		fmt.Println(myapiresource)
-		var unstruct unstructured.Unstructured
-		unstruct.Object = make(map[string]interface{})
-		var blob interface{}
-		if a := json.Unmarshal(ext.Raw, &blob); err != nil {
-			color.Red(a.Error())
-		}
-		unstruct.Object = blob.(map[string]interface{})
-		fmt.Println("unstruct:", unstruct)
-		ns := "default"
-		if md, ok := unstruct.Object["metadata"]; ok {
-			metadata := md.(map[string]interface{})
-			if internalns, ok := metadata["namespace"]; ok {
-				ns = internalns.(string)
-			}
-		}
-		res := dclient.Resource(&myapiresource, ns)
-		fmt.Println(res)
-		us, err := res.Create(&unstruct)
-		if err != nil {
-			color.Red(err.Error())
-		}
-		fmt.Println("unstruct response:", us)
+	fmt.Printf("%++v\n\n", obj.GetObjectKind())
 
+	switch obj.(type) {
+	case *v1beta1.Deployment:
+		color.Blue("Found deployment resource")
+		objdep := obj.(*v1beta1.Deployment)
+		deploymentClient := k.AppsV1beta1().Deployments(namespace)
+		_, err := deploymentClient.Create(objdep)
+		if err != nil {
+			color.Blue("Deployment already exists")
+
+		}
+	case *v1beta1.StatefulSet:
+		color.Blue("Found statefulset resource")
+		sts := obj.(*v1beta1.StatefulSet)
+		stsclient := k.AppsV1beta1().StatefulSets(namespace)
+		_, err := stsclient.Create(sts)
+		if err != nil {
+			color.Blue("Deployment already exists")
+
+		}
+	default:
+		color.Red("Unable to convert API resource")
 	}
+
 	return nil
 }

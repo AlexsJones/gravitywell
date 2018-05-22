@@ -15,9 +15,10 @@ type Configuration struct {
 			Name        string `yaml:"Name"`
 			Deployments []struct {
 				Deployment struct {
-					Name   string `yaml:"Name"`
-					Git    string `yaml:"Git"`
-					Action []struct {
+					Name      string `yaml:"Name"`
+					Namespace string `yaml:"Namespace"`
+					Git       string `yaml:"Git"`
+					Action    []struct {
 						Execute struct {
 							Shell   string `yaml:"Shell"`
 							Kubectl struct {

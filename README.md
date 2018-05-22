@@ -23,6 +23,7 @@ Strategy:
       Deployments:
         - Deployment:
            Name: "kubernetes-nifi-cluster"
+           Namespace: "nifi"
            Git: "https://github.com/AlexsJones/kubernetes-nifi-cluster.git"
            Action:
             - Execute:
@@ -33,6 +34,7 @@ Strategy:
                  Path: statefulset
         - Deployment:
             Name: "kubernetes-zookeeper-cluster"
+            Namespace: "zk"
             Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
@@ -45,7 +47,7 @@ Strategy:
 
 ### Roadmap
 
-- Parallel cluster Deployments
-- Rationalise back into native API for manifest parsing
-- Expand to deploy from in-memory git repo
-- Support additional VCS (SVN etc.)
+- [] Parallel cluster Deployments
+- [] Rationalise back into native API for manifest parsing
+- [] Expand to deploy from in-memory git repo
+- [] Support additional VCS (SVN etc.)
