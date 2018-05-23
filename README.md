@@ -57,6 +57,7 @@ Strategy:
 - [x] StatefulSet
 - [x] Deployment
 - [x] Service
+- [x] PodDisruptionBudget
 - [ ] CronJob
 - [ ] PersistantVolume
 - [ ] PersistantVolumeClaim
