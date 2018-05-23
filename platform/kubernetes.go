@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
 	v1 "k8s.io/api/core/v1"
+	v1polbeta "k8s.io/api/policy/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -118,6 +119,20 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 			_, err := cmclient.Update(cm)
 			if err != nil {
 				color.Red("Configmap could not be updated")
+				return err
+			}
+			color.Blue("Configmap updated")
+		}
+	case *v1polbeta.PodDisruptionBudget:
+		color.Blue("Found PodDisruptionBudget resource")
+		pdb := obj.(*v1polbeta.PodDisruptionBudget)
+		pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
+		_, err := pdbclient.Create(pdb)
+		if err != nil {
+			color.Blue("PodDisruptionBudget already exists")
+			_, err := pdbclient.Update(pdb)
+			if err != nil {
+				color.Red("PodDisruptionBudget could not be updated")
 				return err
 			}
 			color.Blue("Configmap updated")
