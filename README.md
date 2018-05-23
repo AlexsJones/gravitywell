@@ -17,6 +17,8 @@ _It's a bit like docker-compose for Kubernetes deployments across clusters!_
 
 ## Example overview Manifest
 
+_Please see examples directory_
+
 Example command: `gravitywell -config deploy-nifi.yaml`
 
 Lets look at the deploy-nifi.yaml...
