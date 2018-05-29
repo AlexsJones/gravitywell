@@ -7,30 +7,32 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-//Configuration generated from https://mengzhuo.github.io/yaml-to-go/
+type Cluster struct {
+	Name        string `yaml:"Name"`
+	Deployments []struct {
+		Deployment struct {
+			Name      string `yaml:"Name"`
+			Namespace string `yaml:"Namespace"`
+			Git       string `yaml:"Git"`
+			Action    []struct {
+				Execute struct {
+					Shell   string `yaml:"Shell"`
+					Kubectl struct {
+						Path    string `yaml:"Path"`
+						Type    string `yaml:"Type"`
+						Command string `yaml:"Command"`
+					} `yaml:"Kubectl"`
+				} `yaml:"Execute"`
+			} `yaml:"Action"`
+		} `yaml:"Deployment"`
+	} `yaml:"Deployments"`
+}
+
+//Configuration ...
 type Configuration struct {
 	APIVersion string `yaml:"APIVersion"`
 	Strategy   []struct {
-		Cluster struct {
-			Name        string `yaml:"Name"`
-			Deployments []struct {
-				Deployment struct {
-					Name      string `yaml:"Name"`
-					Namespace string `yaml:"Namespace"`
-					Git       string `yaml:"Git"`
-					Action    []struct {
-						Execute struct {
-							Shell   string `yaml:"Shell"`
-							Kubectl struct {
-								Path    string `yaml:"Path"`
-								Type    string `yaml:"Type"`
-								Command string `yaml:"Command"`
-							} `yaml:"Kubectl"`
-						} `yaml:"Execute"`
-					} `yaml:"Action"`
-				} `yaml:"Deployment"`
-			} `yaml:"Deployments"`
-		} `yaml:"Cluster"`
+		Cluster Cluster `yaml:"Cluster"`
 	} `yaml:"Strategy"`
 }
 

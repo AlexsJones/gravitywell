@@ -3,6 +3,7 @@ package platform
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/fatih/color"
@@ -64,7 +65,7 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, _ := decode(raw, nil, nil)
 
-	fmt.Printf("%++v\n\n", obj.GetObjectKind())
+	log.Printf("%++v\n\n", obj.GetObjectKind())
 
 	switch obj.(type) {
 	case *v1beta1.Deployment:
@@ -72,6 +73,7 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		objdep := obj.(*v1beta1.Deployment)
 		deploymentClient := k.AppsV1beta1().Deployments(namespace)
 		_, err := deploymentClient.Create(objdep)
+
 		if err != nil {
 			color.Blue("Deployment already exists")
 			_, err := deploymentClient.Update(objdep)

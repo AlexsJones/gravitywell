@@ -15,6 +15,9 @@ func main() {
 	config := flag.String("config", "", "Configuration path")
 	flag.Parse()
 
+	if *config == "" {
+		return
+	}
 	conf, err := configuration.NewConfiguration(*config)
 	if err != nil {
 		fmt.Println(err.Error())
