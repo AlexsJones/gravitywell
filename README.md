@@ -25,6 +25,8 @@ _Please see examples directory_
 
 Example command: `gravitywell -config examples/small`
 
+_Parallel deployments with --parallel flag_
+
 Lets look at the small.yaml...
 
 ```
