@@ -26,4 +26,3 @@ Strategy:
                 Kubectl:
                   Path: deployment
                   Command: replace
-        
