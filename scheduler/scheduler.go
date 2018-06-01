@@ -16,6 +16,7 @@ type Options struct {
 	TempVCSPath string
 	APIVersion  string
 	Parallel    bool
+	DryRun      bool
 }
 
 //Scheduler object ...

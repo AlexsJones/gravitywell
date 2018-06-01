@@ -11,6 +11,10 @@ _It's a bit like docker-compose for Kubernetes deployments across clusters!_
 
 ![example](resources/output.gif)
 
+_Or using --dryrun to test your deployment status_
+
+![example2](resources/output2.gif)
+
 ## Installation
 
 `go get github.com/AlexsJones/gravitywell`
