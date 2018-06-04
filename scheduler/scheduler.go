@@ -17,6 +17,7 @@ type Options struct {
 	APIVersion  string
 	Parallel    bool
 	DryRun      bool
+	TryUpdate   bool
 }
 
 //Scheduler object ...

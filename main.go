@@ -12,6 +12,7 @@ import (
 
 func main() {
 	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel")
+	tryUpdate := flag.Bool("tryupdate",false "Try to update the resource if possible")
 	dryRun := flag.Bool("dryrun", false, "Run a dry run deployment to test what is deployment")
 	config := flag.String("config", "", "Configuration path")
 	flag.Parse()
@@ -30,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", Parallel: *parallel, DryRun: *dryRun}); err != nil {
+	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", Parallel: *parallel, DryRun: *dryRun, TryUpdate: *tryUpdate}); err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}

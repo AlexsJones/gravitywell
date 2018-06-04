@@ -65,7 +65,7 @@ func process(opt Options, cluster configuration.Cluster) {
 					continue
 				}
 
-				if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun); err != nil {
+				if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun, opt.TryUpdate); err != nil {
 					color.Red(err.Error())
 				}
 			}
