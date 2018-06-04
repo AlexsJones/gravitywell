@@ -28,8 +28,7 @@ func process(opt Options, cluster configuration.Cluster) {
 		gvcs := new(vcs.GitVCS)
 		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git)
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			color.Cyan("Project already exists in local directory")
 		}
 		//---------------------------------
 		for _, a := range deployment.Deployment.Action {
@@ -65,7 +64,7 @@ func process(opt Options, cluster configuration.Cluster) {
 					continue
 				}
 
-				if err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun, opt.TryUpdate); err != nil {
+				if _, err := platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun, opt.TryUpdate); err != nil {
 					color.Red(err.Error())
 				}
 			}
@@ -73,4 +72,5 @@ func process(opt Options, cluster configuration.Cluster) {
 
 		}
 	}
+
 }

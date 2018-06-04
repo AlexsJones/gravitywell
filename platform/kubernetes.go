@@ -8,6 +8,7 @@ import (
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
 	v1 "k8s.io/api/core/v1"
@@ -55,34 +56,36 @@ func getConfig(context string) clientcmd.ClientConfig {
 }
 
 //DeployFromFile ...
-func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, dryRun bool, tryUpdate bool) error {
+func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, dryRun bool, tryUpdate bool) (state.State, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return state.EDeploymentStateError, err
 	}
 	raw, err := ioutil.ReadAll(f)
 	if err != nil {
-		return err
+		return state.EDeploymentStateError, err
 	}
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, _ := decode(raw, nil, nil)
 
 	log.Printf("%++v\n\n", obj.GetObjectKind())
 
+	var response state.State
+	var e error
 	switch obj.(type) {
 	case *v1beta1.Deployment:
-		execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, dryRun, tryUpdate)
+		response, e = execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, dryRun, tryUpdate)
 	case *v1beta1.StatefulSet:
-		execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, dryRun, tryUpdate)
+		response, e = execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, dryRun, tryUpdate)
 	case *v1.Service:
-		execServiceResouce(k, obj.(*v1.Service), namespace, dryRun, tryUpdate)
+		response, e = execServiceResouce(k, obj.(*v1.Service), namespace, dryRun, tryUpdate)
 	case *v1.ConfigMap:
-		execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, dryRun, tryUpdate)
+		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, dryRun, tryUpdate)
 	case *v1polbeta.PodDisruptionBudget:
-		execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, dryRun, tryUpdate)
+		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, dryRun, tryUpdate)
 	default:
 		color.Red("Unable to convert API resource")
 	}
 
-	return nil
+	return response, e
 }

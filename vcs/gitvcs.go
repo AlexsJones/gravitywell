@@ -19,3 +19,8 @@ func (g *GitVCS) Fetch(localpath string, remote string) (string, error) {
 	})
 	return "", err
 }
+
+//Update ...
+func (g *GitVCS) Update(localpath string) (string, error) {
+	return g.Update(localpath)
+}
