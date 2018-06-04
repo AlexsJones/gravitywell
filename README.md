@@ -61,6 +61,19 @@ Strategy:
                   Command: replace
 ````
 
+### Command Options
+
+```
+  -config string
+    	Configuration path
+  -dryrun bool
+    	Run a dry run deployment to test what is deployment
+  -parallel bool
+    	Run cluster scope deployments in parallel
+  -tryupdate bool
+    	Try to update the resource if possible
+```
+
 ### Support APIResource types
 
 - [x] ConfigMap
