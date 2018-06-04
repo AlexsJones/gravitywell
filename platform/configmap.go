@@ -7,6 +7,7 @@ import (
 	"k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, dryRun bool, tryUpdate bool) error {

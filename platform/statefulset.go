@@ -7,6 +7,7 @@ import (
 	"k8s.io/api/apps/v1beta1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, dryRun bool, tryUpdate bool) error {

@@ -7,6 +7,7 @@ import (
 	"k8s.io/api/apps/v1beta1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func execDeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deployment, namespace string, dryRun bool, tryUpdate bool) error {

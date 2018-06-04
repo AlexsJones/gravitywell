@@ -90,4 +90,3 @@ Strategy:
 - [x] Parallel cluster Deployments
 - [x] Rationalise back into native API for manifest parsing
 - [ ] Expand to deploy from in-memory git repo
-- [ ] Support additional VCS (SVN etc.)

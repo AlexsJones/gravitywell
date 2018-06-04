@@ -7,6 +7,7 @@ import (
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func execPodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDisruptionBudget, namespace string, dryRun bool, tryUpdate bool) error {
