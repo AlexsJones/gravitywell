@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel")
+	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel - best not to use if pulling parallel from the same git repo")
 	tryUpdate := flag.Bool("tryupdate", false, "Try to update the resource if possible")
 	dryRun := flag.Bool("dryrun", false, "Run a dry run deployment to test what is deployment")
 	config := flag.String("config", "", "Configuration path")

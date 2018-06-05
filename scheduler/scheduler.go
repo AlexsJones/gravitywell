@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 )
 
@@ -34,6 +35,21 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 		configuration: conf}, nil
 }
 
+func (s *Scheduler) printStatemap(m map[state.State]string) {
+
+	var col func(string, ...interface{})
+
+	for k, v := range m {
+		if k == state.EDeploymentStateError {
+			col = color.Red
+		} else {
+			col = color.Green
+		}
+
+		col(fmt.Sprintf("Deployment %s State => %s\n", v, state.Translate(k)))
+	}
+}
+
 //Run a new scheduler based off of the current configuration
 func (s *Scheduler) Run(opt Options) error {
 
@@ -55,7 +71,8 @@ func (s *Scheduler) Run(opt Options) error {
 		for _, cluster := range s.configuration.Strategy {
 			wg.Add(1)
 			go func(options Options, cluster configuration.Cluster) {
-				process(options, cluster)
+				stateMap := process(options, cluster)
+				s.printStatemap(stateMap)
 				wg.Done()
 			}(opt, cluster.Cluster)
 
@@ -63,7 +80,8 @@ func (s *Scheduler) Run(opt Options) error {
 		wg.Wait()
 	} else {
 		for _, cluster := range s.configuration.Strategy {
-			process(opt, cluster.Cluster)
+			stateMap := process(opt, cluster.Cluster)
+			s.printStatemap(stateMap)
 		}
 	}
 	return nil
