@@ -35,18 +35,17 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 		configuration: conf}, nil
 }
 
-func (s *Scheduler) printStatemap(m map[state.State]string) {
+func (s *Scheduler) printStatemap(cluster string, m map[string]state.State) {
 
 	var col func(string, ...interface{})
 
 	for k, v := range m {
-		if k == state.EDeploymentStateError {
+		if v == state.EDeploymentStateError {
 			col = color.Red
 		} else {
 			col = color.Green
 		}
-
-		col(fmt.Sprintf("Deployment %s State => %s\n", v, state.Translate(k)))
+		col(fmt.Sprintf("Context %s Deployment %s State => %s\n", cluster, k, state.Translate(v)))
 	}
 }
 
@@ -72,7 +71,7 @@ func (s *Scheduler) Run(opt Options) error {
 			wg.Add(1)
 			go func(options Options, cluster configuration.Cluster) {
 				stateMap := process(options, cluster)
-				s.printStatemap(stateMap)
+				s.printStatemap(cluster.Name, stateMap)
 				wg.Done()
 			}(opt, cluster.Cluster)
 
@@ -81,7 +80,7 @@ func (s *Scheduler) Run(opt Options) error {
 	} else {
 		for _, cluster := range s.configuration.Strategy {
 			stateMap := process(opt, cluster.Cluster)
-			s.printStatemap(stateMap)
+			s.printStatemap(cluster.Cluster.Name, stateMap)
 		}
 	}
 	return nil
