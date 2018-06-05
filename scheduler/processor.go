@@ -28,9 +28,9 @@ func process(opt Options, cluster configuration.Cluster) map[string]state.State 
 		//---------------------------------
 		color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", deployment.Deployment.Name, path.Join(opt.TempVCSPath, deployment.Deployment.Name)))
 		gvcs := new(vcs.GitVCS)
-		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git)
+		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git, opt.SSHKeyPath)
 		if err != nil {
-			color.Cyan("Project already exists in local directory")
+			color.Cyan(err.Error())
 		}
 		//---------------------------------
 		for _, a := range deployment.Deployment.Action {
@@ -58,12 +58,12 @@ func process(opt Options, cluster configuration.Cluster) map[string]state.State 
 				color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
 				if _, err = os.Stat(file); os.IsNotExist(err) {
 					continue
-
 				}
 				if sa, _ := os.Stat(file); sa.IsDir() {
 					continue
 				}
 				var stateResponse state.State
+				color.Yellow(fmt.Sprintf("Running..."))
 				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun, opt.TryUpdate); err != nil {
 					color.Red(err.Error())
 				}
