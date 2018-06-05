@@ -81,6 +81,8 @@ Strategy:
 - [x] Deployment
 - [x] Service
 - [x] PodDisruptionBudget
+- [x] ServiceAccounts
+- [x] RoleBinding
 - [ ] CronJob
 - [ ] PersistantVolume
 - [ ] PersistantVolumeClaim

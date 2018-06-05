@@ -13,6 +13,7 @@ import (
 	"k8s.io/api/apps/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
+	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -83,6 +84,10 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, dryRun, tryUpdate)
 	case *v1polbeta.PodDisruptionBudget:
 		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, dryRun, tryUpdate)
+	case *v1.ServiceAccount:
+		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, dryRun, tryUpdate)
+	case *v1rbac.ClusterRoleBinding:
+
 	default:
 		color.Red("Unable to convert API resource")
 	}
