@@ -28,7 +28,7 @@ func process(opt Options, cluster configuration.Cluster) map[string]state.State 
 		//---------------------------------
 		color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", deployment.Deployment.Name, path.Join(opt.TempVCSPath, deployment.Deployment.Name)))
 		gvcs := new(vcs.GitVCS)
-		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git)
+		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git, opt.SSHKeyPath)
 		if err != nil {
 			color.Cyan(err.Error())
 		}

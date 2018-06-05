@@ -13,6 +13,7 @@ import (
 func main() {
 	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel - best not to use if pulling parallel from the same git repo")
 	tryUpdate := flag.Bool("tryupdate", false, "Try to update the resource if possible")
+	sshkeypath := flag.String("sshkeypath", "", "Provide to override default sshkey used")
 	dryRun := flag.Bool("dryrun", false, "Run a dry run deployment to test what is deployment")
 	config := flag.String("config", "", "Configuration path")
 	flag.Parse()
@@ -31,7 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", Parallel: *parallel, DryRun: *dryRun, TryUpdate: *tryUpdate}); err != nil {
+	if err := sh.Run(scheduler.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", SSHKeyPath: *sshkeypath, Parallel: *parallel, DryRun: *dryRun, TryUpdate: *tryUpdate}); err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}
