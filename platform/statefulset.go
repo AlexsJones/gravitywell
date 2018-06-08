@@ -7,6 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,19 +27,23 @@ func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, na
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	if opts.Redeploy {
+		color.Blue("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		stsclient.Delete(sts.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+	}
 	_, err := stsclient.Create(sts)
 	if err != nil {
-		if !opts.TryUpdate {
-			color.Cyan("StatefulSet already exists - Cowardly refusing to overwrite")
-			return state.EDeploymentStateExists, err
+		if opts.TryUpdate {
+			_, err := stsclient.UpdateStatus(sts)
+			if err != nil {
+				color.Red("Could not update Statefulset")
+				return state.EDeploymentStateCantUpdate, err
+			}
+			color.Blue("Statefulset updated")
+			return state.EDeploymentStateUpdated, nil
 		}
-		_, err := stsclient.UpdateStatus(sts)
-		if err != nil {
-			color.Red("Could not update Statefulset")
-			return state.EDeploymentStateCantUpdate, err
-		}
-		color.Blue("Statefulset updated")
 	}
+	color.Blue("Statefulset deployed")
 	return state.EDeploymentStateOkay, nil
 }

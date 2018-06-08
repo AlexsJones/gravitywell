@@ -7,6 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/core/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,19 +27,23 @@ func execServiceAccountResouce(k kubernetes.Interface, cm *v1.ServiceAccount, na
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	if opts.Redeploy {
+		color.Blue("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+	}
 	_, err := cmclient.Create(cm)
 	if err != nil {
-		if !opts.TryUpdate {
-			color.Cyan("ServiceAccount already exists - Cowardly refusing to overwrite")
-			return state.EDeploymentStateExists, err
+		if opts.TryUpdate {
+			_, err := cmclient.Update(cm)
+			if err != nil {
+				color.Red("ServiceAccount could not be updated")
+				return state.EDeploymentStateCantUpdate, err
+			}
+			color.Blue("ServiceAccount updated")
+			return state.EDeploymentStateUpdated, nil
 		}
-		_, err := cmclient.Update(cm)
-		if err != nil {
-			color.Red("ServiceAccount could not be updated")
-			return state.EDeploymentStateCantUpdate, err
-		}
-		color.Blue("ServiceAccount updated")
 	}
+	color.Blue("ServiceAccount deployed")
 	return state.EDeploymentStateOkay, nil
 }

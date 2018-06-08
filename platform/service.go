@@ -7,6 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/core/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,19 +27,23 @@ func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	if opts.Redeploy {
+		color.Blue("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+	}
 	_, err := ssclient.Create(ss)
 	if err != nil {
-		if !opts.TryUpdate {
-			color.Cyan("Service already exists - Cowardly refusing to overwrite")
-			return state.EDeploymentStateExists, err
+		if opts.TryUpdate {
+			_, err := ssclient.Update(ss)
+			if err != nil {
+				color.Red("Could not update service")
+				return state.EDeploymentStateCantUpdate, err
+			}
+			color.Blue("Service updated")
+			return state.EDeploymentStateUpdated, nil
 		}
-		_, err := ssclient.Update(ss)
-		if err != nil {
-			color.Red("Could not update service")
-			return state.EDeploymentStateCantUpdate, err
-		}
-		color.Blue("Service updated")
 	}
+	color.Blue("Service deployed")
 	return state.EDeploymentStateOkay, nil
 }

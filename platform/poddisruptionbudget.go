@@ -7,6 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	v1polbeta "k8s.io/api/policy/v1beta1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,19 +27,23 @@ func execPodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDi
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	if opts.Redeploy {
+		color.Blue("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+	}
 	_, err := pdbclient.Create(pdb)
 	if err != nil {
-		if !opts.TryUpdate {
-			color.Cyan("PodDisruptionBudget already exists - Cowardly refusing to overwrite")
-			return state.EDeploymentStateExists, err
+		if opts.TryUpdate {
+			_, err := pdbclient.Update(pdb)
+			if err != nil {
+				color.Red("PodDisruptionBudget could not be updated")
+				return state.EDeploymentStateCantUpdate, err
+			}
+			color.Blue("PodDisruptionBudget updated")
+			return state.EDeploymentStateUpdated, nil
 		}
-		_, err := pdbclient.Update(pdb)
-		if err != nil {
-			color.Red("PodDisruptionBudget could not be updated")
-			return state.EDeploymentStateCantUpdate, err
-		}
-		color.Blue("Configmap updated")
 	}
+	color.Blue("PodDisruptionBudget deployed")
 	return state.EDeploymentStateOkay, nil
 }

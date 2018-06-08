@@ -10,6 +10,7 @@ const (
 	EDeploymentStateNotExists
 	EDeploymentStateCantUpdate
 	EDeploymentStateDone
+	EDeploymentStateUpdated
 )
 
 //Translate enum to string
@@ -29,6 +30,8 @@ func Translate(i State) string {
 		return "Immutable/Can't update"
 	case EDeploymentStateDone:
 		return "Done"
+	case EDeploymentStateUpdated:
+		return "Updated"
 	}
 	return "N/A"
 }

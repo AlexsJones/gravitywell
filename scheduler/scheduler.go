@@ -26,9 +26,7 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 }
 
 func (s *Scheduler) printStatemap(cluster string, m map[string]state.State) {
-
 	var col func(string, ...interface{})
-
 	for k, v := range m {
 		if v == state.EDeploymentStateError {
 			col = color.Red

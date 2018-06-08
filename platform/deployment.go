@@ -7,6 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,18 +27,21 @@ func execDeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deployment, n
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	if opts.Redeploy {
+		color.Blue("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+	}
 	_, err := deploymentClient.Create(objdep)
 	if err != nil {
-		if !opts.TryUpdate {
-			color.Cyan("Deployment already exists - Cowardly refusing to overwrite")
-			return state.EDeploymentStateExists, err
-		}
-		_, err := deploymentClient.Update(objdep)
-		if err != nil {
-			color.Red("Deployment could not be updated")
-			return state.EDeploymentStateCantUpdate, err
+		if opts.TryUpdate {
+			_, err := deploymentClient.Update(objdep)
+			if err != nil {
+				color.Red("Deployment could not be updated")
+				return state.EDeploymentStateUpdated, err
+			}
 		}
 	}
+	color.Blue("Deployment deployed")
 	return state.EDeploymentStateOkay, nil
 }
