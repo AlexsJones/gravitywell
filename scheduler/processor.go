@@ -13,7 +13,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func process(opt Options, cluster configuration.Cluster) map[string]state.State {
+func process(opt configuration.Options, cluster configuration.Cluster) map[string]state.State {
 	//---------------------------------
 	color.Yellow(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
@@ -64,7 +64,7 @@ func process(opt Options, cluster configuration.Cluster) map[string]state.State 
 				}
 				var stateResponse state.State
 				color.Yellow(fmt.Sprintf("Running..."))
-				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt.DryRun, opt.TryUpdate); err != nil {
+				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt); err != nil {
 					color.Red(err.Error())
 				}
 				stateMap[deployment.Deployment.Name] = stateResponse

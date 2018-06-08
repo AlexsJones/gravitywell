@@ -8,6 +8,7 @@ import (
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
@@ -57,7 +58,7 @@ func getConfig(context string) clientcmd.ClientConfig {
 }
 
 //DeployFromFile ...
-func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, dryRun bool, tryUpdate bool) (state.State, error) {
+func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, opts configuration.Options) (state.State, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return state.EDeploymentStateError, err
@@ -75,17 +76,17 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 	var e error
 	switch obj.(type) {
 	case *v1beta1.Deployment:
-		response, e = execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, dryRun, tryUpdate)
+		response, e = execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, opts)
 	case *v1beta1.StatefulSet:
-		response, e = execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, dryRun, tryUpdate)
+		response, e = execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts)
 	case *v1.Service:
-		response, e = execServiceResouce(k, obj.(*v1.Service), namespace, dryRun, tryUpdate)
+		response, e = execServiceResouce(k, obj.(*v1.Service), namespace, opts)
 	case *v1.ConfigMap:
-		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, dryRun, tryUpdate)
+		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, opts)
 	case *v1polbeta.PodDisruptionBudget:
-		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, dryRun, tryUpdate)
+		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, opts)
 	case *v1.ServiceAccount:
-		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, dryRun, tryUpdate)
+		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, opts)
 	case *v1rbac.ClusterRoleBinding:
 
 	default:

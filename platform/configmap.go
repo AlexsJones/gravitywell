@@ -3,6 +3,7 @@ package platform
 import (
 	"fmt"
 
+	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/core/v1"
@@ -11,11 +12,11 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, dryRun bool, tryUpdate bool) (state.State, error) {
+func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, opts configuration.Options) (state.State, error) {
 	color.Blue("Found Configmap resource")
 	cmclient := k.CoreV1().ConfigMaps(namespace)
 
-	if dryRun {
+	if opts.DryRun {
 		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
 		if err != nil {
 			color.Red(fmt.Sprintf("DRY-RUN: Configmap resource %s does not exist\n", cm.Name))
@@ -28,7 +29,7 @@ func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace st
 
 	_, err := cmclient.Create(cm)
 	if err != nil {
-		if !tryUpdate {
+		if !opts.TryUpdate {
 			color.Cyan("Configmap already exists - Cowardly refusing to overwrite")
 			return state.EDeploymentStateExists, err
 		}

@@ -11,17 +11,6 @@ import (
 	"github.com/fatih/color"
 )
 
-//Options ...
-type Options struct {
-	VCS         string
-	TempVCSPath string
-	APIVersion  string
-	SSHKeyPath  string
-	Parallel    bool
-	DryRun      bool
-	TryUpdate   bool
-}
-
 //Scheduler object ...
 type Scheduler struct {
 	configuration *configuration.Configuration
@@ -51,7 +40,7 @@ func (s *Scheduler) printStatemap(cluster string, m map[string]state.State) {
 }
 
 //Run a new scheduler based off of the current configuration
-func (s *Scheduler) Run(opt Options) error {
+func (s *Scheduler) Run(opt configuration.Options) error {
 
 	if opt.APIVersion != s.configuration.APIVersion {
 		color.Red(fmt.Sprintf("Manifest is not supported by the current API: %s\n", opt.APIVersion))
@@ -66,11 +55,10 @@ func (s *Scheduler) Run(opt Options) error {
 	}
 	//---------------------------------
 	if opt.Parallel {
-
 		var wg sync.WaitGroup
 		for _, cluster := range s.configuration.Strategy {
 			wg.Add(1)
-			go func(options Options, cluster configuration.Cluster) {
+			go func(options configuration.Options, cluster configuration.Cluster) {
 				stateMap := process(options, cluster)
 				s.printStatemap(cluster.Name, stateMap)
 				wg.Done()

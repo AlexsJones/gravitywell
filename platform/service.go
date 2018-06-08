@@ -3,6 +3,7 @@ package platform
 import (
 	"fmt"
 
+	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/core/v1"
@@ -11,11 +12,11 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, dryRun bool, tryUpdate bool) (state.State, error) {
+func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, opts configuration.Options) (state.State, error) {
 	color.Blue("Found service resource")
 	ssclient := k.CoreV1().Services(namespace)
 
-	if dryRun {
+	if opts.DryRun {
 		_, err := ssclient.Get(ss.Name, v12.GetOptions{})
 		if err != nil {
 			color.Red(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", ss.Name))
@@ -28,7 +29,7 @@ func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string
 
 	_, err := ssclient.Create(ss)
 	if err != nil {
-		if !tryUpdate {
+		if !opts.TryUpdate {
 			color.Cyan("Service already exists - Cowardly refusing to overwrite")
 			return state.EDeploymentStateExists, err
 		}

@@ -3,6 +3,7 @@ package platform
 import (
 	"fmt"
 
+	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
 	"k8s.io/api/apps/v1beta1"
@@ -11,11 +12,11 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, dryRun bool, tryUpdate bool) (state.State, error) {
+func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, opts configuration.Options) (state.State, error) {
 	color.Blue("Found statefulset resource")
 	stsclient := k.AppsV1beta1().StatefulSets(namespace)
 
-	if dryRun {
+	if opts.DryRun {
 		_, err := stsclient.Get(sts.Name, v12.GetOptions{})
 		if err != nil {
 			color.Red(fmt.Sprintf("DRY-RUN: StatefulSet resource %s does not exist\n", sts.Name))
@@ -28,7 +29,7 @@ func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, na
 
 	_, err := stsclient.Create(sts)
 	if err != nil {
-		if !tryUpdate {
+		if !opts.TryUpdate {
 			color.Cyan("StatefulSet already exists - Cowardly refusing to overwrite")
 			return state.EDeploymentStateExists, err
 		}
