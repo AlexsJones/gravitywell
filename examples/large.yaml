@@ -7,7 +7,7 @@ Strategy:
         - Deployment:
            Name: "jenkins"
            Namespace: "jenkins"
-           Git: "https://github.com/AlexsJones/devops-kubernetes-jenkins.git"
+           Git: "git@github.com:AlexsJones/devops-kubernetes-jenkins.git"
            Action:
             - Execute:
                Shell: ""
@@ -21,7 +21,7 @@ Strategy:
         - Deployment:
            Name: "SomeCompany-preview"
            Namespace: "preview"
-           Git: "https://github.com/AlexsJones/devops-kubernetes-SomeCompany.git"
+           Git: "git@github.com:AlexsJones/devops-kubernetes-SomeCompany.git"
            Action:
             - Execute:
                Shell: "./build_environment.sh preview"

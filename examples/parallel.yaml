@@ -6,7 +6,7 @@ Strategy:
         - Deployment:
            Name: "kubernetes-nifi-cluster"
            Namespace: "nifi"
-           Git: "https://github.com/AlexsJones/kubernetes-nifi-cluster.git"
+           Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
            Action:
             - Execute:
                Shell: "ls -la"
@@ -19,7 +19,7 @@ Strategy:
         - Deployment:
             Name: "kubernetes-zookeeper-cluster"
             Namespace: "zk"
-            Git: "https://github.com/AlexsJones/kubernetes-zookeeper-cluster.git"
+            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
             Action:
              - Execute:
                 Shell: "./build_environment.sh small"
