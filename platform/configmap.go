@@ -31,7 +31,9 @@ func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace st
 	if opts.Redeploy {
 		color.Blue("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		if err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
+			color.Red(err.Error())
+		}
 	}
 
 	_, err := cmclient.Create(cm)

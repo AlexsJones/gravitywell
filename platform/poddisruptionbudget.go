@@ -30,7 +30,9 @@ func execPodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDi
 	if opts.Redeploy {
 		color.Blue("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		if err := pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
+			color.Red(err.Error())
+		}
 	}
 	_, err := pdbclient.Create(pdb)
 	if err != nil {

@@ -88,7 +88,9 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 	case *v1.ServiceAccount:
 		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, opts)
 	case *v1rbac.ClusterRoleBinding:
-
+		response, e = execClusterRoleBindingResouce(k, obj.(*v1rbac.ClusterRoleBinding), namespace, opts)
+	case *v1rbac.ClusterRole:
+		response, e = execClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts)
 	default:
 		color.Red("Unable to convert API resource")
 	}
