@@ -68,8 +68,6 @@ Strategy:
     	Configuration path
   -dryrun bool
     	Run a dry run deployment to test what is deployment
-  -parallel bool
-    	Run cluster scope deployments in parallel
   -tryupdate bool
     	Try to update the resource if possible
 ```
@@ -83,12 +81,11 @@ Strategy:
 - [x] PodDisruptionBudget
 - [x] ServiceAccounts
 - [x] RoleBinding
-- [ ] CronJob
+- [x] CronJob
 - [ ] PersistantVolume
 - [ ] PersistantVolumeClaim
 
 ### Roadmap
 
-- [x] Parallel cluster Deployments
 - [x] Rationalise back into native API for manifest parsing
 - [ ] Expand to deploy from in-memory git repo
