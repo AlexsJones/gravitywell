@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -25,18 +24,6 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 		configuration: conf}, nil
 }
 
-func (s *Scheduler) printStatemap(cluster string, m map[string]state.State) {
-	var col func(string, ...interface{})
-	for k, v := range m {
-		if v == state.EDeploymentStateError {
-			col = color.Red
-		} else {
-			col = color.Green
-		}
-		col(fmt.Sprintf("Context %s Deployment %s State => %s\n", cluster, k, state.Translate(v)))
-	}
-}
-
 //Run a new scheduler based off of the current configuration
 func (s *Scheduler) Run(opt configuration.Options) error {
 
@@ -52,22 +39,33 @@ func (s *Scheduler) Run(opt configuration.Options) error {
 		os.Mkdir(opt.TempVCSPath, 0777)
 	}
 	//---------------------------------
-	if opt.Parallel {
-		var wg sync.WaitGroup
-		for _, cluster := range s.configuration.Strategy {
-			wg.Add(1)
-			go func(options configuration.Options, cluster configuration.Cluster) {
-				stateMap := process(options, cluster)
-				s.printStatemap(cluster.Name, stateMap)
-				wg.Done()
-			}(opt, cluster.Cluster)
+	var allClusterStates []*state.Capture
 
+	for _, cluster := range s.configuration.Strategy {
+		for _, ignoreItem := range opt.IgnoreList {
+			if ignoreItem == cluster.Cluster.Name {
+				color.Yellow(fmt.Sprintf("Ignoring cluster %s\n", cluster.Cluster.Name))
+				continue
+			}
 		}
-		wg.Wait()
-	} else {
-		for _, cluster := range s.configuration.Strategy {
-			stateMap := process(opt, cluster.Cluster)
-			s.printStatemap(cluster.Cluster.Name, stateMap)
+		stateMap := process(opt, cluster.Cluster)
+		allClusterStates = append(allClusterStates, stateMap)
+	}
+	//----------------------------------
+	var col func(string, ...interface{})
+	for _, stateCapture := range allClusterStates {
+		for k, v := range stateCapture.DeploymentState {
+			col = color.Green
+			if v.State == state.EDeploymentStateError {
+				col = color.Red
+			}
+			if v.State == state.EDeploymentStateNotExists {
+				col = color.Red
+			}
+			col(fmt.Sprintf("Cluster %s Deployment %s State => %s\n", stateCapture.ClusterName, k, state.Translate(v.State)))
+			if v.HasDetail && v.HasError {
+				color.Cyan(fmt.Sprintf("\t %s\n", v.Detail))
+			}
 		}
 	}
 	return nil

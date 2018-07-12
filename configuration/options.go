@@ -6,7 +6,7 @@ type Options struct {
 	TempVCSPath string
 	APIVersion  string
 	SSHKeyPath  string
-	Parallel    bool
+	IgnoreList  []string
 	DryRun      bool
 	TryUpdate   bool
 	Redeploy    bool

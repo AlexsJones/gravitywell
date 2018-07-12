@@ -3,7 +3,6 @@ package platform
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -70,7 +69,7 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, _ := decode(raw, nil, nil)
 
-	log.Printf("%++v\n\n", obj.GetObjectKind())
+	color.Yellow(fmt.Sprintf("%++v\n\n", obj.GetObjectKind()))
 
 	var response state.State
 	var e error

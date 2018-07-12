@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform"
@@ -13,30 +14,43 @@ import (
 	"github.com/fatih/color"
 )
 
-func process(opt configuration.Options, cluster configuration.Cluster) map[string]state.State {
+func process(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
+
+	stateCapture := state.NewCapture()
+	stateCapture.ClusterName = cluster.Name
 	//---------------------------------
-	color.Yellow(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
+	color.Cyan(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
 	if err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}
 	//---------------------------------
-	stateMap := make(map[string]state.State)
-	//---------------------------------
 	for _, deployment := range cluster.Deployments {
 		//---------------------------------
-		color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", deployment.Deployment.Name, path.Join(opt.TempVCSPath, deployment.Deployment.Name)))
-		gvcs := new(vcs.GitVCS)
-		_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, deployment.Deployment.Name), deployment.Deployment.Git, opt.SSHKeyPath)
-		if err != nil {
-			color.Cyan(err.Error())
+		//Generate name from repo
+		var extension = filepath.Ext(deployment.Deployment.Git)
+		var remoteVCSRepoName = deployment.Deployment.Git[0 : len(deployment.Deployment.Git)-len(extension)]
+		splitStrings := strings.Split(remoteVCSRepoName, "/")
+		remoteVCSRepoName = splitStrings[len(splitStrings)-1]
+
+		if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); os.IsNotExist(err) {
+			color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
+			gvcs := new(vcs.GitVCS)
+			_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deployment.Deployment.Git, opt.SSHKeyPath)
+			if err != nil {
+				color.Red(err.Error())
+				stateCapture.DeploymentState[deployment.Deployment.Name] = state.Details{State: state.EDeploymentStateError}
+				return stateCapture
+			}
+		} else {
+			color.Yellow(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 		}
 		//---------------------------------
 		for _, a := range deployment.Deployment.Action {
 			if a.Execute.Shell != "" {
 				color.Yellow(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
-				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, deployment.Deployment.Name), true); err != nil {
+				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
 					color.Red(err.Error())
 				}
 			}
@@ -46,7 +60,7 @@ func process(opt configuration.Options, cluster configuration.Cluster) map[strin
 			}
 			//---------------------------------
 			fileList := []string{}
-			err := filepath.Walk(path.Join(opt.TempVCSPath, deployment.Deployment.Name, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
+			err := filepath.Walk(path.Join(opt.TempVCSPath, remoteVCSRepoName, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
 				fileList = append(fileList, path)
 				return nil
 			})
@@ -67,10 +81,19 @@ func process(opt configuration.Options, cluster configuration.Cluster) map[strin
 				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt); err != nil {
 					color.Red(err.Error())
 				}
-				stateMap[deployment.Deployment.Name] = stateResponse
+				var output = ""
+				var hasError = false
+				if err != nil {
+					output = fmt.Sprintf("File: %s Namespace :%s Error: %s", file, deployment.Deployment.Namespace, err)
+					hasError = true
+				} else {
+					output = fmt.Sprintf("File: %s Namespace :%s", file, deployment.Deployment.Namespace)
+				}
+				stateCapture.DeploymentState[deployment.Deployment.Name] = state.Details{State: stateResponse, HasDetail: true,
+					Detail: output, HasError: hasError}
 			}
 			//---------------------------------
 		}
 	}
-	return stateMap
+	return stateCapture
 }

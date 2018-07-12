@@ -14,10 +14,10 @@ import (
 
 func main() {
 	redeploy := flag.Bool("redeploy", false, "Forces a delete and deploy WARNING: Destructive")
-	parallel := flag.Bool("parallel", false, "Run cluster scope deployments in parallel - best not to use if pulling parallel from the same git repo")
-	tryUpdate := flag.Bool("tryupdate", false, "Try to update the resource if possible")
-	sshkeypath := flag.String("sshkeypath", "", "Provide to override default sshkey used")
-	dryRun := flag.Bool("dryrun", false, "Run a dry run deployment to test what is deployment")
+	tryUpdate := flag.Bool("try-update", false, "Try to update the resource if possible")
+	ignoreList := flag.String("ignore-list", "", "A comma delimited list of clusters to ignore")
+	sshkeypath := flag.String("ssh-key-path", "", "Provide to override default sshkey used")
+	dryRun := flag.Bool("dry-run", false, "Run a dry run deployment to test what is deployment")
 	config := flag.String("config", "", "Configuration path")
 	flag.Parse()
 
@@ -47,7 +47,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := sh.Run(configuration.Options{VCS: "git", TempVCSPath: "./staging", APIVersion: "v1", SSHKeyPath: *sshkeypath, Parallel: *parallel, DryRun: *dryRun, TryUpdate: *tryUpdate, Redeploy: *redeploy}); err != nil {
+	var ignoreListAr []string
+	if *ignoreList != "" {
+		ignoreListAr = strings.Split(*ignoreList, ",")
+	}
+
+	if err := sh.Run(configuration.Options{VCS: "git", TempVCSPath: "./.gravitywell", APIVersion: "v1", SSHKeyPath: *sshkeypath,
+		DryRun: *dryRun, TryUpdate: *tryUpdate, Redeploy: *redeploy, IgnoreList: ignoreListAr}); err != nil {
 		color.Red(err.Error())
 		os.Exit(1)
 	}
