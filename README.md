@@ -61,6 +61,14 @@ Strategy:
                   Command: replace
 ````
 
+_We support three kubectl commands currently_
+
+```
+replace
+apply
+create
+```
+
 ### Command Options
 
 ```
