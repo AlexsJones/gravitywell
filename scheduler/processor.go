@@ -11,7 +11,7 @@ import (
 	"github.com/AlexsJones/gravitywell/platform"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/vcs"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 )
 
 func process(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
@@ -19,14 +19,15 @@ func process(opt configuration.Options, cluster configuration.Cluster) *state.Ca
 	stateCapture := state.NewCapture()
 	stateCapture.ClusterName = cluster.Name
 	//---------------------------------
-	color.Cyan(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
+	log.Warn(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
 	if err != nil {
-		color.Red(err.Error())
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 	//---------------------------------
 	for _, deployment := range cluster.Deployments {
+		log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Deployment.Name))
 		//---------------------------------
 		//Generate name from repo
 		var extension = filepath.Ext(deployment.Deployment.Git)
@@ -35,28 +36,43 @@ func process(opt configuration.Options, cluster configuration.Cluster) *state.Ca
 		remoteVCSRepoName = splitStrings[len(splitStrings)-1]
 
 		if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); os.IsNotExist(err) {
-			color.Yellow(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
+			log.Debug(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 			gvcs := new(vcs.GitVCS)
 			_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deployment.Deployment.Git, opt.SSHKeyPath)
 			if err != nil {
-				color.Red(err.Error())
+				log.Error(err.Error())
 				stateCapture.DeploymentState[deployment.Deployment.Name] = state.Details{State: state.EDeploymentStateError}
 				return stateCapture
 			}
 		} else {
-			color.Yellow(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
+			log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 		}
 		//---------------------------------
 		for _, a := range deployment.Deployment.Action {
 			if a.Execute.Shell != "" {
-				color.Yellow(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
+				log.Warn(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
 				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
-					color.Red(err.Error())
+					log.Error(err.Error())
 				}
 			}
 			//---------------------------------
+			var commandFlag configuration.CommandFlag
 			if a.Execute.Kubectl.Command == "" {
-				color.Red("No Kubernetes create action to run")
+				log.Warn("No Kubernetes action to run aborting (supports: create/apply/replace)")
+				continue
+			}
+			switch strings.ToLower(a.Execute.Kubectl.Command) {
+			case "apply":
+				log.Println("Using apply command")
+				commandFlag = configuration.Apply
+			case "create":
+				log.Println("Using create command")
+				commandFlag = configuration.Create
+			case "replace":
+				log.Println("Using replace command")
+				commandFlag = configuration.Replace
+			default:
+
 			}
 			//---------------------------------
 			fileList := []string{}
@@ -65,11 +81,11 @@ func process(opt configuration.Options, cluster configuration.Cluster) *state.Ca
 				return nil
 			})
 			if err != nil {
-				color.Red(err.Error())
+				log.Error(err.Error())
 
 			}
 			for _, file := range fileList {
-				color.Yellow(fmt.Sprintf("Attempting to deploy %s\n", file))
+				log.Warn(fmt.Sprintf("Attempting to deploy %s\n", file))
 				if _, err = os.Stat(file); os.IsNotExist(err) {
 					continue
 				}
@@ -77,9 +93,9 @@ func process(opt configuration.Options, cluster configuration.Cluster) *state.Ca
 					continue
 				}
 				var stateResponse state.State
-				color.Yellow(fmt.Sprintf("Running..."))
-				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt); err != nil {
-					color.Red(err.Error())
+				log.Debug(fmt.Sprintf("Running..."))
+				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt, commandFlag); err != nil {
+					log.Error(err.Error())
 				}
 				var output = ""
 				var hasError = false

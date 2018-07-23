@@ -9,8 +9,17 @@ import (
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 )
+
+func init() {
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.DebugLevel)
+}
 
 func main() {
 	redeploy := flag.Bool("redeploy", false, "Forces a delete and deploy WARNING: Destructive")
@@ -27,7 +36,7 @@ func main() {
 
 	if *redeploy {
 		reader := bufio.NewReader(os.Stdin)
-		color.Red(fmt.Sprintf("This is a very destructive action, are you sure [Y/N]?: "))
+		log.Warn(fmt.Sprintf("This is a very destructive action, are you sure [Y/N]?: "))
 		text, _ := reader.ReadString('\n')
 		trimmed := strings.Trim(text, "\n")
 		if strings.Compare(trimmed, "Y") != 0 {
@@ -43,7 +52,7 @@ func main() {
 	}
 	sh, err := scheduler.NewScheduler(conf)
 	if err != nil {
-		color.Red(err.Error())
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -54,7 +63,7 @@ func main() {
 
 	if err := sh.Run(configuration.Options{VCS: "git", TempVCSPath: "./.gravitywell", APIVersion: "v1", SSHKeyPath: *sshkeypath,
 		DryRun: *dryRun, TryUpdate: *tryUpdate, Redeploy: *redeploy, IgnoreList: ignoreListAr}); err != nil {
-		color.Red(err.Error())
+		log.Warn(err.Error())
 		os.Exit(1)
 	}
 

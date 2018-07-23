@@ -5,7 +5,7 @@ import (
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,39 +13,39 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, opts configuration.Options) (state.State, error) {
-	color.Blue("Found service resource")
+func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	log.Debug("Found service resource")
 	ssclient := k.CoreV1().Services(namespace)
 
 	if opts.DryRun {
 		_, err := ssclient.Get(ss.Name, v12.GetOptions{})
 		if err != nil {
-			color.Red(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", ss.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", ss.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			color.Blue(fmt.Sprintf("DRY-RUN: Service resource %s exists\n", ss.Name))
+			log.Debug(fmt.Sprintf("DRY-RUN: Service resource %s exists\n", ss.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy {
-		color.Blue("Removing resource in preparation for redeploy")
+	if opts.Redeploy || commandFlag == configuration.Replace {
+		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		if err := ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
-			color.Red(err.Error())
+			log.Error(err.Error())
 		}
 	}
 	_, err := ssclient.Create(ss)
 	if err != nil {
-		if opts.TryUpdate {
+		if opts.TryUpdate || commandFlag == configuration.Apply {
 			_, err := ssclient.Update(ss)
 			if err != nil {
-				color.Red("Could not update service")
+				log.Error("Could not update service")
 				return state.EDeploymentStateCantUpdate, err
 			}
-			color.Blue("Service updated")
+			log.Debug("Service updated")
 			return state.EDeploymentStateUpdated, nil
 		}
 	}
-	color.Blue("Service deployed")
+	log.Debug("Service deployed")
 	return state.EDeploymentStateOkay, nil
 }

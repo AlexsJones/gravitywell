@@ -5,17 +5,16 @@ import (
 	"io/ioutil"
 	"os"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 	"k8s.io/api/apps/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	//This is required for gcp auth provider scope
@@ -57,7 +56,7 @@ func getConfig(context string) clientcmd.ClientConfig {
 }
 
 //DeployFromFile ...
-func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, opts configuration.Options) (state.State, error) {
+func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return state.EDeploymentStateError, err
@@ -69,29 +68,29 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, _ := decode(raw, nil, nil)
 
-	color.Yellow(fmt.Sprintf("%++v\n\n", obj.GetObjectKind()))
+	log.Debug(fmt.Sprintf("%++v\n\n", obj.GetObjectKind()))
 
 	var response state.State
 	var e error
 	switch obj.(type) {
 	case *v1beta1.Deployment:
-		response, e = execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, opts)
+		response, e = execDeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.StatefulSet:
-		response, e = execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts)
+		response, e = execStatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
 	case *v1.Service:
-		response, e = execServiceResouce(k, obj.(*v1.Service), namespace, opts)
+		response, e = execServiceResouce(k, obj.(*v1.Service), namespace, opts, commandFlag)
 	case *v1.ConfigMap:
-		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, opts)
+		response, e = execConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, opts, commandFlag)
 	case *v1polbeta.PodDisruptionBudget:
-		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, opts)
+		response, e = execPodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, opts, commandFlag)
 	case *v1.ServiceAccount:
-		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, opts)
+		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, opts, commandFlag)
 	case *v1rbac.ClusterRoleBinding:
-		response, e = execClusterRoleBindingResouce(k, obj.(*v1rbac.ClusterRoleBinding), namespace, opts)
+		response, e = execClusterRoleBindingResouce(k, obj.(*v1rbac.ClusterRoleBinding), namespace, opts, commandFlag)
 	case *v1rbac.ClusterRole:
-		response, e = execClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts)
+		response, e = execClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	default:
-		color.Red("Unable to convert API resource")
+		log.Error("Unable to convert API resource")
 	}
 
 	return response, e

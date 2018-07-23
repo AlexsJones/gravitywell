@@ -13,7 +13,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRoleBinding, namespace string, opts configuration.Options) (state.State, error) {
+func execClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	color.Blue("Found ClusterRoleBinding resource")
 	cmclient := k.RbacV1().ClusterRoleBindings()
 
@@ -28,7 +28,7 @@ func execClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRol
 		}
 	}
 
-	if opts.Redeploy {
+	if opts.Redeploy || commandFlag == configuration.Replace {
 		color.Blue("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		if err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
@@ -38,7 +38,7 @@ func execClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRol
 
 	_, err := cmclient.Create(cm)
 	if err != nil {
-		if opts.TryUpdate {
+		if opts.TryUpdate || commandFlag == configuration.Apply {
 			_, err := cmclient.Update(cm)
 			if err != nil {
 				color.Red("ClusterRoleBinding could not be updated")

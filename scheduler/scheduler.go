@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
+	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 )
 
@@ -28,7 +29,7 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 func (s *Scheduler) Run(opt configuration.Options) error {
 
 	if opt.APIVersion != s.configuration.APIVersion {
-		color.Red(fmt.Sprintf("Manifest is not supported by the current API: %s\n", opt.APIVersion))
+		log.Error(fmt.Sprintf("Manifest is not supported by the current API: %s\n", opt.APIVersion))
 		os.Exit(1)
 	}
 	//---------------------------------
@@ -44,7 +45,7 @@ func (s *Scheduler) Run(opt configuration.Options) error {
 	for _, cluster := range s.configuration.Strategy {
 		for _, ignoreItem := range opt.IgnoreList {
 			if ignoreItem == cluster.Cluster.Name {
-				color.Yellow(fmt.Sprintf("Ignoring cluster %s\n", cluster.Cluster.Name))
+				log.Warn(fmt.Sprintf("Ignoring cluster %s\n", cluster.Cluster.Name))
 				continue
 			}
 		}

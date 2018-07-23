@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 )
 
 //ShellCommand ...
@@ -37,7 +37,7 @@ func ShellCommand(command string, path string, validated bool) error {
 		return err
 	} else {
 		if validated {
-			color.Green("Successful")
+			log.Debug("Successful")
 		}
 	}
 	return nil

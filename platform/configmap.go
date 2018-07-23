@@ -13,7 +13,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, opts configuration.Options) (state.State, error) {
+func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	color.Blue("Found Configmap resource")
 	cmclient := k.CoreV1().ConfigMaps(namespace)
 
@@ -28,7 +28,7 @@ func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace st
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy {
+	if opts.Redeploy || commandFlag == configuration.Replace {
 		color.Blue("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		if err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
@@ -38,7 +38,7 @@ func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace st
 
 	_, err := cmclient.Create(cm)
 	if err != nil {
-		if opts.TryUpdate {
+		if opts.TryUpdate || commandFlag == configuration.Apply {
 			_, err := cmclient.Update(cm)
 			if err != nil {
 				color.Red("Configmap could not be updated")

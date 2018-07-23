@@ -5,7 +5,7 @@ import (
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 	"k8s.io/api/apps/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,37 +13,37 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, opts configuration.Options) (state.State, error) {
-	color.Blue("Found statefulset resource")
+func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	log.Debug("Found statefulset resource")
 	stsclient := k.AppsV1beta1().StatefulSets(namespace)
 
 	if opts.DryRun {
 		_, err := stsclient.Get(sts.Name, v12.GetOptions{})
 		if err != nil {
-			color.Red(fmt.Sprintf("DRY-RUN: StatefulSet resource %s does not exist\n", sts.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: StatefulSet resource %s does not exist\n", sts.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			color.Blue(fmt.Sprintf("DRY-RUN: StatefulSet resource %s exists\n", sts.Name))
+			log.Debug(fmt.Sprintf("DRY-RUN: StatefulSet resource %s exists\n", sts.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy {
-		color.Blue("Removing resource in preparation for redeploy")
+	if opts.Redeploy || commandFlag == configuration.Replace {
+		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		stsclient.Delete(sts.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 	}
 	_, err := stsclient.Create(sts)
 	if err != nil {
-		if opts.TryUpdate {
+		if opts.TryUpdate || commandFlag == configuration.Apply {
 			_, err := stsclient.UpdateStatus(sts)
 			if err != nil {
-				color.Red("Could not update Statefulset")
+				log.Error("Could not update Statefulset")
 				return state.EDeploymentStateCantUpdate, err
 			}
-			color.Blue("Statefulset updated")
+			log.Debug("Statefulset updated")
 			return state.EDeploymentStateUpdated, nil
 		}
 	}
-	color.Blue("Statefulset deployed")
+	log.Debug("Statefulset deployed")
 	return state.EDeploymentStateOkay, nil
 }

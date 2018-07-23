@@ -1,0 +1,87 @@
+APIVersion: "v1"
+Strategy:
+#Preview
+  - Cluster:
+      Name: "gke_beamery-preview_us-central1-a_beamery-preview-cluster"
+      Deployments:
+        - Deployment:
+           Name: "beamery-preview"
+           Namespace: "preview"
+           Git: "git@github.com:SeedJobs/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/ingress/hostmap.yaml
+            - Execute:
+                Kubectl:
+                  Command: apply
+                  Path: preview/account/serviceaccount.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/preview.yaml --template templates/accounts/devops.yaml --output preview/account"
+                Kubectl:
+                  Command: apply
+                  Path: preview/account/devops.yaml
+  - Cluster:
+      Name: "gke_beamery-preview_us-central1-a_beamery-services"
+      Deployments:
+        - Deployment:
+           Name: "beamery-queue"
+           Namespace: "queue"
+           Git: "git@github.com:SeedJobs/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/ingress/hostmap.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/preview.yaml --template templates/accounts/devops.yaml --output preview/account"
+                Kubectl:
+                  Command: apply
+                  Path: preview/account/devops.yaml
+        - Deployment:
+           Name: "beamery-cron"
+           Namespace: "service-cron"
+           Git: "git@github.com:SeedJobs/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/ingress/hostmap.yaml
+        - Deployment:
+           Name: "beamery-devops"
+           Namespace: "devops"
+           Git: "git@github.com:SeedJobs/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/ingress/hostmap.yaml
+  - Cluster:
+      Name: "gke_beamery-preview_us-central1-a_beamery-foundation"
+      Deployments:
+        - Deployment:
+           Name: "monstache"
+           Namespace: "monstache"
+           Git: "git@github.com:SeedJobs/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: preview/service
