@@ -97,3 +97,257 @@ create
 
 - [x] Rationalise back into native API for manifest parsing
 - [ ] Expand to deploy from in-memory git repo
+
+
+### Example of a real production configuration across multiple clusters
+
+```
+APIVersion: "v1"
+Strategy:
+#alpha
+  - Cluster:
+      Name: "gke_MYCOMPANY-alpha_us-central1-a_MYCOMPANY-alpha-cluster"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-alpha"
+           Namespace: "alpha"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/ingress/hostmap.yaml
+            - Execute:
+                Kubectl:
+                  Command: apply
+                  Path: alpha/account/serviceaccount.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/alpha.yaml --template templates/accounts/devops.yaml --output alpha/account"
+                Kubectl:
+                  Command: replace
+                  Path: alpha/account/devops.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-alpha_us-central1-a_MYCOMPANY-services"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-queue"
+           Namespace: "queue"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/ingress/hostmap.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/alpha.yaml --template templates/accounts/devops.yaml --output alpha/account"
+                Kubectl:
+                  Command: replace
+                  Path: alpha/account/devops.yaml
+        - Deployment:
+           Name: "MYCOMPANY-cron"
+           Namespace: "service-cron"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/ingress/hostmap.yaml
+        - Deployment:
+           Name: "MYCOMPANY-devops"
+           Namespace: "devops"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/ingress/hostmap.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-alpha_us-central1-a_MYCOMPANY-foundation"
+      Deployments:
+        - Deployment:
+           Name: "monstache"
+           Namespace: "monstache"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: alpha/service
+
+#beta
+  - Cluster:
+      Name: "gke_MYCOMPANY-beta_us-central1-a_MYCOMPANY-preproduction"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-beta"
+           Namespace: "beta"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/ingress/hostmap.yaml
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/account/serviceaccount.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/beta.yaml --template templates/accounts/devops.yaml --output beta/account"
+                Kubectl:
+                  Command: replace
+                  Path: beta/account/devops.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-beta_us-central1-a_MYCOMPANY-services"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-queue"
+           Namespace: "queue"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/ingress/hostmap.yaml
+            - Execute:
+                Shell: "vortex --varpath environments/beta.yaml --template templates/accounts/devops.yaml --output beta/account"
+                Kubectl:
+                  Command: apply
+                  Path: beta/account/devops.yaml
+        - Deployment:
+           Name: "MYCOMPANY-cron"
+           Namespace: "service-cron"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/ingress/hostmap.yaml
+        - Deployment:
+           Name: "MYCOMPANY-devops"
+           Namespace: "devops"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/ingress/hostmap.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-beta_us-central1-a_MYCOMPANY-foundation"
+      Deployments:
+        - Deployment:
+           Name: "monstache"
+           Namespace: "monstache"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: beta/service
+  - Cluster:
+      Name: "gke_MYCOMPANY-production_us-east4-a_MYCOMPANY-production"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-production"
+           Namespace: "production"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/ingress/hostmap.yaml
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/account/serviceaccount.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-production_us-east4-a_MYCOMPANY-service-cluster"
+      Deployments:
+        - Deployment:
+           Name: "MYCOMPANY-queue"
+           Namespace: "queue"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/ingress/hostmap.yaml
+        - Deployment:
+           Name: "MYCOMPANY-cron"
+           Namespace: "service-cron"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/ingress/hostmap.yaml
+        - Deployment:
+           Name: "MYCOMPANY-devops"
+           Namespace: "devops"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/service
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/ingress/hostmap.yaml
+  - Cluster:
+      Name: "gke_MYCOMPANY-production_us-east4-a_MYCOMPANY-foundation"
+      Deployments:
+        - Deployment:
+           Name: "monstache"
+           Namespace: "monstache"
+           Git: "git@github.com:MYCOMPANY/devops-kubernetes-configuration.git"
+           Action:
+            - Execute:
+               Kubectl:
+                 Command: apply
+                 Path: production/service
+
+```
