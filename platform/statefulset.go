@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AlexsJones/gravitywell/configuration"
@@ -27,23 +28,39 @@ func execStatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, na
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy || commandFlag == configuration.Replace {
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		stsclient.Delete(sts.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-	}
-	_, err := stsclient.Create(sts)
-	if err != nil {
-		if opts.TryUpdate || commandFlag == configuration.Apply {
-			_, err := stsclient.UpdateStatus(sts)
-			if err != nil {
-				log.Error("Could not update Statefulset")
-				return state.EDeploymentStateCantUpdate, err
-			}
-			log.Debug("Statefulset updated")
-			return state.EDeploymentStateUpdated, nil
+		_, err := stsclient.Create(sts)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy sts resource %s due to %s", sts.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("Statefulset deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	log.Debug("Statefulset deployed")
-	return state.EDeploymentStateOkay, nil
+	//Create ---------------------------------------------------------------------
+	if commandFlag == configuration.Create {
+		_, err := stsclient.Create(sts)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy sts resource %s due to %s", sts.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		log.Debug("Statefulset deployed")
+		return state.EDeploymentStateOkay, nil
+	}
+	//Apply --------------------------------------------------------------------
+	if commandFlag == configuration.Apply {
+		_, err := stsclient.UpdateStatus(sts)
+		if err != nil {
+			log.Error("Could not update Statefulset")
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug("Statefulset updated")
+		return state.EDeploymentStateUpdated, nil
+	}
+	return state.EDeploymentStateNil, errors.New("No kubectl command")
+
 }

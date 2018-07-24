@@ -16,8 +16,10 @@ import (
 
 func process(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
 
-	stateCapture := state.NewCapture()
-	stateCapture.ClusterName = cluster.Name
+	stateCapture := &state.Capture{
+		ClusterName:     cluster.Name,
+		DeploymentState: make(map[string]state.Details),
+	}
 	//---------------------------------
 	log.Warn(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)

@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AlexsJones/gravitywell/configuration"
@@ -27,25 +28,39 @@ func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy || commandFlag == configuration.Replace {
+
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		if err := ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
-			log.Error(err.Error())
+		ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := ssclient.Create(ss)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("Service deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	_, err := ssclient.Create(ss)
-	if err != nil {
-		if opts.TryUpdate || commandFlag == configuration.Apply {
-			_, err := ssclient.Update(ss)
-			if err != nil {
-				log.Error("Could not update service")
-				return state.EDeploymentStateCantUpdate, err
-			}
-			log.Debug("Service updated")
-			return state.EDeploymentStateUpdated, nil
+	//Create ---------------------------------------------------------------------
+	if commandFlag == configuration.Create {
+		_, err := ssclient.Create(ss)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("Service deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	log.Debug("Service deployed")
-	return state.EDeploymentStateOkay, nil
+	//Apply --------------------------------------------------------------------
+	if commandFlag == configuration.Apply {
+		_, err := ssclient.Update(ss)
+		if err != nil {
+			log.Error("Could not update Service")
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug("Service updated")
+		return state.EDeploymentStateUpdated, nil
+	}
+	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

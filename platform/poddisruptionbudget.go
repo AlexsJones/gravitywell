@@ -1,11 +1,12 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,38 +15,51 @@ import (
 )
 
 func execPodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDisruptionBudget, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	color.Blue("Found PodDisruptionBudget resource")
+	log.Info("Found PodDisruptionBudget resource")
 	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
 
 	if opts.DryRun {
 		_, err := pdbclient.Get(pdb.Name, v12.GetOptions{})
 		if err != nil {
-			color.Red(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", pdb.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", pdb.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			color.Blue(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", pdb.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", pdb.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	if opts.Redeploy || commandFlag == configuration.Replace {
-		color.Blue("Removing resource in preparation for redeploy")
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		if err := pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
-			color.Red(err.Error())
+		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := pdbclient.Create(pdb)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("PodDisruptionBudget deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	_, err := pdbclient.Create(pdb)
-	if err != nil {
-		if opts.TryUpdate || commandFlag == configuration.Apply {
-			_, err := pdbclient.Update(pdb)
-			if err != nil {
-				color.Red("PodDisruptionBudget could not be updated")
-				return state.EDeploymentStateCantUpdate, err
-			}
-			color.Blue("PodDisruptionBudget updated")
-			return state.EDeploymentStateUpdated, nil
+	//Create ---------------------------------------------------------------------
+	if commandFlag == configuration.Create {
+		_, err := pdbclient.Create(pdb)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("PodDisruptionBudget deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	color.Blue("PodDisruptionBudget deployed")
-	return state.EDeploymentStateOkay, nil
+	//Apply --------------------------------------------------------------------
+	if commandFlag == configuration.Apply {
+		_, err := pdbclient.Update(pdb)
+		if err != nil {
+			log.Error("Could not update PodDisruptionBudget")
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug("PodDisruptionBudget updated")
+		return state.EDeploymentStateUpdated, nil
+	}
+	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

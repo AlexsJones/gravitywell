@@ -1,11 +1,12 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/fatih/color"
+	log "github.com/Sirupsen/logrus"
 	v1rbac "k8s.io/api/rbac/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,40 +15,52 @@ import (
 )
 
 func execClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	color.Blue("Found ClusterRoleBinding resource")
+	log.Info("Found ClusterRoleBinding resource")
 	cmclient := k.RbacV1().ClusterRoleBindings()
 
 	if opts.DryRun {
 		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
 		if err != nil {
-			color.Red(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s does not exist\n", cm.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s does not exist\n", cm.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			color.Blue(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s exists\n", cm.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s exists\n", cm.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
 
-	if opts.Redeploy || commandFlag == configuration.Replace {
-		color.Blue("Removing resource in preparation for redeploy")
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		if err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod}); err != nil {
-			color.Red(err.Error())
+		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := cmclient.Create(cm)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", cm.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("Deployment deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-
-	_, err := cmclient.Create(cm)
-	if err != nil {
-		if opts.TryUpdate || commandFlag == configuration.Apply {
-			_, err := cmclient.Update(cm)
-			if err != nil {
-				color.Red("ClusterRoleBinding could not be updated")
-				return state.EDeploymentStateCantUpdate, err
-			}
-			color.Blue("ClusterRoleBinding updated")
-			return state.EDeploymentStateUpdated, nil
+	//Create ---------------------------------------------------------------------
+	if commandFlag == configuration.Create {
+		_, err := cmclient.Create(cm)
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", cm.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
+		log.Debug("ClusterRoleBinding deployed")
+		return state.EDeploymentStateOkay, nil
 	}
-	color.Blue("ClusterRoleBinding deployed")
-	return state.EDeploymentStateOkay, nil
+	//Apply --------------------------------------------------------------------
+	if commandFlag == configuration.Apply {
+		_, err := cmclient.Update(cm)
+		if err != nil {
+			log.Error("Could not update ClusterRoleBinding")
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug("ClusterRoleBinding updated")
+		return state.EDeploymentStateUpdated, nil
+	}
+	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

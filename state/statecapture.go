@@ -11,10 +11,3 @@ type Capture struct {
 	ClusterName     string
 	DeploymentState map[string]Details
 }
-
-func NewCapture() *Capture {
-
-	return &Capture{
-		DeploymentState: make(map[string]Details),
-	}
-}
