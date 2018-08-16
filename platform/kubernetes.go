@@ -10,6 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/api/apps/v1beta1"
 	v1 "k8s.io/api/core/v1"
+	v1betav1 "k8s.io/api/extensions/v1beta1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/client-go/kubernetes"
@@ -89,6 +90,8 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		response, e = execClusterRoleBindingResouce(k, obj.(*v1rbac.ClusterRoleBinding), namespace, opts, commandFlag)
 	case *v1rbac.ClusterRole:
 		response, e = execClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
+	case *v1betav1.DaemonSet:
+		response, e = execDaemonSetResouce(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag)
 	default:
 		log.Error("Unable to convert API resource")
 	}

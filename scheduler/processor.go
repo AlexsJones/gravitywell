@@ -12,6 +12,7 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
+	"k8s.io/api/core/v1"
 )
 
 func process(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
@@ -95,7 +96,19 @@ func process(opt configuration.Options, cluster configuration.Cluster) *state.Ca
 					continue
 				}
 				var stateResponse state.State
+				//---------------------------------
 				log.Debug(fmt.Sprintf("Running..."))
+				if deployment.Deployment.CreateNamespace {
+					log.Debug("Creating namespace...")
+					nsclient := k8siface.CoreV1().Namespaces()
+					cm := &v1.Namespace{}
+					cm.Name = deployment.Deployment.Namespace
+					cm.Namespace = deployment.Deployment.Namespace
+					_, err := nsclient.Create(cm)
+					if err != nil {
+						log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
+					}
+				}
 				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt, commandFlag); err != nil {
 					log.Error(err.Error())
 				}

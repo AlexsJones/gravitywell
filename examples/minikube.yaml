@@ -1,0 +1,27 @@
+APIVersion: "v1"
+Strategy:
+  - Cluster:
+      Name: "minikube"
+      Deployments:
+        - Deployment:
+           Name: "kubernetes-zookeeper-cluster"
+           Namespace: "zk"
+           CreateNamespace: true
+           Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+           Action:
+            - Execute:
+               Shell: "./build_environment.sh small"
+               Kubectl:
+                 Command: apply
+                 Path: deployment
+        - Deployment:
+            Name: "kubernetes-kafka-cluster"
+            Namespace: "kafka"
+            CreateNamespace: true
+            Git: "git@github.com:AlexsJones/kubernetes-kafka-cluster.git"
+            Action:
+             - Execute:
+                Shell: "./build_environment.sh small"
+                Kubectl:
+                  Path: deployments
+                  Command: apply

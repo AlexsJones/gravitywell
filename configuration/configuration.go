@@ -11,10 +11,11 @@ type Cluster struct {
 	Name        string `yaml:"Name"`
 	Deployments []struct {
 		Deployment struct {
-			Name      string `yaml:"Name"`
-			Namespace string `yaml:"Namespace"`
-			Git       string `yaml:"Git"`
-			Action    []struct {
+			Name            string `yaml:"Name"`
+			Namespace       string `yaml:"Namespace"`
+			CreateNamespace bool   `yaml:"CreateNamespace"`
+			Git             string `yaml:"Git"`
+			Action          []struct {
 				Execute struct {
 					Shell   string `yaml:"Shell"`
 					Kubectl struct {
