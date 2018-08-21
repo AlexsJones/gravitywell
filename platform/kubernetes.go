@@ -88,6 +88,8 @@ func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, na
 		response, e = execServiceAccountResouce(k, obj.(*v1.ServiceAccount), namespace, opts, commandFlag)
 	case *v1rbac.ClusterRoleBinding:
 		response, e = execClusterRoleBindingResouce(k, obj.(*v1rbac.ClusterRoleBinding), namespace, opts, commandFlag)
+	case *v1rbac.RoleBinding:
+		response, e = execRoleBindingResouce(k, obj.(*v1rbac.RoleBinding), namespace, opts, commandFlag)
 	case *v1rbac.ClusterRole:
 		response, e = execClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	case *v1betav1.DaemonSet:
