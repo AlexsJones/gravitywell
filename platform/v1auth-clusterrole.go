@@ -7,24 +7,25 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
-	"k8s.io/api/core/v1"
+	"github.com/fatih/color"
+	auth_v1 "k8s.io/api/rbac/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	log.Debug("Found service resource")
-	ssclient := k.CoreV1().Services(namespace)
+func execV1AuthClusterRoleResouce(k kubernetes.Interface, cm *auth_v1.ClusterRole, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	color.Blue("Found ClusterRole resource")
+	cmclient := k.RbacV1().ClusterRoles()
 
 	if opts.DryRun {
-		_, err := ssclient.Get(ss.Name, v12.GetOptions{})
+		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", ss.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: ClusterRole resource %s does not exist\n", cm.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Debug(fmt.Sprintf("DRY-RUN: Service resource %s exists\n", ss.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: ClusterRole resource %s exists\n", cm.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
@@ -33,33 +34,33 @@ func execServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-		_, err := ssclient.Create(ss)
+		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := cmclient.Create(cm)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy ClusterRole resource %s due to %s", cm.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("Service deployed")
+		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := ssclient.Create(ss)
+		_, err := cmclient.Create(cm)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy ClusterRole resource %s due to %s", cm.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("Service deployed")
+		log.Debug("ClusterRole deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := ssclient.Update(ss)
+		_, err := cmclient.Update(cm)
 		if err != nil {
-			log.Error("Could not update Service")
+			log.Error("Could not update ClusterRole")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug("Service updated")
+		log.Debug("ClusterRole updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

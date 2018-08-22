@@ -14,17 +14,17 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execDeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deployment, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	log.Debug("Found deployment resource")
+func execV1Beta1StatefulSetResouce(k kubernetes.Interface, sts *v1beta1.StatefulSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	log.Debug("Found statefulset resource")
+	stsclient := k.AppsV1beta1().StatefulSets(namespace)
 
-	deploymentClient := k.AppsV1beta1().Deployments(namespace)
 	if opts.DryRun {
-		_, err := deploymentClient.Get(objdep.Name, v12.GetOptions{})
+		_, err := stsclient.Get(sts.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: Deployment resource %s does not exist\n", objdep.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: StatefulSet resource %s does not exist\n", sts.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Debug(fmt.Sprintf("DRY-RUN: Deployment resource %s exists\n", objdep.Name))
+			log.Debug(fmt.Sprintf("DRY-RUN: StatefulSet resource %s exists\n", sts.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
@@ -32,33 +32,33 @@ func execDeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deployment, n
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-		_, err := deploymentClient.Create(objdep)
+		stsclient.Delete(sts.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := stsclient.Create(sts)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy sts resource %s due to %s", sts.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("Deployment deployed")
+		log.Debug("Statefulset deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := deploymentClient.Create(objdep)
+		_, err := stsclient.Create(sts)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy sts resource %s due to %s", sts.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("Deployment deployed")
+		log.Debug("Statefulset deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := deploymentClient.Update(objdep)
+		_, err := stsclient.UpdateStatus(sts)
 		if err != nil {
-			log.Error("Could not update Deployment")
+			log.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug("Deployment updated")
+		log.Debug("Statefulset updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

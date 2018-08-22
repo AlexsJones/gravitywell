@@ -14,7 +14,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.RoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func exec1VRbacRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.RoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found RoleBinding resource")
 	cmclient := k.RbacV1().RoleBindings(namespace)
 

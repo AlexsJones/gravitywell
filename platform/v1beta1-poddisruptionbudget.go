@@ -7,25 +7,24 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
-	"k8s.io/api/core/v1"
+	v1polbeta "k8s.io/api/policy/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	log.Info("Found Configmap resource")
-	cmclient := k.CoreV1().ConfigMaps(namespace)
+func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDisruptionBudget, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	log.Info("Found PodDisruptionBudget resource")
+	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
 
 	if opts.DryRun {
-		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
+		_, err := pdbclient.Get(pdb.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: Configmap resource %s does not exist\n", cm.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", pdb.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Info(fmt.Sprintf("DRY-RUN: Configmap resource %s exists\n", cm.Name))
-
+			log.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", pdb.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
@@ -33,33 +32,33 @@ func execConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace st
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-		_, err := cmclient.Create(cm)
+		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := pdbclient.Create(pdb)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy ConfigMap resource %s due to %s", cm.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("Deployment deployed")
+		log.Debug("PodDisruptionBudget deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := cmclient.Create(cm)
+		_, err := pdbclient.Create(pdb)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy ConfigMap resource %s due to %s", cm.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("ConfigMap deployed")
+		log.Debug("PodDisruptionBudget deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := cmclient.Update(cm)
+		_, err := pdbclient.Update(pdb)
 		if err != nil {
-			log.Error("Could not update ConfigMap")
+			log.Error("Could not update PodDisruptionBudget")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug("ConfigMap updated")
+		log.Debug("PodDisruptionBudget updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

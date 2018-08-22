@@ -14,7 +14,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execDaemonSetResouce(k kubernetes.Interface, sts *v1beta1.DaemonSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Beta1DaemonSetResouce(k kubernetes.Interface, sts *v1beta1.DaemonSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Debug("Found statefulset resource")
 	dsclient := k.Extensions().DaemonSets(namespace)
 

@@ -14,7 +14,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execServiceAccountResouce(k kubernetes.Interface, cm *v1.ServiceAccount, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1ServiceAccountResouce(k kubernetes.Interface, cm *v1.ServiceAccount, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found ServiceAccount resource")
 	cmclient := k.CoreV1().ServiceAccounts(namespace)
 

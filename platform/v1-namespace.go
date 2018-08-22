@@ -7,58 +7,60 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
-	v1polbeta "k8s.io/api/policy/v1beta1"
+	"github.com/fatih/color"
+	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execPodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDisruptionBudget, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	log.Info("Found PodDisruptionBudget resource")
-	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
+func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+	color.Blue("Found Namespace resource")
+	cmclient := k.CoreV1().Namespaces()
 
 	if opts.DryRun {
-		_, err := pdbclient.Get(pdb.Name, v12.GetOptions{})
+		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", pdb.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: Namespace resource %s does not exist\n", cm.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", pdb.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: Namespace resource %s exists\n", cm.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
+
 	//Replace -------------------------------------------------------------------
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-		_, err := pdbclient.Create(pdb)
+		cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_, err := cmclient.Create(cm)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("PodDisruptionBudget deployed")
+		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := pdbclient.Create(pdb)
+		_, err := cmclient.Create(cm)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("PodDisruptionBudget deployed")
+		log.Debug("Namespace deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := pdbclient.Update(pdb)
+		_, err := cmclient.Update(cm)
 		if err != nil {
-			log.Error("Could not update PodDisruptionBudget")
+			log.Error("Could not update Namespace")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug("PodDisruptionBudget updated")
+		log.Debug("Namespace updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
