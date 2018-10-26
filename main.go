@@ -22,7 +22,8 @@ const ban string = `
 {{.AnsiColor.Blue}} \______  /__|  (____  /\_/ |__||__|  / ____|  \/\_/  \___  >____/____/
 {{.AnsiColor.Blue}}        \/           \/               \/                  \/
 {{.AnsiColor.Blue}}
-{{.AnsiColor.Yellow}} Pull all of your kubernetes cluster configurations into one place.
+{{.AnsiColor.Yellow}} Pull all o
+f your kubernetes cluster configurations into one place.
 `
 
 func init() {
@@ -60,7 +61,7 @@ func main() {
 		}
 	}
 
-	conf, err := configuration.NewConfiguration(*config)
+	conf, err := configuration.NewConfigurationFromPath(*config)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -76,8 +77,14 @@ func main() {
 		ignoreListAr = strings.Split(*ignoreList, ",")
 	}
 
-	if err := sh.Run(configuration.Options{VCS: "git", TempVCSPath: "./.gravitywell", APIVersion: "v1", SSHKeyPath: *sshkeypath,
-		DryRun: *dryRun, TryUpdate: *tryUpdate, Redeploy: *redeploy, IgnoreList: ignoreListAr}); err != nil {
+	if err := sh.Run(configuration.Options{VCS: "git",
+	TempVCSPath: "./.gravitywell",
+	APIVersion: "v1",
+	SSHKeyPath: *sshkeypath,
+	DryRun: *dryRun,
+	TryUpdate: *tryUpdate,
+	Redeploy: *redeploy,
+	IgnoreList: ignoreListAr}); err != nil {
 		log.Warn(err.Error())
 		os.Exit(1)
 	}

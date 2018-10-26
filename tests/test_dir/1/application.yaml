@@ -1,0 +1,26 @@
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+- Cluster:
+    Name: "minikube"
+    Deployments:
+    - Deployment:
+        Name: "kubernetes-nifi-cluster"
+        Namespace: "nifi"
+        Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
+        Action:
+        - Execute:
+            Shell: "ls -la"
+            Kubectl:
+              Command: replace
+              Path: statefulset
+    - Deployment:
+        Name: "kubernetes-zookeeper-cluster"
+        Namespace: "zk"
+        Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+        Action:
+        - Execute:
+            Shell: "./build_environment.sh small"
+            Kubectl:
+              Path: deployment
+              Command: replace

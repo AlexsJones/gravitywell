@@ -1,0 +1,3 @@
+APIVersion: "v1"
+Kind: "Cluster"
+Strategy:
