@@ -14,8 +14,8 @@ import (
 
 type Cluster struct {
 	Name        string `yaml:"Name"`
-	Deployments []struct {
-		Deployment struct {
+	Applications []struct {
+		Application struct {
 			Name            string `yaml:"Name"`
 			Namespace       string `yaml:"Namespace"`
 			CreateNamespace bool   `yaml:"CreateNamespace"`
@@ -30,8 +30,8 @@ type Cluster struct {
 					} `yaml:"Kubectl"`
 				} `yaml:"Execute"`
 			} `yaml:"Action"`
-		} `yaml:"Deployment"`
-	} `yaml:"Deployments"`
+		} `yaml:"Application"`
+	} `yaml:"Applications"`
 }
 
 //ApplicationKind ...

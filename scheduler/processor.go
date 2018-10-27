@@ -29,29 +29,29 @@ func processApplication(opt configuration.Options, cluster configuration.Cluster
 		os.Exit(1)
 	}
 	//---------------------------------
-	for _, deployment := range cluster.Deployments {
-		log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Deployment.Name))
+	for _, deployment := range cluster.Applications {
+		log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Application.Name))
 		//---------------------------------
 		//Generate name from repo
-		var extension = filepath.Ext(deployment.Deployment.Git)
-		var remoteVCSRepoName = deployment.Deployment.Git[0 : len(deployment.Deployment.Git)-len(extension)]
+		var extension = filepath.Ext(deployment.Application.Git)
+		var remoteVCSRepoName = deployment.Application.Git[0 : len(deployment.Application.Git)-len(extension)]
 		splitStrings := strings.Split(remoteVCSRepoName, "/")
 		remoteVCSRepoName = splitStrings[len(splitStrings)-1]
 
 		if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); os.IsNotExist(err) {
 			log.Debug(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 			gvcs := new(vcs.GitVCS)
-			_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deployment.Deployment.Git, opt.SSHKeyPath)
+			_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deployment.Application.Git, opt.SSHKeyPath)
 			if err != nil {
 				log.Error(err.Error())
-				stateCapture.DeploymentState[deployment.Deployment.Name] = state.Details{State: state.EDeploymentStateError}
+				stateCapture.DeploymentState[deployment.Application.Name] = state.Details{State: state.EDeploymentStateError}
 				return stateCapture
 			}
 		} else {
 			log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 		}
 		//---------------------------------
-		for _, a := range deployment.Deployment.Action {
+		for _, a := range deployment.Application.Action {
 			if a.Execute.Shell != "" {
 				log.Warn(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
 				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
@@ -98,29 +98,29 @@ func processApplication(opt configuration.Options, cluster configuration.Cluster
 				var stateResponse state.State
 				//---------------------------------
 				log.Debug(fmt.Sprintf("Running..."))
-				if deployment.Deployment.CreateNamespace {
+				if deployment.Application.CreateNamespace {
 					log.Debug("Creating namespace...")
 					nsclient := k8siface.CoreV1().Namespaces()
 					cm := &v1.Namespace{}
-					cm.Name = deployment.Deployment.Namespace
-					cm.Namespace = deployment.Deployment.Namespace
+					cm.Name = deployment.Application.Namespace
+					cm.Namespace = deployment.Application.Namespace
 					_, err := nsclient.Create(cm)
 					if err != nil {
 						log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
 					}
 				}
-				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Deployment.Namespace, opt, commandFlag); err != nil {
+				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Application.Namespace, opt, commandFlag); err != nil {
 					log.Error(err.Error())
 				}
 				var output = ""
 				var hasError = false
 				if err != nil {
-					output = fmt.Sprintf("File: %s Namespace :%s Error: %s", file, deployment.Deployment.Namespace, err)
+					output = fmt.Sprintf("File: %s Namespace :%s Error: %s", file, deployment.Application.Namespace, err)
 					hasError = true
 				} else {
-					output = fmt.Sprintf("File: %s Namespace :%s", file, deployment.Deployment.Namespace)
+					output = fmt.Sprintf("File: %s Namespace :%s", file, deployment.Application.Namespace)
 				}
-				stateCapture.DeploymentState[deployment.Deployment.Name] = state.Details{State: stateResponse, HasDetail: true,
+				stateCapture.DeploymentState[deployment.Application.Name] = state.Details{State: stateResponse, HasDetail: true,
 					Detail: output, HasError: hasError}
 			}
 			//---------------------------------
