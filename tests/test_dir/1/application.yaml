@@ -3,8 +3,8 @@ Kind: "Application"
 Strategy:
 - Cluster:
     Name: "minikube"
-    Deployments:
-    - Deployment:
+    Applications:
+    - Application:
         Name: "kubernetes-nifi-cluster"
         Namespace: "nifi"
         Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
@@ -14,7 +14,7 @@ Strategy:
             Kubectl:
               Command: replace
               Path: statefulset
-    - Deployment:
+    - Application:
         Name: "kubernetes-zookeeper-cluster"
         Namespace: "zk"
         Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
