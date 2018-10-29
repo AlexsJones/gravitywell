@@ -22,7 +22,7 @@ const ban string = `
 {{.AnsiColor.Blue}} \______  /__|  (____  /\_/ |__||__|  / ____|  \/\_/  \___  >____/____/
 {{.AnsiColor.Blue}}        \/           \/               \/                  \/
 {{.AnsiColor.Blue}}
-{{.AnsiColor.Blue}} Pull all of your kubernetes cluster configurations into one place.
+{{.AnsiColor.Default}} Pull all of your kubernetes cluster configurations into one place.
 `
 
 func init() {
