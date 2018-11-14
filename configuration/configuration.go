@@ -12,25 +12,35 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type Execute struct {
+	Shell   string `yaml:"Shell"`
+	Kubectl struct {
+		Path    string `yaml:"Path"`
+		Type    string `yaml:"Type"`
+		Command string `yaml:"Command"`
+		Patch struct {
+			Op string `yaml:"Op"`
+			Path string `yaml:"Path"`
+			Value string `yaml:"Value"`
+		} `yaml:"Patch"`
+	} `yaml:"Kubectl"`
+}
+
+type Application struct {
+		Name            string `yaml:"Name"`
+		Namespace       string `yaml:"Namespace"`
+		CreateNamespace bool   `yaml:"CreateNamespace"`
+		Git             string `yaml:"Git"`
+		Image			string `yaml:"Image"`
+		Action          []struct {
+			Execute Execute `yaml:"Execute"`
+		} `yaml:"Action"`
+	}
+
 type Cluster struct {
 	Name        string `yaml:"Name"`
 	Applications []struct {
-		Application struct {
-			Name            string `yaml:"Name"`
-			Namespace       string `yaml:"Namespace"`
-			CreateNamespace bool   `yaml:"CreateNamespace"`
-			Git             string `yaml:"Git"`
-			Action          []struct {
-				Execute struct {
-					Shell   string `yaml:"Shell"`
-					Kubectl struct {
-						Path    string `yaml:"Path"`
-						Type    string `yaml:"Type"`
-						Command string `yaml:"Command"`
-					} `yaml:"Kubectl"`
-				} `yaml:"Execute"`
-			} `yaml:"Action"`
-		} `yaml:"Application"`
+		Application Application `yaml:"Application"`
 	} `yaml:"Applications"`
 }
 
@@ -44,7 +54,27 @@ type ApplicationKind struct {
 
 //ClusterKind ...
 type ClusterKind struct {
-
+	APIVersion string `yaml:"APIVersion"`
+	Kind       string `yaml:"Kind"`
+	Strategy   []struct {
+		Provider struct {
+			Clusters []struct {
+				Cluster struct {
+					Name      string `yaml:"Name"`
+					NodePools []struct {
+						NodePool struct {
+							Count       int    `yaml:"Count"`
+							MachineType string `yaml:"MachineType"`
+							Name        string `yaml:"Name"`
+						} `yaml:"NodePool"`
+					} `yaml:"NodePools"`
+					Region string   `yaml:"Region"`
+					Zones  []string `yaml:"Zones"`
+				} `yaml:"Cluster"`
+			} `yaml:"Clusters"`
+			Name string `yaml:"Name"`
+		} `yaml:"Provider"`
+	} `yaml:"Strategy"`
 }
 //GravitywellKind ...
 type GravitywellKind struct {

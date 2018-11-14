@@ -1,26 +1,33 @@
-APIVersion: "v1"
-Kind: "Application"
-Strategy:
-  - Cluster:
-      Name: "minikube"
-      Applications:
-        - Application:
-           Name: "kubernetes-nifi-cluster"
-           Namespace: "nifi"
-           Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
-           Action:
-            - Execute:
-               Shell: "ls -la"
-               Kubectl:
-                 Command: replace
-                 Path: statefulset
-        - Application:
-            Name: "kubernetes-zookeeper-cluster"
-            Namespace: "zk"
-            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
-            Action:
-             - Execute:
-                Shell: "./build_environment.sh small"
-                Kubectl:
-                  Path: deployment
-                  Command: replace
+  APIVersion: "v1"
+  Kind: "Application"
+  Strategy:
+    - Cluster:
+        Name: "minikube"
+        Applications:
+          - Application:
+             Name: "kubernetes-nifi-cluster"
+             Namespace: "nifi"
+             Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
+             Action:
+              - Execute:
+                 Shell: "pwd" # Arbitrary commands can be run with the execute shell block
+                 Kubectl:
+                   Command: apply
+                   Path: statefulset #The folder path to point too for replacing manifests
+              - Execute:
+                  Kubectl:
+                    Command: patch
+                    Patch:
+                      Op: replace
+                      Path: "/spec/template/spec/containers/0/image"
+                      Value: "nifi:latest"
+          - Application:
+              Name: "kubernetes-zookeeper-cluster"
+              Namespace: "zk"
+              Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+              Action:
+               - Execute:
+                  Shell: "./build_environment.sh small"
+                  Kubectl:
+                    Path: deployment
+                    Command: replace

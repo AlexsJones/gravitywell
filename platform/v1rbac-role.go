@@ -14,9 +14,12 @@ v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1RbacRoleResouce(k kubernetes.Interface, cm *v1rbac.Role, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1RbacRoleResouce(k kubernetes.Interface, cm *v1rbac.Role,
+	application configuration.Application,
+	executionStep configuration.Execute,
+	opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found Role resource")
-	cmclient := k.RbacV1().Roles(namespace)
+	cmclient := k.RbacV1().Roles(application.Namespace)
 
 	if opts.DryRun {
 		_, err := cmclient.Get(cm.Name, v12.GetOptions{})

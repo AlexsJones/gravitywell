@@ -14,9 +14,11 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1ConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1ConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, application configuration.Application,
+	executionStep configuration.Execute,
+	opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found Configmap resource")
-	cmclient := k.CoreV1().ConfigMaps(namespace)
+	cmclient := k.CoreV1().ConfigMaps(application.Namespace)
 
 	if opts.DryRun {
 		_, err := cmclient.Get(cm.Name, v12.GetOptions{})

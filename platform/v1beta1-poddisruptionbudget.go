@@ -14,9 +14,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbeta.PodDisruptionBudget, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface,
+	pdb *v1polbeta.PodDisruptionBudget,application configuration.Application,
+	executionStep configuration.Execute,
+	opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found PodDisruptionBudget resource")
-	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
+	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(application.Namespace)
 
 	if opts.DryRun {
 		_, err := pdbclient.Get(pdb.Name, v12.GetOptions{})

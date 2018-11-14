@@ -11,6 +11,7 @@ const (
 	EDeploymentStateCantUpdate
 	EDeploymentStateDone
 	EDeploymentStateUpdated
+	EDeploymentStatePatched
 )
 
 //Translate enum to string
@@ -32,6 +33,8 @@ func Translate(i State) string {
 		return "Done"
 	case EDeploymentStateUpdated:
 		return "Updated"
+	case EDeploymentStatePatched:
+		return "Patched"
 	}
 	return "N/A"
 }

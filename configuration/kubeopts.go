@@ -6,4 +6,5 @@ const (
 	Create CommandFlag = iota
 	Apply
 	Replace
+	Patch
 )

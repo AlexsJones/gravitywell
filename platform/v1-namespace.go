@@ -15,7 +15,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, application configuration.Application,
+	executionStep configuration.Execute,
+	opts configuration.Options,
+	commandFlag configuration.CommandFlag) (state.State, error) {
 	color.Blue("Found Namespace resource")
 	cmclient := k.CoreV1().Namespaces()
 

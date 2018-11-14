@@ -1,8 +1,10 @@
 package platform
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -14,10 +16,13 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deployment, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deployment,
+	application configuration.Application,
+	executionStep configuration.Execute,
+	opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Debug("Found deployment resource")
 
-	deploymentClient := k.AppsV1beta2().Deployments(namespace)
+	deploymentClient := k.AppsV1beta2().Deployments(application.Namespace)
 	if opts.DryRun {
 		_, err := deploymentClient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
@@ -59,6 +64,45 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug("Deployment updated")
+		return state.EDeploymentStateUpdated, nil
+	}
+	//Patch --------------------------------------------------------------------
+	if commandFlag == configuration.Patch {
+
+		type patchStringValue struct {
+			Op    string `json:"op"`
+			Path  string `json:"path"`
+			Value string `json:"value"`
+		}
+
+		if executionStep.Kubectl.Patch.Op == "" {
+			log.Warn("Missing Op value for patch")
+			return state.EDeploymentStateError, errors.New("Missing Op value for patch")
+		}
+		if executionStep.Kubectl.Patch.Path == "" {
+			log.Warn("Missing Path value for patch")
+			return state.EDeploymentStateError, errors.New("Missing Path value for patch")
+		}
+		if executionStep.Kubectl.Patch.Value == "" {
+			log.Warn("Missing Value for patch")
+			return state.EDeploymentStateError, errors.New("Missing Value for patch")
+		}
+
+		payload := []patchStringValue{{
+			Op:    executionStep.Kubectl.Patch.Op,
+			Path:  executionStep.Kubectl.Patch.Path,
+			Value: executionStep.Kubectl.Patch.Value,
+		}}
+
+		payloadBytes, _ := json.Marshal(payload)
+
+		_, err := deploymentClient.Patch(objdep.Name, types.JSONPatchType, payloadBytes)
+		if err != nil {
+			log.Error("Could not update Deployment")
+			return state.EDeploymentStateCantUpdate, err
+		}
+
+		log.Debug("Deployment patched")
 		return state.EDeploymentStateUpdated, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

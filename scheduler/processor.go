@@ -61,7 +61,7 @@ func processApplication(opt configuration.Options, cluster configuration.Cluster
 			//---------------------------------
 			var commandFlag configuration.CommandFlag
 			if a.Execute.Kubectl.Command == "" {
-				log.Warn("No Kubernetes action to run aborting (supports: create/apply/replace)")
+				log.Warn("No Kubernetes action to run aborting (supports: create/apply/replace/patch)")
 				continue
 			}
 			switch strings.ToLower(a.Execute.Kubectl.Command) {
@@ -74,6 +74,8 @@ func processApplication(opt configuration.Options, cluster configuration.Cluster
 			case "replace":
 				log.Println("Using replace command")
 				commandFlag = configuration.Replace
+			case "patch":
+				log.Println("Using patch command")
 			default:
 
 			}
@@ -109,9 +111,12 @@ func processApplication(opt configuration.Options, cluster configuration.Cluster
 						log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
 					}
 				}
-				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Application.Namespace, opt, commandFlag); err != nil {
+				//Run deployment
+				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Application,a.Execute, opt, commandFlag); err != nil {
 					log.Error(err.Error())
 				}
+
+
 				var output = ""
 				var hasError = false
 				if err != nil {

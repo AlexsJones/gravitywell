@@ -1,3 +1,19 @@
 APIVersion: "v1"
 Kind: "Cluster"
 Strategy:
+- Provider:
+    Name: "Google Cloud Platform"
+    Clusters:
+    - Cluster:
+        Name: "TestClusterAlpha"
+        Region: "us-east4"
+        Zones: [ "us-east4a", "us-east4b", "us-east4c"]
+        NodePools:
+        - NodePool:
+            Name: "Pool1"
+            MachineType: "n1-standard-2"
+            Count: 3
+        - NodePool:
+            Name: "Pool2"
+            MachineType: "n1-standard-1"
+            Count: 6
