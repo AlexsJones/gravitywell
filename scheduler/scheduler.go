@@ -29,8 +29,10 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 func (s *Scheduler) Run(opt configuration.Options) error {
 
 	//Cluster ops not implemented yet...
-	for _, _ = range s.configuration.ClusterKinds {
+	for _, clusterKind := range s.configuration.ClusterKinds {
 		color.Yellow("Cluster Kinds not supported yet")
+
+
 	}
 	//Application ...
 	for _, applicationKind := range s.configuration.ApplicationKinds {
@@ -56,7 +58,7 @@ func (s *Scheduler) Run(opt configuration.Options) error {
 					continue
 				}
 			}
-			stateMap := processApplication(opt, cluster.Cluster)
+			stateMap := ApplicationProcessor(opt, cluster.Cluster)
 			allClusterStates = append(allClusterStates, stateMap)
 		}
 		//----------------------------------

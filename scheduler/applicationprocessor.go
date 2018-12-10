@@ -15,7 +15,7 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-func processApplication(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
+func ApplicationProcessor(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
 
 	stateCapture := &state.Capture{
 		ClusterName:     cluster.Name,

@@ -44,7 +44,29 @@ type ApplicationKind struct {
 
 //ClusterKind ...
 type ClusterKind struct {
-
+	APIVersion string `yaml:"APIVersion"`
+	Kind       string `yaml:"Kind"`
+	Strategy   []struct {
+		Cluster struct {
+			Applications []struct {
+				Application struct {
+					Action []struct {
+						Execute struct {
+							Kubectl struct {
+								Command string `yaml:"Command"`
+								Path    string `yaml:"Path"`
+							} `yaml:"Kubectl"`
+							Shell string `yaml:"Shell"`
+						} `yaml:"Execute"`
+					} `yaml:"Action"`
+					Git       string `yaml:"Git"`
+					Name      string `yaml:"Name"`
+					Namespace string `yaml:"Namespace"`
+				} `yaml:"Application"`
+			} `yaml:"Applications"`
+			Name string `yaml:"Name"`
+		} `yaml:"Cluster"`
+	} `yaml:"Strategy"`
 }
 //GravitywellKind ...
 type GravitywellKind struct {
