@@ -12,7 +12,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Cluster struct {
+type ApplicationCluster struct {
 	Name        string `yaml:"Name"`
 	Applications []struct {
 		Application struct {
@@ -26,19 +26,45 @@ type Cluster struct {
 					Kubectl struct {
 						Path    string `yaml:"Path"`
 						Type    string `yaml:"Type"`
-						Command string `yaml:"Command"`
 					} `yaml:"Kubectl"`
 				} `yaml:"Execute"`
 			} `yaml:"Action"`
 		} `yaml:"Application"`
 	} `yaml:"Applications"`
 }
+type ProviderCluster struct {
+		InitialNodeCount int    `yaml:"InitialNodeCount"`
+		InitialNodeType  string `yaml:"InitialNodeType"`
+		Name             string `yaml:"Name"`
+		Project 		 string `yaml:"Project"`
+		NodePools        []struct {
+			NodePool struct {
+				Count    int    `yaml:"Count"`
+				Name     string `yaml:"Name"`
+				NodeType string `yaml:"NodeType"`
+			} `yaml:"NodePool"`
+		} `yaml:"NodePools"`
+		OauthScopes     string `yaml:"OauthScopes"`
+		PostInstallHook []struct {
+			Execute struct {
+				Shell string `yaml:"Shell"`
+			} `yaml:"Execute"`
+		} `yaml:"PostInstallHook"`
+		Region string   `yaml:"Region"`
+		Zones  []string `yaml:"Zones"`
+}
+type Provider struct {
+	Clusters []struct {
+		Cluster ProviderCluster `yaml:"Cluster"`
+	} `yaml:"Clusters"`
+	Name string `yaml:"Name"`
+}
 
 //ApplicationKind ...
 type ApplicationKind struct {
 	APIVersion string `yaml:"APIVersion"`
 	Strategy   []struct {
-		Cluster Cluster `yaml:"Cluster"`
+		Cluster ApplicationCluster `yaml:"Cluster"`
 	} `yaml:"Strategy"`
 }
 
@@ -47,27 +73,10 @@ type ClusterKind struct {
 	APIVersion string `yaml:"APIVersion"`
 	Kind       string `yaml:"Kind"`
 	Strategy   []struct {
-		Cluster struct {
-			Applications []struct {
-				Application struct {
-					Action []struct {
-						Execute struct {
-							Kubectl struct {
-								Command string `yaml:"Command"`
-								Path    string `yaml:"Path"`
-							} `yaml:"Kubectl"`
-							Shell string `yaml:"Shell"`
-						} `yaml:"Execute"`
-					} `yaml:"Action"`
-					Git       string `yaml:"Git"`
-					Name      string `yaml:"Name"`
-					Namespace string `yaml:"Namespace"`
-				} `yaml:"Application"`
-			} `yaml:"Applications"`
-			Name string `yaml:"Name"`
-		} `yaml:"Cluster"`
+		Provider Provider `yaml:"Provider"`
 	} `yaml:"Strategy"`
 }
+
 //GravitywellKind ...
 type GravitywellKind struct {
 	APIVersion string `yaml:"APIVersion"`
@@ -85,6 +94,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	if err != nil {
 		return err
 	}
+	//for --- found in a file recurse this function
 	appc := GravitywellKind{}
 	err = yaml.Unmarshal(bytes, &appc)
 	if err != nil {

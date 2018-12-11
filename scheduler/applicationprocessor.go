@@ -15,7 +15,8 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-func ApplicationProcessor(opt configuration.Options, cluster configuration.Cluster) *state.Capture {
+func ApplicationProcessor(commandFlag configuration.CommandFlag,
+	opt configuration.Options, cluster configuration.ApplicationCluster) *state.Capture {
 
 	stateCapture := &state.Capture{
 		ClusterName:     cluster.Name,
@@ -57,25 +58,6 @@ func ApplicationProcessor(opt configuration.Options, cluster configuration.Clust
 				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
 					log.Error(err.Error())
 				}
-			}
-			//---------------------------------
-			var commandFlag configuration.CommandFlag
-			if a.Execute.Kubectl.Command == "" {
-				log.Warn("No Kubernetes action to run aborting (supports: create/apply/replace)")
-				continue
-			}
-			switch strings.ToLower(a.Execute.Kubectl.Command) {
-			case "apply":
-				log.Println("Using apply command")
-				commandFlag = configuration.Apply
-			case "create":
-				log.Println("Using create command")
-				commandFlag = configuration.Create
-			case "replace":
-				log.Println("Using replace command")
-				commandFlag = configuration.Replace
-			default:
-
 			}
 			//---------------------------------
 			fileList := []string{}

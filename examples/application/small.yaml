@@ -12,7 +12,6 @@ Strategy:
             - Execute:
                Shell: "ls -la"
                Kubectl:
-                 Command: replace
                  Path: statefulset
         - Application:
             Name: "kubernetes-zookeeper-cluster"
@@ -23,4 +22,3 @@ Strategy:
                 Shell: "./build_environment.sh small"
                 Kubectl:
                   Path: deployment
-                  Command: replace

@@ -8,7 +8,6 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
-	"github.com/fatih/color"
 )
 
 //Scheduler object ...
@@ -26,12 +25,14 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 }
 
 //Run a new scheduler based off of the current configuration
-func (s *Scheduler) Run(opt configuration.Options) error {
+func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
+	opt configuration.Options) error {
 
-	//Cluster ops not implemented yet...
-	for _, clusterKind := range s.configuration.ClusterKinds {
-		color.Yellow("Cluster Kinds not supported yet")
-
+	//Cluster ...
+	for _, ck := range s.configuration.ClusterKinds {
+		for _, clusterKind := range ck.Strategy {
+			ClusterProcessor(commandFlag, clusterKind.Provider)
+		}
 
 	}
 	//Application ...
@@ -52,31 +53,13 @@ func (s *Scheduler) Run(opt configuration.Options) error {
 		var allClusterStates []*state.Capture
 
 		for _, cluster := range applicationKind.Strategy {
-			for _, ignoreItem := range opt.IgnoreList {
-				if ignoreItem == cluster.Cluster.Name {
-					log.Warn(fmt.Sprintf("Ignoring cluster %s\n", cluster.Cluster.Name))
-					continue
-				}
-			}
-			stateMap := ApplicationProcessor(opt, cluster.Cluster)
+			stateMap := ApplicationProcessor(commandFlag, opt, cluster.Cluster)
 			allClusterStates = append(allClusterStates, stateMap)
 		}
 		//----------------------------------
-		var col func(string, ...interface{})
 		for _, stateCapture := range allClusterStates {
-			for k, v := range stateCapture.DeploymentState {
-				col = color.Green
-				if v.State == state.EDeploymentStateError {
-					col = color.Red
-				}
-				if v.State == state.EDeploymentStateNotExists {
-					col = color.Red
-				}
-				col(fmt.Sprintf("Cluster %s Deployment %s State => %s\n", stateCapture.ClusterName, k, state.Translate(v.State)))
-				if v.HasDetail && v.HasError {
-					color.Cyan(fmt.Sprintf("\t %s\n", v.Detail))
-				}
-			}
+
+			stateCapture.Print()
 		}
 	}
 	return nil

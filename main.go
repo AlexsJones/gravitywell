@@ -1,29 +1,14 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
-	"flag"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler"
 	log "github.com/Sirupsen/logrus"
-	"github.com/dimiro1/banner"
+	"github.com/jessevdk/go-flags"
+	"os"
+	"strings"
 )
-
-const ban string = `
-{{.AnsiColor.Blue}}  ________                  .__  __                         .__  .__
-{{.AnsiColor.Blue}} /  _____/___________ ___  _|__|/  |_ ___.__.__  _  __ ____ |  | |  |
-{{.AnsiColor.Blue}}/   \  __\_  __ \__  \\  \/ /  \   __<   |  |\ \/ \/ // __ \|  | |  |
-{{.AnsiColor.Blue}}\    \_\  \  | \// __ \\   /|  ||  |  \___  | \     /\  ___/|  |_|  |__
-{{.AnsiColor.Blue}} \______  /__|  (____  /\_/ |__||__|  / ____|  \/\_/  \___  >____/____/
-{{.AnsiColor.Blue}}        \/           \/               \/                  \/
-{{.AnsiColor.Blue}}
-{{.AnsiColor.Default}} Pull all of your kubernetes cluster configurations into one place.
-`
 
 func init() {
 	// Output to stdout instead of the default stderr
@@ -34,33 +19,38 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
+var Opts struct {
+	DryRun bool `short:"d" long:"dryrun" description:"Performs a dryrun."`
+	FileName string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
+	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
+}
+func Usage() {
+
+	os.Exit(0)
+}
 func main() {
 
-	banner.Init(os.Stdout, true, true, bytes.NewBufferString(ban))
-	redeploy := flag.Bool("redeploy", false, "Forces a delete and deploy overriding all kubectl commands. WARNING: Destructive")
-	tryUpdate := flag.Bool("try-update", false, "Try to update the resource if possible")
-	ignoreList := flag.String("ignore-list", "", "A comma delimited list of clusters to ignore")
-	sshkeypath := flag.String("ssh-key-path", "", "Provide to override default sshkey used")
-	dryRun := flag.Bool("dry-run", false, "Run a dry run deployment to test what is deployment")
-	config := flag.String("config", "", "Configuration path")
-	flag.Parse()
-
-	if *config == "" {
-		return
+	args := os.Args
+	var command = ""
+	if len(args) <= 2 {
+		Usage()
 	}
 
-	if *redeploy {
-		reader := bufio.NewReader(os.Stdin)
-		log.Warn(fmt.Sprintf("This is a very destructive action, are you sure [Y/N]?: "))
-		text, _ := reader.ReadString('\n')
-		trimmed := strings.Trim(text, "\n")
-		if strings.Compare(trimmed, "Y") != 0 {
+	if args[1] == "" {
+		Usage()
+	}
+	command = strings.ToLower(args[1])
+	if command == "" {
+		Usage()
+	}
+	args = args[2:len(args)]
 
-			os.Exit(0)
-		}
+	_, err := flags.ParseArgs(&Opts, os.Args)
+	if err != nil {
+		panic(err)
 	}
 
-	conf, err := configuration.NewConfigurationFromPath(*config)
+	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -71,19 +61,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	var ignoreListAr []string
-	if *ignoreList != "" {
-		ignoreListAr = strings.Split(*ignoreList, ",")
+	var commandFlag configuration.CommandFlag
+	switch command {
+	case "create":
+		commandFlag = configuration.Create
+	case "apply":
+		commandFlag = configuration.Apply
+	case "replace":
+		commandFlag = configuration.Replace
+	default:
+		fmt.Println("Command not recognised.")
+		os.Exit(1)
 	}
 
-	if err := sh.Run(configuration.Options{VCS: "git",
+	if err :=
+		sh.Run(commandFlag, configuration.Options{VCS: "git",
 	TempVCSPath: "./.gravitywell",
 	APIVersion: "v1",
-	SSHKeyPath: *sshkeypath,
-	DryRun: *dryRun,
-	TryUpdate: *tryUpdate,
-	Redeploy: *redeploy,
-	IgnoreList: ignoreListAr}); err != nil {
+	SSHKeyPath: Opts.SSHKeyPath,
+	});
+	err != nil {
 		log.Warn(err.Error())
 		os.Exit(1)
 	}
