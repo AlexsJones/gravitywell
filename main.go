@@ -69,6 +69,8 @@ func main() {
 		commandFlag = configuration.Apply
 	case "replace":
 		commandFlag = configuration.Replace
+	case "delete":
+		commandFlag = configuration.Delete
 	default:
 		fmt.Println("Command not recognised.")
 		os.Exit(1)

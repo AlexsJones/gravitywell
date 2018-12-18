@@ -2,18 +2,14 @@
 
 ![gravitywell](resources/bg.png)
 
+- Deploy cluster into GCP from yaml
+- Deploy manifests into those clusters from yaml
 
 Pull all your Kubernetes deployment configuration into one place.
 
 Run one command and one manifest to switch clusters, deploy services and be the boss of your infrastructure.
 
-_It's a bit like docker-compose for Kubernetes deployments across clusters!_
-
-![example](resources/output.gif)
-
-_Or using --dryrun to test your deployment status_
-
-![example2](resources/output2.gif)
+It's as easy as `gravitywell create -f ./`
 
 ## Installation
 
@@ -22,34 +18,84 @@ _Or using --dryrun to test your deployment status_
 ## Requirements
 
 `go get github.com/AlexsJones/vortex`
-
+`export GOOGLE_APPLICATION_CREDENTIALS=` This needs to be set to a valid service account for the project you with to perform GCP operations on
 ## Example overview Manifest
 
-_Please see examples directory_
+There are two kinds of manifest.
+`Cluster` and `Application`
 
-Example command: `gravitywell -config examples/application/small.yaml`
+```bash
+APIVersion: "v1"
+Kind: "Cluster"
+Strategy:
+  - Provider:
+      Name: "Google Cloud Platform"
+      Clusters:
+        - Cluster:
+            Name: "testclustera"
+            Project: "beamery-trials"
+            Region: "us-east4"
+            Zones: ["us-east4-a"]
+            InitialNodeCount: 1
+            InitialNodeType: "n1-standard-1"
+            OauthScopes: "https://www.googleapis.com/auth/monitoring.write,
+            https://www.googleapis.com/auth/logging.write,
+            https://www.googleapis.com/auth/trace.append,
+            https://www.googleapis.com/auth/devstorage.full_control,
+            https://www.googleapis.com/auth/compute"
+            NodePools:
+              - NodePool:
+                  Name: "Pool-A"
+                  Count: 3
+                  NodeType: "n1-standard-1"
+            PostInstallHook:
+              - Execute:
+                  Shell: "gcloud container clusters get-credentials TestClusterA --region=us-east4 --zone=a"
+```
 
+```bash
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+  - Cluster:
+      Name: "minikube"
+      Applications:
+        - Application:
+           Name: "kubernetes-nifi-cluster"
+           Namespace: "nifi"
+           Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
+           Action:
+            - Execute:
+               Shell: "ls -la"
+               Kubectl:
+                 Path: statefulset
+        - Application:
+            Name: "kubernetes-zookeeper-cluster"
+            Namespace: "zk"
+            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+            Action:
+             - Execute:
+                Shell: "./build_environment.sh small"
+                Kubectl:
+                  Path: deployment
+
+```
+## Commands
 
 _We support three kubectl commands currently_
 
 ```
-replace
+delete
 apply
 create
 ```
 
-### Command Options
+### Supported Cloud providers
 
-```
-  -config string
-    	Configuration path
-  -dryrun bool
-    	Run a dry run deployment to test what is deployment
-  -tryupdate bool
-    	Try to update the resource if possible
-```
+- [x] Google cloud platform 
+- [ ] Amazon Web Services
 
-### Support APIResource types
+### Supported Kubernetes resource definition types
 
 - [x] ConfigMap
 - [x] StatefulSet
@@ -64,5 +110,4 @@ create
 
 ### Roadmap
 
-- [x] Rationalise back into native API for manifest parsing
-- [ ] Expand to deploy from in-memory git repo
+- [ ] Depends on Cluster from Application flag

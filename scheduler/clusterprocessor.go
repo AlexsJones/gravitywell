@@ -12,7 +12,8 @@ import (
 	"strings"
 )
 
-func runCreate(cmc *container.ClusterManagerClient,ctx context.Context, cluster configuration.ProviderCluster) {
+func runGCPCreate(cmc *container.ClusterManagerClient,ctx context.Context,
+	cluster configuration.ProviderCluster) {
 
 	var convertedNodePool []*containerpb.NodePool
 
@@ -29,6 +30,12 @@ func runCreate(cmc *container.ClusterManagerClient,ctx context.Context, cluster 
 	int32(cluster.InitialNodeCount),
 	cluster.InitialNodeType,
 		convertedNodePool)
+}
+func runGCPDelete(cmc *container.ClusterManagerClient,ctx context.Context,
+	cluster configuration.ProviderCluster) {
+
+		gcp.Delete(cmc,ctx,cluster.Project,cluster.Region,cluster.Name)
+
 }
 func ClusterProcessor(commandFlag configuration.CommandFlag,
 	provider configuration.Provider) {
@@ -48,9 +55,13 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 		if commandFlag == configuration.Create || commandFlag == configuration.Apply {
 
 			for _, cluster := range provider.Clusters {
-				runCreate(cmc,ctx,cluster.Cluster)
+				runGCPCreate(cmc,ctx,cluster.Cluster)
 			}
-
+		}
+		if commandFlag == configuration.Delete {
+			for _, cluster := range provider.Clusters {
+				runGCPDelete(cmc,ctx,cluster.Cluster)
+			}
 		}
 	case "amazon web services":
 		log.Warn("Amazon Web Services not yet supported")
