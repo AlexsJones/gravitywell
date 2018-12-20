@@ -2,6 +2,8 @@
 
 ![gravitywell](resources/bg.png)
 
+_It's like terraform that actually works for Kubernetes clusters and deployments_
+
 - Deploy cluster into GCP from yaml
 - Deploy manifests into those clusters from yaml
 
@@ -10,6 +12,12 @@ Pull all your Kubernetes deployment configuration into one place.
 Run one command and one manifest to switch clusters, deploy services and be the boss of your infrastructure.
 
 It's as easy as `gravitywell create -f ./`
+
+![provision](resources/provision.png)
+
+Or `gravitywell delete -f ./`
+
+![deprovision](resources/deprovision.png)
 
 ## Installation
 

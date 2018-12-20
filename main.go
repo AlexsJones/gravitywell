@@ -55,6 +55,7 @@ func main() {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
+
 	sh, err := scheduler.NewScheduler(conf)
 	if err != nil {
 		log.Error(err.Error())

@@ -48,8 +48,15 @@ type ProviderCluster struct {
 		PostInstallHook []struct {
 			Execute struct {
 				Shell string `yaml:"Shell"`
+				Path string `yaml:"Path"`
 			} `yaml:"Execute"`
 		} `yaml:"PostInstallHook"`
+		PostDeleteHooak []struct {
+		Execute struct {
+			Shell string `yaml:"Shell"`
+			Path string `yaml:"Path"`
+		} `yaml:"Execute"`
+	} `yaml:"PostDeleteHook"`
 		Region string   `yaml:"Region"`
 		Zones  []string `yaml:"Zones"`
 }
@@ -98,6 +105,8 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	appc := GravitywellKind{}
 	err = yaml.Unmarshal(bytes, &appc)
 	if err != nil {
+		color.Red(fmt.Sprintf("%+v",err))
+		os.Exit(1)
 		return err
 	}
 	//Load specific kind

@@ -35,7 +35,7 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 		}
 
 	}
-	//Application ...
+	//Appliwcation ...
 	for _, applicationKind := range s.configuration.ApplicationKinds {
 
 		if opt.APIVersion != applicationKind.APIVersion {

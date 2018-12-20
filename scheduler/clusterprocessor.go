@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/container/apiv1"
 	"context"
 	"fmt"
+	"github.com/AlexsJones/gravitywell/_vendor-20181210205236/github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
@@ -13,7 +14,7 @@ import (
 )
 
 func runGCPCreate(cmc *container.ClusterManagerClient,ctx context.Context,
-	cluster configuration.ProviderCluster) {
+	cluster configuration.ProviderCluster) error {
 
 	var convertedNodePool []*containerpb.NodePool
 
@@ -24,7 +25,7 @@ func runGCPCreate(cmc *container.ClusterManagerClient,ctx context.Context,
 			 nodePool.Config.MachineType = model.NodePool.NodeType
 			 nodePool.InitialNodeCount = int32(model.NodePool.Count)
 		 }
-	gcp.Create(cmc,ctx,cluster.Project,
+	return gcp.Create(cmc,ctx,cluster.Project,
 		cluster.Region, cluster.Name,
 		cluster.Zones,
 	int32(cluster.InitialNodeCount),
@@ -32,9 +33,9 @@ func runGCPCreate(cmc *container.ClusterManagerClient,ctx context.Context,
 		convertedNodePool)
 }
 func runGCPDelete(cmc *container.ClusterManagerClient,ctx context.Context,
-	cluster configuration.ProviderCluster) {
+	cluster configuration.ProviderCluster) error {
 
-		gcp.Delete(cmc,ctx,cluster.Project,cluster.Region,cluster.Name)
+		return gcp.Delete(cmc,ctx,cluster.Project,cluster.Region,cluster.Name)
 
 }
 func ClusterProcessor(commandFlag configuration.CommandFlag,
@@ -52,17 +53,47 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 			log.Error(err)
 			os.Exit(1)
 		}
+		// Run Command ------------------------------------------------------------------
 		if commandFlag == configuration.Create || commandFlag == configuration.Apply {
 
 			for _, cluster := range provider.Clusters {
-				runGCPCreate(cmc,ctx,cluster.Cluster)
+				err := runGCPCreate(cmc,ctx,cluster.Cluster)
+				if err != nil {
+					color.Red(err.Error())
+					continue
+				}
+				// Run post install -----------------------------------------------------
+				for _, executeCommand := range cluster.Cluster.PostInstallHook {
+					if executeCommand.Execute.Shell != "" {
+						err := ShellCommand(executeCommand.Execute.Shell,
+							executeCommand.Execute.Path,false)
+						if err != nil {
+							color.Red(err.Error())
+						}
+						}
+				}
 			}
 		}
 		if commandFlag == configuration.Delete {
 			for _, cluster := range provider.Clusters {
-				runGCPDelete(cmc,ctx,cluster.Cluster)
+				err := runGCPDelete(cmc,ctx,cluster.Cluster)
+				if err != nil {
+					color.Red(err.Error())
+					continue
+				}
+				// Run post delete -----------------------------------------------------
+				for _, executeCommand := range cluster.Cluster.PostDeleteHooak {
+					if executeCommand.Execute.Shell != "" {
+						err := ShellCommand(executeCommand.Execute.Shell,
+							executeCommand.Execute.Path,false)
+						if err != nil {
+							color.Red(err.Error())
+						}
+					}
+				}
 			}
 		}
+
 	case "amazon web services":
 		log.Warn("Amazon Web Services not yet supported")
 		os.Exit(1)
