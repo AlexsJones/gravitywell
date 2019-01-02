@@ -62,5 +62,16 @@ func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace stri
 		log.Debug("Service updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",ss.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", ss.Kind))
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

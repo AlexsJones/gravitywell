@@ -3,7 +3,6 @@
 ![gravitywell](resources/bg.png)
 
 _ITS LIKE HELM MEETS TERRAFORM_
-
 - Deploy cluster into GCP from yaml
 - Deploy manifests into those clusters from yaml
 
@@ -86,6 +85,34 @@ Strategy:
                 Shell: "./build_environment.sh small"
                 Kubectl:
                   Path: deployment
+
+```
+Command output ...
+
+```
+go run main.go create -f examples/application/small.yaml
+2019/01/02 12:19:08 Loading examples/application/small.yaml
+Application kind found
+WARN[0000] Switching to cluster: gke_beamery-trials_us-east4_testclustera
+DEBU[0000] Loading deployment kubernetes-apache-tika
+DEBU[0000] Fetching deployment kubernetes-apache-tika into .gravitywell/kubernetes-apache-tika
+Enumerating objects: 45, done.
+Total 45 (delta 0), reused 0 (delta 0), pack-reused 45
+WARN[0001] Running shell command ./build_environment.sh default
+Building for environment default
+DEBU[0001] Successful
+ERRO[0001] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment
+ERRO[0001] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment/tika
+INFO[0001] Decoded Kind: extensions/v1beta1, Kind=Deployment
+INFO[0001] Decoded Kind: /v1, Kind=Namespace
+INFO[0001] Decoded Kind: /v1, Kind=Service
+Found Namespace resource
+DEBU[0001] Namespace deployed
+DEBU[0001] Found deployment resource
+DEBU[0001] Deployment deployed
+DEBU[0001] Found service resource
+DEBU[0002] Service deployed
+```
 
 ```
 ## Commands

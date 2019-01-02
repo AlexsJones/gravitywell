@@ -61,5 +61,15 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbet
 		log.Debug("PodDisruptionBudget updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",pdb.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", pdb.Kind))
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

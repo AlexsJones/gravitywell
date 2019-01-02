@@ -62,5 +62,15 @@ func execV1ConfigMapResouce(k kubernetes.Interface, cm *v1.ConfigMap, namespace 
 		log.Debug("ConfigMap updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",cm.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", cm.Kind))
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

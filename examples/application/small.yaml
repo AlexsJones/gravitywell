@@ -5,20 +5,11 @@ Strategy:
       Name: "gke_beamery-trials_us-east4_testclustera"
       Applications:
         - Application:
-           Name: "kubernetes-nifi-cluster"
-           Namespace: "nifi"
-           Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
+           Name: "kubernetes-apache-tika"
+           Namespace: "tika"
+           Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
            Action:
             - Execute:
-               Shell: "ls -la"
+               Shell: "./build_environment.sh default"
                Kubectl:
-                 Path: statefulset
-        - Application:
-            Name: "kubernetes-zookeeper-cluster"
-            Namespace: "zk"
-            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
-            Action:
-             - Execute:
-                Shell: "./build_environment.sh small"
-                Kubectl:
-                  Path: deployment
+                 Path: deployment

@@ -61,5 +61,15 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deploy
 		log.Debug("Deployment updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",objdep.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", objdep.Kind))
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

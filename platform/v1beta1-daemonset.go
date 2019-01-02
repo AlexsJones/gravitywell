@@ -61,6 +61,16 @@ func execV1Beta1DaemonSetResouce(k kubernetes.Interface, sts *v1beta1.DaemonSet,
 		log.Debug("Statefulset updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := dsclient.Delete(sts.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",sts.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", sts.Kind))
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 
 }

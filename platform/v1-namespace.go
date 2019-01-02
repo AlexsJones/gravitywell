@@ -29,7 +29,6 @@ func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
 	//Replace -------------------------------------------------------------------
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
@@ -43,7 +42,7 @@ func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
-	//Create ---------------------------------------------------------------------
+	//Create -------------------------------------------------------------------
 	if commandFlag == configuration.Create {
 		_, err := cmclient.Create(cm)
 		if err != nil {
@@ -53,7 +52,7 @@ func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace
 		log.Debug("Namespace deployed")
 		return state.EDeploymentStateOkay, nil
 	}
-	//Apply --------------------------------------------------------------------
+	//Apply -------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 		_, err := cmclient.Update(cm)
 		if err != nil {
@@ -62,6 +61,16 @@ func execV1NamespaceResource(k kubernetes.Interface, cm *v1.Namespace, namespace
 		}
 		log.Debug("Namespace updated")
 		return state.EDeploymentStateUpdated, nil
+	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error(fmt.Sprintf("Could not delete %s",cm.Kind))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug(fmt.Sprintf("%s deleted", cm.Kind))
+		return state.EDeploymentStateOkay, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 }

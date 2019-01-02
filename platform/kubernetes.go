@@ -80,7 +80,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 		decode := scheme.Codecs.UniversalDeserializer().Decode
 		obj, kind, err := decode(raw, nil, nil)
 		if err != nil {
-			log.Error(err.Error())
+			log.Error(fmt.Sprintf("%s : %s",err.Error(),kind))
 			continue
 		}
 		log.Printf("Decoded Kind: %s", kind.String())
@@ -106,7 +106,8 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 				//Remove the namespace from the array and run first
 				_, err := execV1NamespaceResource(k,resource.(*v1.Namespace), namespace, opts, commandFlag)
 				if err != nil {
-					return err
+					log.Error(err.Error())
+					continue
 				}
 		default:
 			kubernetesResources[out] = resource
@@ -120,19 +121,22 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 
 		_, err := DeployFromObject(config,k,resource,namespace,opts,commandFlag)
 		if err != nil {
-			return err
+			log.Error(fmt.Sprintf("%s : %s",err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
+			continue
 		}
 	}
 	return nil
 }
 //DeployFromObject ...
-func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj interface{},
+func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.Object,
 	namespace string, opts configuration.Options,
 	commandFlag configuration.CommandFlag) (state.State, error) {
 
-	var response state.State
+	var response	state.State
 	var e error
 	switch obj.(type) {
+	case *v1betav1.Deployment:
+		response, e = execV1Betav1DeploymentResouce(k, obj.(*v1betav1.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.Deployment:
 		response, e = execV1Beta1DeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, opts, commandFlag)
 	case *v1beta2.Deployment:
@@ -159,7 +163,7 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj interface
 	case *v1betav1.DaemonSet:
 		response, e = execV1Beta1DaemonSetResouce(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag)
 	default:
-		log.Error("Unable to convert API resource")
+		log.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
 	}
 
 	return response, e

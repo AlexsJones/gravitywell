@@ -61,6 +61,16 @@ func execV1ServiceAccountResouce(k kubernetes.Interface, cm *v1.ServiceAccount, 
 		log.Debug("ServiceAccount updated")
 		return state.EDeploymentStateUpdated, nil
 	}
+	//Delete -------------------------------------------------------------------
+	if commandFlag == configuration.Delete {
+		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
+		if err != nil {
+			log.Error("Could not delete Service Account")
+			return state.EDeploymentStateCantUpdate, err
+		}
+		log.Debug("Service Account deleted")
+		return state.EDeploymentStateOkay, nil
+	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
 
 }
