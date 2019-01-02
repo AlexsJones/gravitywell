@@ -140,12 +140,13 @@ tika-db84b854c-qrl8p   0/1     ContainerCreating   0          52s
 
 ## Commands
 
-_We support three kubectl commands currently_
+_We support four kubectl commands currently_
 
 ```
 delete
 apply
 create
+replace
 ```
 
 ### Supported Cloud providers
