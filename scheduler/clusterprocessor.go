@@ -24,7 +24,9 @@ func runGCPCreate(cmc *container.ClusterManagerClient,ctx context.Context,
 			 nodePool.Config = new(containerpb.NodeConfig)
 			 nodePool.Config.MachineType = model.NodePool.NodeType
 			 nodePool.InitialNodeCount = int32(model.NodePool.Count)
+			 convertedNodePool = append(convertedNodePool, nodePool)
 		 }
+
 	return gcp.Create(cmc,ctx,cluster.Project,
 		cluster.Region, cluster.Name,
 		cluster.Zones,

@@ -15,18 +15,29 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 	initialNodeType string,
 	nodePools []*containerpb.NodePool) error {
 
-	clusterReq := &containerpb.CreateClusterRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectName,
-			locationName),
-		Cluster:&containerpb.Cluster{
+	var cluster *containerpb.Cluster
+	if len(nodePools) == 0 {
+
+		cluster = &containerpb.Cluster{
+			Name:             clusterName,
+			Locations:        locations,
+			InitialNodeCount: initialNodeCount,
+			NodeConfig: &containerpb.NodeConfig{
+				MachineType: initialNodeType,
+			},
+		}
+
+	}else {
+		cluster = &containerpb.Cluster{
 			Name: clusterName,
 			Locations: locations,
 			NodePools: nodePools,
-			InitialNodeCount: initialNodeCount,
-			NodeConfig : &containerpb.NodeConfig{
-				MachineType: initialNodeType,
-			},
-		},
+		}
+	}
+	clusterReq := &containerpb.CreateClusterRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectName,
+			locationName),
+		Cluster: cluster,
 	}
 
 	clusterResponse, err:= c.CreateCluster(ctx,clusterReq)

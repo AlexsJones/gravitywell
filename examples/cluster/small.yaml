@@ -18,7 +18,7 @@ Strategy:
           https://www.googleapis.com/auth/compute"
             NodePools:
               - NodePool:
-                  Name: "Pool-A"
+                  Name: "poola"
                   Count: 3
                   NodeType: "n1-standard-1"
             PostInstallHook:
