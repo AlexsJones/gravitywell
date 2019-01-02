@@ -162,5 +162,7 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 	case mode.IsRegular():
 		LoadConfigurationFromFile(path, conf)
 	}
+	var d []func() bool
+
 	return conf,nil
 }

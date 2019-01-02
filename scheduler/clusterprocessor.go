@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/container/apiv1"
 	"context"
 	"fmt"
-	"github.com/AlexsJones/gravitywell/_vendor-20181210205236/github.com/fatih/color"
+	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
