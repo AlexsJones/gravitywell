@@ -5,7 +5,7 @@ Strategy:
       Name: "Google Cloud Platform"
       Clusters:
         - Cluster:
-            Name: "testclustera"
+            Name: "testclusterb"
             Project: "beamery-trials"
             Region: "us-east4"
             Zones: ["us-east4-a"]
@@ -24,7 +24,7 @@ Strategy:
             PostInstallHook:
               - Execute:
                   Path: "."
-                  Shell: "gcloud container clusters get-credentials testclustera --region=us-east4 --project=beamery-trials"
+                  Shell: "gcloud container clusters get-credentials testclusterb --region=us-east4 --project=beamery-trials"
             PostDeleteHook:
               - Execute:
                   Path: "."
