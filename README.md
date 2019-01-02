@@ -91,34 +91,53 @@ Strategy:
                   Path: deployment
 
 ```
-Command output ...
+Command output `gravitywell create -f examples/`
 
 ```
-go run main.go create -f examples/application/small.yaml
-2019/01/02 12:19:08 Loading examples/application/small.yaml
+go run main.go create -f examples/       ✔  2846  15:06:38
+2019/01/02 15:07:02 Loading examples/
+2019/01/02 15:07:02 Loading examples/application
+2019/01/02 15:07:02 Loading examples/application/small.yaml
 Application kind found
-WARN[0000] Switching to cluster: gke_beamery-trials_us-east4_testclustera
-DEBU[0000] Loading deployment kubernetes-apache-tika
-DEBU[0000] Fetching deployment kubernetes-apache-tika into .gravitywell/kubernetes-apache-tika
+2019/01/02 15:07:02 Loading examples/cluster
+2019/01/02 15:07:02 Loading examples/cluster/small.yaml
+Cluster kind found
+Started cluster build at 2019-01-02T15:07:04.790122357Z
+Cluster running
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for testclusterb.
+WARN[0154] Switching to cluster: gke_beamery-trials_us-east4_testclusterb
+DEBU[0154] Loading deployment kubernetes-apache-tika
+DEBU[0154] Fetching deployment kubernetes-apache-tika into .gravitywell/kubernetes-apache-tika
 Enumerating objects: 45, done.
 Total 45 (delta 0), reused 0 (delta 0), pack-reused 45
-WARN[0001] Running shell command ./build_environment.sh default
+WARN[0155] Running shell command ./build_environment.sh default
 Building for environment default
-DEBU[0001] Successful
-ERRO[0001] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment
-ERRO[0001] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment/tika
-INFO[0001] Decoded Kind: extensions/v1beta1, Kind=Deployment
-INFO[0001] Decoded Kind: /v1, Kind=Namespace
-INFO[0001] Decoded Kind: /v1, Kind=Service
+DEBU[0155] Successful
+ERRO[0155] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment
+ERRO[0155] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment/tika
+INFO[0155] Decoded Kind: extensions/v1beta1, Kind=Deployment
+INFO[0155] Decoded Kind: /v1, Kind=Namespace
+INFO[0155] Decoded Kind: /v1, Kind=Service
 Found Namespace resource
-DEBU[0001] Namespace deployed
-DEBU[0001] Found deployment resource
-DEBU[0001] Deployment deployed
-DEBU[0001] Found service resource
-DEBU[0002] Service deployed
+DEBU[0156] Namespace deployed
+DEBU[0156] Found deployment resource
+DEBU[0157] Deployment deployed
+DEBU[0157] Found service resource
+DEBU[0157] Service deployed
+ alexjones@Alexs-MBP-2  ~/Go/src/github.com/AlexsJones/gravitywell   master  kubectl get ns                           ✔  2847  15:09:39
+NAME          STATUS   AGE
+default       Active   1m
+kube-public   Active   1m
+kube-system   Active   1m
+tika          Active   48s
+ alexjones@Alexs-MBP-2  ~/Go/src/github.com/AlexsJones/gravitywell   master  kubectl get pods -n tika                 ✔  2848  15:10:26
+NAME                   READY   STATUS              RESTARTS   AGE
+tika-db84b854c-45r6p   0/1     ContainerCreating   0          52s
+tika-db84b854c-lxj6v   0/1     ContainerCreating   0          52s
+tika-db84b854c-qrl8p   0/1     ContainerCreating   0          52s
 ```
 
-```
 ## Commands
 
 _We support three kubectl commands currently_
