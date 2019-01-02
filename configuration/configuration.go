@@ -42,6 +42,7 @@ type ProviderCluster struct {
 				Count    int    `yaml:"Count"`
 				Name     string `yaml:"Name"`
 				NodeType string `yaml:"NodeType"`
+				Labels string `yaml:"Labels"`
 			} `yaml:"NodePool"`
 		} `yaml:"NodePools"`
 		OauthScopes     string `yaml:"OauthScopes"`

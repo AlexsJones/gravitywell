@@ -21,6 +21,7 @@ Strategy:
                   Name: "poola"
                   Count: 3
                   NodeType: "n1-standard-1"
+                  Labels: "k8s-node-type=test"
             PostInstallHook:
               - Execute:
                   Path: "."
