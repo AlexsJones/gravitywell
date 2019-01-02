@@ -24,14 +24,18 @@ Or `gravitywell delete -f ./`
 
 ## Requirements
 
-`go get github.com/AlexsJones/vortex`
-`export GOOGLE_APPLICATION_CREDENTIALS=` This needs to be set to a valid service account for the project you with to perform GCP operations on
+- Golang 1.10
+
+- `go get github.com/AlexsJones/vortex`
+- `export GOOGLE_APPLICATION_CREDENTIALS=somegooglecloudserviceaccountfile.json` (_This needs to be set to a valid service account for the project you with to perform GCP operations on_)
+
+
 ## Example overview Manifest
 
 There are two kinds of manifest.
 `Cluster` and `Application`
 
-```bash
+```
 APIVersion: "v1"
 Kind: "Cluster"
 Strategy:
@@ -60,7 +64,7 @@ Strategy:
                   Shell: "gcloud container clusters get-credentials TestClusterA --region=us-east4 --zone=a"
 ```
 
-```bash
+```
 APIVersion: "v1"
 Kind: "Application"
 Strategy:
