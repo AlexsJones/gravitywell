@@ -61,7 +61,6 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 				err := runGCPCreate(cmc,ctx,cluster.Cluster)
 				if err != nil {
 					color.Red(err.Error())
-					continue
 				}
 				// Run post install -----------------------------------------------------
 				for _, executeCommand := range cluster.Cluster.PostInstallHook {
