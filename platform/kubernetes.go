@@ -1,9 +1,12 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/runtime"
 	"os"
+	"strings"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -56,21 +59,76 @@ func getConfig(context string) clientcmd.ClientConfig {
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
+//GenerateDeploymentPlan
+func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
+	files []string, namespace string, opts configuration.Options,
+	commandFlag configuration.CommandFlag) error {
 
-//DeployFromFile ...
-func DeployFromFile(config *rest.Config, k kubernetes.Interface, path string, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return state.EDeploymentStateError, err
-	}
-	raw, err := ioutil.ReadAll(f)
-	if err != nil {
-		return state.EDeploymentStateError, err
-	}
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-	obj, _, _ := decode(raw, nil, nil)
+	var kubernetesResources []runtime.Object
+	for _, file := range files {
+		f, err := os.Open(file)
+		if err != nil {
+			log.Error("Could not open file %s",file)
+			continue
+		}
+		raw, err := ioutil.ReadAll(f)
+		if err != nil {
+			log.Error("Could not read from file %s",file)
+			continue
+		}
+		//Decode into kubernetes object
+		decode := scheme.Codecs.UniversalDeserializer().Decode
+		obj, kind, err := decode(raw, nil, nil)
+		if err != nil {
+			log.Error(err.Error())
+			continue
+		}
+		log.Printf("Decoded Kind: %s", kind.String())
 
-	log.Debug(fmt.Sprintf("%++v\n\n", obj.GetObjectKind()))
+		kubernetesResources = append(kubernetesResources, obj)
+	}
+
+	//TODO: Deployment plan printing
+
+	if len(kubernetesResources) == 0 {
+		return errors.New("no resources within file list")
+	}
+
+	//TODO: Run X resource first
+
+	//Run namespace first
+	out := 0
+	for _, resource := range kubernetesResources {
+		gvk := resource.GetObjectKind().GroupVersionKind()
+
+		switch strings.ToLower(gvk.Kind) {
+			case "namespace":
+				//Remove the namespace from the array and run first
+				_, err := execV1NamespaceResource(k,resource.(*v1.Namespace), namespace, opts, commandFlag)
+				if err != nil {
+					return err
+				}
+		default:
+			kubernetesResources[out] = resource
+			out++
+		}
+	}
+	kubernetesResources = kubernetesResources[:out]
+
+	//Run all other resources
+	for _, resource := range kubernetesResources {
+
+		_, err := DeployFromObject(config,k,resource,namespace,opts,commandFlag)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+//DeployFromObject ...
+func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj interface{},
+	namespace string, opts configuration.Options,
+	commandFlag configuration.CommandFlag) (state.State, error) {
 
 	var response state.State
 	var e error

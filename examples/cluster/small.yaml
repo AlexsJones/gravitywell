@@ -11,8 +11,7 @@ Strategy:
             Zones: ["us-east4-a"]
             InitialNodeCount: 1
             InitialNodeType: "n1-standard-1"
-            OauthScopes:
-          "https://www.googleapis.com/auth/monitoring.write,
+            OauthScopes: "https://www.googleapis.com/auth/monitoring.write,
           https://www.googleapis.com/auth/logging.write,
           https://www.googleapis.com/auth/trace.append,
           https://www.googleapis.com/auth/devstorage.full_control,
@@ -25,7 +24,7 @@ Strategy:
             PostInstallHook:
               - Execute:
                   Path: "."
-                  Shell: "gcloud container clusters get-credentials TestClusterA --region=us-east4 --project=beamery-trials"
+                  Shell: "gcloud container clusters get-credentials testclustera --region=us-east4 --project=beamery-trials"
             PostDeleteHook:
               - Execute:
                   Path: "."

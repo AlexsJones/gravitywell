@@ -2,7 +2,7 @@
 
 ![gravitywell](resources/bg.png)
 
-_It's like terraform that actually works for Kubernetes clusters and deployments_
+_ITS LIKE HELM MEETS TERRAFORM_
 
 - Deploy cluster into GCP from yaml
 - Deploy manifests into those clusters from yaml

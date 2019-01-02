@@ -2,7 +2,7 @@ APIVersion: "v1"
 Kind: "Application"
 Strategy:
   - Cluster:
-      Name: "minikube"
+      Name: "gke_beamery-trials_us-east4_testclustera"
       Applications:
         - Application:
            Name: "kubernetes-nifi-cluster"

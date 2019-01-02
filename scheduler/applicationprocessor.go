@@ -12,12 +12,12 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
-	"k8s.io/api/core/v1"
 )
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	opt configuration.Options, cluster configuration.ApplicationCluster) *state.Capture {
 
+		//TODO: Remove this state capture stuff, it's clunkys
 	stateCapture := &state.Capture{
 		ClusterName:     cluster.Name,
 		DeploymentState: make(map[string]state.Details),
@@ -69,41 +69,9 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 				log.Error(err.Error())
 
 			}
-			for _, file := range fileList {
-				log.Warn(fmt.Sprintf("Attempting to deploy %s\n", file))
-				if _, err = os.Stat(file); os.IsNotExist(err) {
-					continue
-				}
-				if sa, _ := os.Stat(file); sa.IsDir() {
-					continue
-				}
-				var stateResponse state.State
-				//---------------------------------
-				log.Debug(fmt.Sprintf("Running..."))
-				if deployment.Application.CreateNamespace {
-					log.Debug("Creating namespace...")
-					nsclient := k8siface.CoreV1().Namespaces()
-					cm := &v1.Namespace{}
-					cm.Name = deployment.Application.Namespace
-					cm.Namespace = deployment.Application.Namespace
-					_, err := nsclient.Create(cm)
-					if err != nil {
-						log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", cm.Name, err.Error()))
-					}
-				}
-				if stateResponse, err = platform.DeployFromFile(restclient, k8siface, file, deployment.Application.Namespace, opt, commandFlag); err != nil {
-					log.Error(err.Error())
-				}
-				var output = ""
-				var hasError = false
-				if err != nil {
-					output = fmt.Sprintf("File: %s Namespace :%s Error: %s", file, deployment.Application.Namespace, err)
-					hasError = true
-				} else {
-					output = fmt.Sprintf("File: %s Namespace :%s", file, deployment.Application.Namespace)
-				}
-				stateCapture.DeploymentState[deployment.Application.Name] = state.Details{State: stateResponse, HasDetail: true,
-					Detail: output, HasError: hasError}
+			err = platform.GenerateDeploymentPlan(restclient, k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
+			if err != nil {
+				log.Error(err.Error())
 			}
 			//---------------------------------
 		}

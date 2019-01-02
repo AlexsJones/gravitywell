@@ -46,6 +46,7 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 		os.Exit(1)
 	}
 	switch strings.ToLower(provider.Name) {
+
 	case "google cloud platform":
 		ctx := context.Background()
 		cmc, err := container.NewClusterManagerClient(ctx)
