@@ -69,7 +69,8 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 				log.Error(err.Error())
 
 			}
-			err = platform.GenerateDeploymentPlan(restclient, k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
+			err = platform.GenerateDeploymentPlan(restclient,
+				k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
 			if err != nil {
 				log.Error(err.Error())
 			}

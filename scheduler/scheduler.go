@@ -33,9 +33,8 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 		for _, clusterKind := range ck.Strategy {
 			ClusterProcessor(commandFlag, clusterKind.Provider)
 		}
-
 	}
-	//Appliwcation ...
+	//Application ...
 	for _, applicationKind := range s.configuration.ApplicationKinds {
 
 		if opt.APIVersion != applicationKind.APIVersion {
