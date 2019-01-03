@@ -3,11 +3,12 @@ package configuration
 import (
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/fatih/color"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -35,6 +36,7 @@ type ApplicationCluster struct {
 type ProviderCluster struct {
 	InitialNodeCount int    `yaml:"InitialNodeCount"`
 	InitialNodeType  string `yaml:"InitialNodeType"`
+	Labels           string `yaml:"Labels"`
 	Name             string `yaml:"Name"`
 	Project          string `yaml:"Project"`
 	NodePools        []struct {

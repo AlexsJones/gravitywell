@@ -1,17 +1,18 @@
 package gcp
 
 import (
-	"cloud.google.com/go/container/apiv1"
 	"context"
 	"fmt"
+	"time"
+
+	"cloud.google.com/go/container/apiv1"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
-	"time"
 )
 
 func Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
-	initialNodeType string,
+	initialNodeType string, clusterLabels map[string]string,
 	nodePools []*containerpb.NodePool) error {
 
 	var cluster *containerpb.Cluster
@@ -24,13 +25,15 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 			NodeConfig: &containerpb.NodeConfig{
 				MachineType: initialNodeType,
 			},
+			ResourceLabels: clusterLabels,
 		}
 
 	} else {
 		cluster = &containerpb.Cluster{
-			Name:      clusterName,
-			Locations: locations,
-			NodePools: nodePools,
+			Name:           clusterName,
+			Locations:      locations,
+			NodePools:      nodePools,
+			ResourceLabels: clusterLabels,
 		}
 	}
 	clusterReq := &containerpb.CreateClusterRequest{
