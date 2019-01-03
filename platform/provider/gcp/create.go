@@ -1,18 +1,18 @@
 package gcp
 
 import (
-	"cloud.google.com/go/container/apiv1"
 	"context"
 	"fmt"
+	"time"
+
+	"cloud.google.com/go/container/apiv1"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
-	"time"
 )
 
-
 func Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
-	locationName string,clusterName string, locations []string,initialNodeCount int32,
-	initialNodeType string,
+	locationName string, clusterName string, locations []string, initialNodeCount int32,
+	initialNodeType string, clusterLabels map[string]string,
 	nodePools []*containerpb.NodePool) error {
 
 	var cluster *containerpb.Cluster
@@ -25,13 +25,15 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 			NodeConfig: &containerpb.NodeConfig{
 				MachineType: initialNodeType,
 			},
+			ResourceLabels: clusterLabels,
 		}
 
-	}else {
+	} else {
 		cluster = &containerpb.Cluster{
-			Name: clusterName,
-			Locations: locations,
-			NodePools: nodePools,
+			Name:           clusterName,
+			Locations:      locations,
+			NodePools:      nodePools,
+			ResourceLabels: clusterLabels,
 		}
 	}
 	clusterReq := &containerpb.CreateClusterRequest{
@@ -40,18 +42,17 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 		Cluster: cluster,
 	}
 
-	clusterResponse, err:= c.CreateCluster(ctx,clusterReq)
+	clusterResponse, err := c.CreateCluster(ctx, clusterReq)
 	if err != nil {
 		color.Red(err.Error())
 		return err
 	}
-	color.Blue(fmt.Sprintf("Started cluster build at %s",clusterResponse.StartTime))
+	color.Blue(fmt.Sprintf("Started cluster build at %s", clusterResponse.StartTime))
 
 	for {
 		clust, err :=
-			c.GetCluster(ctx,&containerpb.GetClusterRequest{Name:
-			fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName,clusterName)})
+			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
+				locationName, clusterName)})
 		if err != nil {
 			return err
 		}
