@@ -9,6 +9,11 @@ import (
 	"os"
 	"strings"
 )
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 
 func init() {
 	// Output to stdout instead of the default stderr
@@ -31,7 +36,7 @@ func Usage() {
 	os.Exit(0)
 }
 func main() {
-
+	fmt.Printf("%v, commit %v, built at %v", version, commit, date)
 	args := os.Args
 	var command = ""
 	if len(args) <= 2 {
