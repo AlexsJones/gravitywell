@@ -25,8 +25,7 @@ func List(c *container.ClusterManagerClient, ctx context.Context, projectName st
 		req := &containerpb.ListNodePoolsRequest{
 			Parent:fmt.Sprintf("projects/%s/locations/%s/clusters/%s",projectName,cluster.Location,cluster.Name),
 		}
-
-
+		
 		color.Green(fmt.Sprintf("Cluster %s located in %s status: %s\n",cluster.Name, cluster.Location,cluster.Status))
 		resp, err := c.ListNodePools(ctx, req)
 		if err != nil {

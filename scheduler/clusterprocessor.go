@@ -64,11 +64,10 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 			log.Error(err)
 			os.Exit(1)
 		}
-		// Run Command ------------------------------------------------------------------
-		if commandFlag == configuration.Create || commandFlag == configuration.Apply {
 
+		create := func() {
 			for _, cluster := range provider.Clusters {
-				err := runGCPCreate(cmc,ctx,cluster.Cluster)
+				err := runGCPCreate(cmc, ctx, cluster.Cluster)
 				if err != nil {
 					color.Red(err.Error())
 				}
@@ -76,15 +75,15 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 				for _, executeCommand := range cluster.Cluster.PostInstallHook {
 					if executeCommand.Execute.Shell != "" {
 						err := ShellCommand(executeCommand.Execute.Shell,
-							executeCommand.Execute.Path,false)
+							executeCommand.Execute.Path, false)
 						if err != nil {
 							color.Red(err.Error())
 						}
-						}
+					}
 				}
 			}
 		}
-		if commandFlag == configuration.Delete {
+		delete := func() {
 			for _, cluster := range provider.Clusters {
 				err := runGCPDelete(cmc,ctx,cluster.Cluster)
 				if err != nil {
@@ -103,7 +102,18 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 				}
 			}
 		}
-
+		// Run Command ------------------------------------------------------------------
+		switch commandFlag{
+		case configuration.Create:
+			create()
+		case configuration.Apply:
+			create()
+		case configuration.Replace:
+			delete()
+			create()
+		case configuration.Delete:
+			delete()
+		}
 	case "amazon web services":
 		log.Warn("Amazon Web Services not yet supported")
 		os.Exit(1)

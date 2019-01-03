@@ -26,6 +26,8 @@ var Opts struct {
 }
 func Usage() {
 
+	fmt.Println("...Usage...")
+	fmt.Println("create/delete/replace/apply e.g. gravitywell create -f folder/")
 	os.Exit(0)
 }
 func main() {
