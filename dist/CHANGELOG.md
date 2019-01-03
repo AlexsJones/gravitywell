@@ -1,3 +1,3 @@
 ## Changelog
 
-cad6d41 dont require vgo
+5219c9f improving the goreleaser syntax
