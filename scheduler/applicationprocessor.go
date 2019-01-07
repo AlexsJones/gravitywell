@@ -59,22 +59,22 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 					log.Error(err.Error())
 				}
 			}
-			//---------------------------------
-			fileList := []string{}
-			err := filepath.Walk(path.Join(opt.TempVCSPath, remoteVCSRepoName, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
-				fileList = append(fileList, path)
-				return nil
-			})
-			if err != nil {
-				log.Error(err.Error())
+			if a.Execute.Kubectl.Path != "" {
+				fileList := []string{}
+				err := filepath.Walk(path.Join(opt.TempVCSPath, remoteVCSRepoName, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
+					fileList = append(fileList, path)
+					return nil
+				})
+				if err != nil {
+					log.Error(err.Error())
 
+				}
+				err = platform.GenerateDeploymentPlan(restclient,
+					k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
+				if err != nil {
+					log.Error(err.Error())
+				}
 			}
-			err = platform.GenerateDeploymentPlan(restclient,
-				k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
-			if err != nil {
-				log.Error(err.Error())
-			}
-			//---------------------------------
 		}
 	}
 	return stateCapture
