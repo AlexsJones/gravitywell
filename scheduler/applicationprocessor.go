@@ -17,7 +17,7 @@ import (
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	opt configuration.Options, cluster configuration.ApplicationCluster) *state.Capture {
 
-		//TODO: Remove this state capture stuff, it's clunkys
+	//TODO: Remove this state capture stuff, it's clunkys
 	stateCapture := &state.Capture{
 		ClusterName:     cluster.Name,
 		DeploymentState: make(map[string]state.Details),
