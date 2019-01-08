@@ -59,6 +59,7 @@ func getConfig(context string) clientcmd.ClientConfig {
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
+
 //GenerateDeploymentPlan
 func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	files []string, namespace string, opts configuration.Options,
@@ -68,19 +69,19 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	for _, file := range files {
 		f, err := os.Open(file)
 		if err != nil {
-			log.Error("Could not open file %s",file)
+			log.Error("Could not open file %s", file)
 			continue
 		}
 		raw, err := ioutil.ReadAll(f)
 		if err != nil {
-			log.Error("Could not read from file %s",file)
+			log.Error("Could not read from file %s", file)
 			continue
 		}
 		//Decode into kubernetes object
 		decode := scheme.Codecs.UniversalDeserializer().Decode
 		obj, kind, err := decode(raw, nil, nil)
 		if err != nil {
-			log.Error(fmt.Sprintf("%s : %s",err.Error(),kind))
+			log.Error(fmt.Sprintf("%s : %s", err.Error(), kind))
 			continue
 		}
 		log.Printf("Decoded Kind: %s", kind.String())
@@ -102,13 +103,13 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 		gvk := resource.GetObjectKind().GroupVersionKind()
 
 		switch strings.ToLower(gvk.Kind) {
-			case "namespace":
-				//Remove the namespace from the array and run first
-				_, err := execV1NamespaceResource(k,resource.(*v1.Namespace), namespace, opts, commandFlag)
-				if err != nil {
-					log.Error(err.Error())
-					continue
-				}
+		case "namespace":
+			//Remove the namespace from the array and run first
+			_, err := execV1NamespaceResource(k, resource.(*v1.Namespace), namespace, opts, commandFlag)
+			if err != nil {
+				log.Error(err.Error())
+				continue
+			}
 		default:
 			kubernetesResources[out] = resource
 			out++
@@ -119,20 +120,21 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	//Run all other resources
 	for _, resource := range kubernetesResources {
 
-		_, err := DeployFromObject(config,k,resource,namespace,opts,commandFlag)
+		_, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag)
 		if err != nil {
-			log.Error(fmt.Sprintf("%s : %s",err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
+			log.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 			continue
 		}
 	}
 	return nil
 }
+
 //DeployFromObject ...
 func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.Object,
 	namespace string, opts configuration.Options,
 	commandFlag configuration.CommandFlag) (state.State, error) {
 
-	var response	state.State
+	var response state.State
 	var e error
 	switch obj.(type) {
 	case *v1betav1.Deployment:
@@ -143,6 +145,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.StatefulSet:
 		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
+	case *v1.Secret:
+		response, e = execV1SecretResouce(k, obj.(*v1.Secret), namespace, opts, commandFlag)
 	case *v1.Service:
 		response, e = execV1ServiceResouce(k, obj.(*v1.Service), namespace, opts, commandFlag)
 	case *v1.ConfigMap:
