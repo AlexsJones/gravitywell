@@ -164,6 +164,7 @@ replace
 - [x] ServiceAccounts
 - [x] RoleBinding
 - [x] CronJob
+- [x] Secret
 - [ ] PersistantVolume
 - [ ] PersistantVolumeClaim
 

@@ -66,7 +66,7 @@ func exec1VRbacRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.RoleBinding
 	if commandFlag == configuration.Delete {
 		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s",cm.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", cm.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug(fmt.Sprintf("%s deleted", cm.Kind))

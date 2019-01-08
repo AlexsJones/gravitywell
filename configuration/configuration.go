@@ -13,7 +13,7 @@ import (
 )
 
 type ApplicationCluster struct {
-	Name        string `yaml:"Name"`
+	Name         string `yaml:"Name"`
 	Applications []struct {
 		Application struct {
 			Name            string `yaml:"Name"`
@@ -24,8 +24,8 @@ type ApplicationCluster struct {
 				Execute struct {
 					Shell   string `yaml:"Shell"`
 					Kubectl struct {
-						Path    string `yaml:"Path"`
-						Type    string `yaml:"Type"`
+						Path string `yaml:"Path"`
+						Type string `yaml:"Type"`
 					} `yaml:"Kubectl"`
 				} `yaml:"Execute"`
 			} `yaml:"Action"`
@@ -33,33 +33,33 @@ type ApplicationCluster struct {
 	} `yaml:"Applications"`
 }
 type ProviderCluster struct {
-		InitialNodeCount int    `yaml:"InitialNodeCount"`
-		InitialNodeType  string `yaml:"InitialNodeType"`
-		Name             string `yaml:"Name"`
-		Project 		 string `yaml:"Project"`
-		NodePools        []struct {
-			NodePool struct {
-				Count    int    `yaml:"Count"`
-				Name     string `yaml:"Name"`
-				NodeType string `yaml:"NodeType"`
-				Labels string `yaml:"Labels"`
-			} `yaml:"NodePool"`
-		} `yaml:"NodePools"`
-		OauthScopes     string `yaml:"OauthScopes"`
-		PostInstallHook []struct {
-			Execute struct {
-				Shell string `yaml:"Shell"`
-				Path string `yaml:"Path"`
-			} `yaml:"Execute"`
-		} `yaml:"PostInstallHook"`
-		PostDeleteHooak []struct {
+	InitialNodeCount int    `yaml:"InitialNodeCount"`
+	InitialNodeType  string `yaml:"InitialNodeType"`
+	Name             string `yaml:"Name"`
+	Project          string `yaml:"Project"`
+	NodePools        []struct {
+		NodePool struct {
+			Count    int    `yaml:"Count"`
+			Name     string `yaml:"Name"`
+			NodeType string `yaml:"NodeType"`
+			Labels   string `yaml:"Labels"`
+		} `yaml:"NodePool"`
+	} `yaml:"NodePools"`
+	OauthScopes     string `yaml:"OauthScopes"`
+	PostInstallHook []struct {
 		Execute struct {
 			Shell string `yaml:"Shell"`
-			Path string `yaml:"Path"`
+			Path  string `yaml:"Path"`
+		} `yaml:"Execute"`
+	} `yaml:"PostInstallHook"`
+	PostDeleteHooak []struct {
+		Execute struct {
+			Shell string `yaml:"Shell"`
+			Path  string `yaml:"Path"`
 		} `yaml:"Execute"`
 	} `yaml:"PostDeleteHook"`
-		Region string   `yaml:"Region"`
-		Zones  []string `yaml:"Zones"`
+	Region string   `yaml:"Region"`
+	Zones  []string `yaml:"Zones"`
 }
 type Provider struct {
 	Clusters []struct {
@@ -88,12 +88,12 @@ type ClusterKind struct {
 //GravitywellKind ...
 type GravitywellKind struct {
 	APIVersion string `yaml:"APIVersion"`
-	Kind string `yaml:"Kind"`
+	Kind       string `yaml:"Kind"`
 }
 
 type Configuration struct {
 	ApplicationKinds []ApplicationKind
-	ClusterKinds []ClusterKind
+	ClusterKinds     []ClusterKind
 }
 
 func LoadConfigurationFromFile(path string, c *Configuration) error {
@@ -106,12 +106,12 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	appc := GravitywellKind{}
 	err = yaml.Unmarshal(bytes, &appc)
 	if err != nil {
-		color.Red(fmt.Sprintf("%+v",err))
+		color.Red(fmt.Sprintf("%+v", err))
 		os.Exit(1)
 		return err
 	}
 	//Load specific kind
-	switch appc.Kind{
+	switch appc.Kind {
 	case "Application":
 		appc := ApplicationKind{}
 		err = yaml.Unmarshal(bytes, &appc)
@@ -138,7 +138,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 func NewConfigurationFromPath(path string) (*Configuration, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	conf := &Configuration{}
@@ -151,7 +151,7 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 					return err
 				}
 				if info.Size() == 0 {
-					color.Red(fmt.Sprintf("Skipping empty file %s",info.Name()))
+					color.Red(fmt.Sprintf("Skipping empty file %s", info.Name()))
 					return nil
 				}
 				LoadConfigurationFromFile(path, conf)
@@ -163,5 +163,5 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 	case mode.IsRegular():
 		LoadConfigurationFromFile(path, conf)
 	}
-	return conf,nil
+	return conf, nil
 }

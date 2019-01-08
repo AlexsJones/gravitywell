@@ -14,7 +14,7 @@ func List(c *container.ClusterManagerClient, ctx context.Context, projectName st
 		Parent: fmt.Sprintf("projects/%s/locations/-", projectName),
 	}
 
-	clusterResponse, err:= c.ListClusters(ctx,clusterReq)
+	clusterResponse, err := c.ListClusters(ctx, clusterReq)
 	if err != nil {
 		// TODO: Handle error.
 		color.Red(err.Error())
@@ -23,16 +23,16 @@ func List(c *container.ClusterManagerClient, ctx context.Context, projectName st
 
 	for _, cluster := range clusterResponse.Clusters {
 		req := &containerpb.ListNodePoolsRequest{
-			Parent:fmt.Sprintf("projects/%s/locations/%s/clusters/%s",projectName,cluster.Location,cluster.Name),
+			Parent: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName, cluster.Location, cluster.Name),
 		}
-		
-		color.Green(fmt.Sprintf("Cluster %s located in %s status: %s\n",cluster.Name, cluster.Location,cluster.Status))
+
+		color.Green(fmt.Sprintf("Cluster %s located in %s status: %s\n", cluster.Name, cluster.Location, cluster.Status))
 		resp, err := c.ListNodePools(ctx, req)
 		if err != nil {
 			continue
 		}
 		for _, np := range resp.NodePools {
-			color.Blue(fmt.Sprintf("\t%s %d * %s\n",np.Name,np.InitialNodeCount,np.Config.MachineType))
+			color.Blue(fmt.Sprintf("\t%s %d * %s\n", np.Name, np.InitialNodeCount, np.Config.MachineType))
 
 		}
 	}

@@ -20,17 +20,17 @@ type Capture struct {
 var col func(string, ...interface{})
 
 func (c *Capture) Print() {
-		for k, v := range c.DeploymentState {
-			col = color.Green
-			if v.State == EDeploymentStateError {
-				col = color.Red
-			}
-			if v.State == EDeploymentStateNotExists {
-				col = color.Red
-			}
-			col(fmt.Sprintf("Cluster %s Deployment %s State => %s\n", c.ClusterName, k, Translate(v.State)))
-			if v.HasDetail && v.HasError {
-				color.Cyan(fmt.Sprintf("\t %s\n", v.Detail))
-			}
+	for k, v := range c.DeploymentState {
+		col = color.Green
+		if v.State == EDeploymentStateError {
+			col = color.Red
 		}
+		if v.State == EDeploymentStateNotExists {
+			col = color.Red
+		}
+		col(fmt.Sprintf("Cluster %s Deployment %s State => %s\n", c.ClusterName, k, Translate(v.State)))
+		if v.HasDetail && v.HasError {
+			color.Cyan(fmt.Sprintf("\t %s\n", v.Detail))
+		}
+	}
 }

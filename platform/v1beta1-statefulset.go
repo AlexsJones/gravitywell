@@ -65,7 +65,7 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, sts *v1beta1.Stateful
 	if commandFlag == configuration.Delete {
 		err := stsclient.Delete(sts.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s",sts.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", sts.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug(fmt.Sprintf("%s deleted", sts.Kind))

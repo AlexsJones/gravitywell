@@ -1,17 +1,17 @@
 package platform
 
 import (
-"errors"
-"fmt"
+	"errors"
+	"fmt"
 
-"github.com/AlexsJones/gravitywell/configuration"
-"github.com/AlexsJones/gravitywell/state"
-log "github.com/Sirupsen/logrus"
-v1rbac "k8s.io/api/rbac/v1"
-meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
-"k8s.io/client-go/kubernetes"
-_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/state"
+	log "github.com/Sirupsen/logrus"
+	v1rbac "k8s.io/api/rbac/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func execV1RbacRoleResouce(k kubernetes.Interface, cm *v1rbac.Role, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
@@ -66,7 +66,7 @@ func execV1RbacRoleResouce(k kubernetes.Interface, cm *v1rbac.Role, namespace st
 	if commandFlag == configuration.Delete {
 		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s",cm.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", cm.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug(fmt.Sprintf("%s deleted", cm.Kind))

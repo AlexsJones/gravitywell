@@ -65,7 +65,7 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deploy
 	if commandFlag == configuration.Delete {
 		err := deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s",objdep.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug(fmt.Sprintf("%s deleted", objdep.Kind))

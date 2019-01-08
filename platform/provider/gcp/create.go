@@ -9,9 +9,8 @@ import (
 	"time"
 )
 
-
 func Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
-	locationName string,clusterName string, locations []string,initialNodeCount int32,
+	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string,
 	nodePools []*containerpb.NodePool) error {
 
@@ -27,9 +26,9 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 			},
 		}
 
-	}else {
+	} else {
 		cluster = &containerpb.Cluster{
-			Name: clusterName,
+			Name:      clusterName,
 			Locations: locations,
 			NodePools: nodePools,
 		}
@@ -40,18 +39,17 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 		Cluster: cluster,
 	}
 
-	clusterResponse, err:= c.CreateCluster(ctx,clusterReq)
+	clusterResponse, err := c.CreateCluster(ctx, clusterReq)
 	if err != nil {
 		color.Red(err.Error())
 		return err
 	}
-	color.Blue(fmt.Sprintf("Started cluster build at %s",clusterResponse.StartTime))
+	color.Blue(fmt.Sprintf("Started cluster build at %s", clusterResponse.StartTime))
 
 	for {
 		clust, err :=
-			c.GetCluster(ctx,&containerpb.GetClusterRequest{Name:
-			fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName,clusterName)})
+			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
+				locationName, clusterName)})
 		if err != nil {
 			return err
 		}

@@ -9,28 +9,26 @@ import (
 	"time"
 )
 
-func Delete(c *container.ClusterManagerClient, ctx context.Context,projectName string,
+func Delete(c *container.ClusterManagerClient, ctx context.Context, projectName string,
 	locationName string,
 	clusterName string) error {
 
 	clusterReq := &containerpb.DeleteClusterRequest{
 
-		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,locationName,clusterName),
+		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName, locationName, clusterName),
 	}
 
-	clusterResponse, err:= c.DeleteCluster(ctx,clusterReq)
+	clusterResponse, err := c.DeleteCluster(ctx, clusterReq)
 	if err != nil {
 		color.Red(err.Error())
 		return err
 	}
-	color.Blue(fmt.Sprintf("Started cluster deletion at %s",clusterResponse.StartTime))
+	color.Blue(fmt.Sprintf("Started cluster deletion at %s", clusterResponse.StartTime))
 
 	for {
 		_, err :=
-			c.GetCluster(ctx,&containerpb.GetClusterRequest{Name:
-			fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName,clusterName)})
-
+			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
+				locationName, clusterName)})
 
 		if err != nil {
 			//I know this looks awful but you need to test if the cluster is alive

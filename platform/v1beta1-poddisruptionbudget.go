@@ -65,7 +65,7 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbet
 	if commandFlag == configuration.Delete {
 		err := pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s",pdb.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", pdb.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		log.Debug(fmt.Sprintf("%s deleted", pdb.Kind))

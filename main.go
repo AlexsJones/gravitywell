@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 )
+
 var (
 	version = "dev"
 	commit  = "none"
@@ -25,10 +26,11 @@ func init() {
 }
 
 var Opts struct {
-	DryRun bool `short:"d" long:"dryrun" description:"Performs a dryrun."`
-	FileName string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
+	DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
+	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
 	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 }
+
 func Usage() {
 
 	fmt.Println("...Usage...")
@@ -86,11 +88,10 @@ func main() {
 
 	if err :=
 		sh.Run(commandFlag, configuration.Options{VCS: "git",
-	TempVCSPath: "./.gravitywell",
-	APIVersion: "v1",
-	SSHKeyPath: Opts.SSHKeyPath,
-	});
-	err != nil {
+			TempVCSPath: "./.gravitywell",
+			APIVersion:  "v1",
+			SSHKeyPath:  Opts.SSHKeyPath,
+		}); err != nil {
 		log.Warn(err.Error())
 		os.Exit(1)
 	}
