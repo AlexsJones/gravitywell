@@ -12,24 +12,26 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type Application struct {
+	Name            string `yaml:"Name"`
+	Namespace       string `yaml:"Namespace"`
+	CreateNamespace bool   `yaml:"CreateNamespace"`
+	Git             string `yaml:"Git"`
+	Action          []struct {
+		Execute struct {
+			Shell   string `yaml:"Shell"`
+			Kubectl struct {
+				Path string `yaml:"Path"`
+				Type string `yaml:"Type"`
+			} `yaml:"Kubectl"`
+		} `yaml:"Execute"`
+	} `yaml:"Action"`
+}
+
 type ApplicationCluster struct {
 	Name         string `yaml:"Name"`
 	Applications []struct {
-		Application struct {
-			Name            string `yaml:"Name"`
-			Namespace       string `yaml:"Namespace"`
-			CreateNamespace bool   `yaml:"CreateNamespace"`
-			Git             string `yaml:"Git"`
-			Action          []struct {
-				Execute struct {
-					Shell   string `yaml:"Shell"`
-					Kubectl struct {
-						Path string `yaml:"Path"`
-						Type string `yaml:"Type"`
-					} `yaml:"Kubectl"`
-				} `yaml:"Execute"`
-			} `yaml:"Action"`
-		} `yaml:"Application"`
+		Application Application `yaml:"Application"`
 	} `yaml:"Applications"`
 }
 type ProviderCluster struct {

@@ -12,7 +12,25 @@ import (
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
+	"k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
+
+func createNamespaceIfNeeded(app configuration.Application, k8siface kubernetes.Interface) {
+	if !app.CreateNamespace {
+		return
+	}
+	log.Debug("Creating namespace...")
+	nsclient := k8siface.CoreV1().Namespaces()
+	ns := &v1.Namespace{}
+	ns.Name = app.Namespace
+	ns.Namespace = app.Namespace
+	_, err := nsclient.Create(ns)
+	if err != nil {
+		log.Error(fmt.Sprintf("Could not deploy Namespace resource %s due to %s", ns.Name, err.Error()))
+		panic("Not able to create Namespace")
+	}
+}
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	opt configuration.Options, cluster configuration.ApplicationCluster) *state.Capture {
@@ -32,8 +50,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	//---------------------------------
 	for _, deployment := range cluster.Applications {
 		log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Application.Name))
-		//---------------------------------
-		//Generate name from repo
+		createNamespaceIfNeeded(deployment.Application, k8siface)
 		var extension = filepath.Ext(deployment.Application.Git)
 		var remoteVCSRepoName = deployment.Application.Git[0 : len(deployment.Application.Git)-len(extension)]
 		splitStrings := strings.Split(remoteVCSRepoName, "/")
@@ -59,6 +76,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 					log.Error(err.Error())
 				}
 			}
+
 			//---------------------------------
 			fileList := []string{}
 			err := filepath.Walk(path.Join(opt.TempVCSPath, remoteVCSRepoName, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
