@@ -77,16 +77,19 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 			log.Error("Could not read from file %s", file)
 			continue
 		}
-		//Decode into kubernetes object
-		decode := scheme.Codecs.UniversalDeserializer().Decode
-		obj, kind, err := decode(raw, nil, nil)
-		if err != nil {
-			log.Error(fmt.Sprintf("%s : %s", err.Error(), kind))
-			continue
-		}
-		log.Printf("Decoded Kind: %s", kind.String())
+		documents := strings.Split(string(raw), "---")
+		for i, doc := range documents {
+			//Decode into kubernetes object
+			decode := scheme.Codecs.UniversalDeserializer().Decode
+			obj, kind, err := decode([]byte(doc), nil, nil)
+			if err != nil {
+				log.Error(fmt.Sprintf("%s : %s", err.Error(), kind))
+				continue
+			}
+			log.Printf("Decoded Kind: %s", kind.String())
 
-		kubernetesResources = append(kubernetesResources, obj)
+			kubernetesResources = append(kubernetesResources, obj)
+		}
 	}
 
 	//TODO: Deployment plan printing
