@@ -78,7 +78,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 			continue
 		}
 		documents := strings.Split(string(raw), "---")
-		for i, doc := range documents {
+		for _, doc := range documents {
 			//Decode into kubernetes object
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
