@@ -34,17 +34,17 @@ type ApplicationCluster struct {
 	} `yaml:"Applications"`
 }
 type ProviderCluster struct {
-	InitialNodeCount int    `yaml:"InitialNodeCount"`
-	InitialNodeType  string `yaml:"InitialNodeType"`
-	Labels           string `yaml:"Labels"`
-	Name             string `yaml:"Name"`
-	Project          string `yaml:"Project"`
+	InitialNodeCount int               `yaml:"InitialNodeCount"`
+	InitialNodeType  string            `yaml:"InitialNodeType"`
+	Labels           map[string]string `yaml:"Labels"`
+	Name             string            `yaml:"Name"`
+	Project          string            `yaml:"Project"`
 	NodePools        []struct {
 		NodePool struct {
-			Count    int    `yaml:"Count"`
-			Name     string `yaml:"Name"`
-			NodeType string `yaml:"NodeType"`
-			Labels   string `yaml:"Labels"`
+			Count    int               `yaml:"Count"`
+			Name     string            `yaml:"Name"`
+			NodeType string            `yaml:"NodeType"`
+			Labels   map[string]string `yaml:"Labels"`
 		} `yaml:"NodePool"`
 	} `yaml:"NodePools"`
 	OauthScopes     string `yaml:"OauthScopes"`
