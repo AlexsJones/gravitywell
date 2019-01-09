@@ -26,15 +26,22 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		nodePool.Config.MachineType = model.NodePool.NodeType
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 
+		var labels = map[string]string{}
+
 		if len(cluster.Labels) > 0 {
-			nodePool.Config.Labels = cluster.Labels
+			for index, element := range cluster.Labels {
+				// nodePool.Config.Labels[index] = element
+				labels[index] = element
+			}
 		}
 
 		if len(model.NodePool.Labels) > 0 {
 			for index, element := range model.NodePool.Labels {
-				nodePool.Config.Labels[index] = element
+				// nodePool.Config.Labels[index] = element
+				labels[index] = element
 			}
 		}
+		nodePool.Config.Labels = labels
 
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
