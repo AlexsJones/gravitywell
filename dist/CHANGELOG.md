@@ -1,3 +1,3 @@
 ## Changelog
 
-5219c9f improving the goreleaser syntax
+22ee7c8 removed go mods
