@@ -17,15 +17,6 @@ import (
 func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 	cluster configuration.ProviderCluster) error {
 
-	// var clusterLabels = map[string]string{}
-	// if cluster.Labels != "" {
-	// 	lpt := strings.Split(cluster.Labels, ",")
-	// 	for _, pair := range lpt {
-	// 		z := strings.Split(pair, "=")
-	// 		clusterLabels[z[0]] = z[1]
-	// 	}
-	// }
-
 	var convertedNodePool []*containerpb.NodePool
 
 	for _, model := range cluster.NodePools {
@@ -35,33 +26,28 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		nodePool.Config.MachineType = model.NodePool.NodeType
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 
-		// var labels = map[string]string{}
-		// for index, element := range clusterLabels {
-		for index, element := range cluster.Labels {
-			// labels[index] = element
-			model.NodePool.Labels[index] = element
+		// if len(model.NodePool.Labels) >= 1 {
+		// 	if len(cluster.Labels) >= 1 {
+		// 		for index, element := range cluster.Labels {
+		// 			model.NodePool.Labels[index] = element
+		// 		}
+		// 	}
+
+		// 	nodePool.Config.Labels = model.NodePool.Labels
+		// }
+
+		if len(cluster.Labels) >= 1 {
+			nodePool.Config.Labels = cluster.Labels
 		}
 
-		// if model.NodePool.Labels != "" {
-		// 	lp := strings.Split(model.NodePool.Labels, ",")
-		// 	for _, pair := range lp {
-		// 		z := strings.Split(pair, "=")
-		// 		labels[z[0]] = z[1]
-		// 	}
-		// }
-		// nodePool.Config.Labels = labels
-		nodePool.Config.Labels = model.NodePool.Labels
+		if len(model.NodePool.Labels) >= 1 {
+			for index, element := range cluster.Labels {
+				nodePool.Config.Labels[index] = element
+			}
+		}
 
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
-
-	// return gcp.Create(cmc, ctx, cluster.Project,
-	// 	cluster.Region, cluster.Name,
-	// 	cluster.Zones,
-	// 	int32(cluster.InitialNodeCount),
-	// 	cluster.InitialNodeType,
-	// 	clusterLabels,
-	// 	convertedNodePool)
 
 	return gcp.Create(cmc, ctx, cluster.Project,
 		cluster.Region, cluster.Name,
