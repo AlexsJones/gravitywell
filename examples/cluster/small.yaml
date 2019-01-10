@@ -5,10 +5,12 @@ Strategy:
       Name: "Google Cloud Platform"
       Clusters:
         - Cluster:
-            Name: "testclusterb"
+            Name: "testclusterc"
             Project: "beamery-trials"
             Region: "us-east4"
             Zones: ["us-east4-a"]
+            Labels:
+              type: "test"
             InitialNodeCount: 1
             InitialNodeType: "n1-standard-1"
             OauthScopes: "https://www.googleapis.com/auth/monitoring.write,
@@ -18,10 +20,11 @@ Strategy:
           https://www.googleapis.com/auth/compute"
             NodePools:
               - NodePool:
-                  Name: "poola"
+                  Name: "np1"
                   Count: 3
                   NodeType: "n1-standard-1"
-                  Labels: "k8s-node-type=test"
+                  Labels:
+                    k8s-node-type: "test"
             PostInstallHook:
               - Execute:
                   Path: "."

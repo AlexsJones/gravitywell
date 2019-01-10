@@ -47,6 +47,9 @@ Strategy:
             Project: "beamery-trials"
             Region: "us-east4"
             Zones: ["us-east4-a"]
+            Labels:
+                A: "B"
+                Foo: "Bar"
             InitialNodeCount: 1
             InitialNodeType: "n1-standard-1"
             OauthScopes: "https://www.googleapis.com/auth/monitoring.write,
@@ -59,6 +62,8 @@ Strategy:
                   Name: "Pool-A"
                   Count: 3
                   NodeType: "n1-standard-1"
+                  Labels:
+                    Foo: "Bar"
             PostInstallHook:
               - Execute:
                   Shell: "gcloud container clusters get-credentials TestClusterA --region=us-east4 --zone=a"
