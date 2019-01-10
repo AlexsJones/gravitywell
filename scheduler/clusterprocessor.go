@@ -1,16 +1,17 @@
 package scheduler
 
 import (
-	"cloud.google.com/go/container/apiv1"
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
+	"cloud.google.com/go/container/apiv1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
-	"os"
-	"strings"
 )
 
 func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
@@ -26,12 +27,20 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 
 		var labels = map[string]string{}
-		lp := strings.Split(model.NodePool.Labels, ",")
-		for _, pair := range lp {
-			z := strings.Split(pair, "=")
-			labels[z[0]] = z[1]
+
+		if len(cluster.Labels) > 0 {
+			for index, element := range cluster.Labels {
+				labels[index] = element
+			}
+		}
+
+		if len(model.NodePool.Labels) > 0 {
+			for index, element := range model.NodePool.Labels {
+				labels[index] = element
+			}
 		}
 		nodePool.Config.Labels = labels
+
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
 
@@ -40,6 +49,7 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		cluster.Zones,
 		int32(cluster.InitialNodeCount),
 		cluster.InitialNodeType,
+		cluster.Labels,
 		convertedNodePool)
 }
 func runGCPDelete(cmc *container.ClusterManagerClient, ctx context.Context,
