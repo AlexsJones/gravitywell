@@ -30,14 +30,12 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 
 		if len(cluster.Labels) > 0 {
 			for index, element := range cluster.Labels {
-				// nodePool.Config.Labels[index] = element
 				labels[index] = element
 			}
 		}
 
 		if len(model.NodePool.Labels) > 0 {
 			for index, element := range model.NodePool.Labels {
-				// nodePool.Config.Labels[index] = element
 				labels[index] = element
 			}
 		}
