@@ -23,7 +23,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 		DeploymentState: make(map[string]state.Details),
 	}
 	//---------------------------------
-	log.Warn(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
+	log.Info(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
 	if err != nil {
 		log.Error(err.Error())
@@ -54,7 +54,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 		//---------------------------------
 		for _, a := range deployment.Application.Action {
 			if a.Execute.Shell != "" {
-				log.Warn(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
+				log.Info(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
 				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
 					log.Error(err.Error())
 				}
