@@ -18,6 +18,7 @@ import (
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
+	storagev1b1 "k8s.io/api/storage/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -172,6 +173,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1AuthClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	case *v1betav1.DaemonSet:
 		response, e = execV1Beta1DaemonSetResouce(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag)
+	case *storagev1b1.StorageClass:
+		response, e = execV1Beta1StorageResouce(k, obj.(*storagev1b1.StorageClass), namespace, opts, commandFlag)
 	default:
 		log.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
 	}
