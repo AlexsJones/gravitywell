@@ -21,10 +21,10 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, sc *storagev1b1.StorageCl
 	if opts.DryRun {
 		_, err := client.Get(sc.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: StorageClasses resource %s does not exist\n", sc.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: StorageClass resource %s does not exist\n", sc.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Info(fmt.Sprintf("DRY-RUN: StorageClasses resource %s exists\n", sc.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: StorageClass resource %s exists\n", sc.Name))
 
 			return state.EDeploymentStateExists, nil
 		}
@@ -36,7 +36,7 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, sc *storagev1b1.StorageCl
 		client.Delete(sc.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 		_, err := client.Create(sc)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy StorageClasses resource %s due to %s", sc.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy StorageClass resource %s due to %s", sc.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("Deployment deployed")
@@ -46,20 +46,20 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, sc *storagev1b1.StorageCl
 	if commandFlag == configuration.Create {
 		_, err := client.Create(sc)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy StorageClasses resource %s due to %s", sc.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy StorageClass resource %s due to %s", sc.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		log.Debug("StorageClasses deployed")
+		log.Debug("StorageClass deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 		_, err := client.Update(sc)
 		if err != nil {
-			log.Error("Could not update StorageClasses")
+			log.Error("Could not update StorageClass")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug("StorageClasses updated")
+		log.Debug("StorageClass updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	//Delete -------------------------------------------------------------------
