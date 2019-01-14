@@ -11,6 +11,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/apps/v1beta2"
 	batchbeta1 "k8s.io/api/batch/v1beta1"
@@ -152,6 +153,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.StatefulSet:
 		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
+	case *appsv1.StatefulSet:
+		response, e = execV1StatefulSetResouce(k, obj.(*appsv1.StatefulSet), namespace, opts, commandFlag)
 	case *v1.Secret:
 		response, e = execV1SecretResouce(k, obj.(*v1.Secret), namespace, opts, commandFlag)
 	case *v1.Service:
