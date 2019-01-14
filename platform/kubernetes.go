@@ -14,6 +14,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/apps/v1beta2"
+	batchv1 "k8s.io/api/batch/v1"
 	batchbeta1 "k8s.io/api/batch/v1beta1"
 	"k8s.io/api/core/v1"
 	v1betav1 "k8s.io/api/extensions/v1beta1"
@@ -145,6 +146,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 	switch obj.(type) {
 	case *batchbeta1.CronJob:
 		response, e = execV1Beta1CronJob(k, obj.(*batchbeta1.CronJob), namespace, opts, commandFlag)
+	case *batchv1.Job:
+		response, e = execV1Job(k, obj.(*batchv1.Job), namespace, opts, commandFlag)
 	case *v1betav1.Deployment:
 		response, e = execV1Betav1DeploymentResouce(k, obj.(*v1betav1.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.Deployment:
