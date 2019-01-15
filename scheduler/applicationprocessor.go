@@ -51,30 +51,61 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 		} else {
 			log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 		}
-		//---------------------------------
+		// Run actions ---------------
 		for _, a := range deployment.Application.Action {
-			if a.Execute.Shell != "" {
-				log.Warn(fmt.Sprintf("Running shell command %s\n", a.Execute.Shell))
-				if err := ShellCommand(a.Execute.Shell, path.Join(opt.TempVCSPath, remoteVCSRepoName), true); err != nil {
+
+			// Switch action based on Kind
+			switch strings.ToLower(a.Execute.Kind) {
+
+			case "shell":
+
+				command, ok := a.Execute.Configuration["Command"]
+				if !ok {
+					log.Warn("Could not run the shell step as Command could not be found")
+					continue
+				}
+
+				p := path.Join(opt.TempVCSPath, remoteVCSRepoName)
+
+				tp, ok := a.Execute.Configuration["Path"]
+				if ok {
+					p = tp
+				}
+
+				log.Warn(fmt.Sprintf("Running shell command %s\n", command))
+				if err := ShellCommand(command, p, true); err != nil {
 					log.Error(err.Error())
 				}
-			}
-			//---------------------------------
-			fileList := []string{}
-			err := filepath.Walk(path.Join(opt.TempVCSPath, remoteVCSRepoName, a.Execute.Kubectl.Path), func(path string, f os.FileInfo, err error) error {
-				fileList = append(fileList, path)
-				return nil
-			})
-			if err != nil {
-				log.Error(err.Error())
 
+			case "kubernetes":
+
+				var deploymentPath = "."
+
+				if tp, ok := a.Execute.Configuration["Path"]; ok && tp != "" {
+					deploymentPath = tp
+
+				}
+				// Deploy -------------------------
+				fileList := []string{}
+				err := filepath.Walk(path.Join(opt.TempVCSPath,
+					remoteVCSRepoName, deploymentPath),
+					func(path string, f os.FileInfo, err error) error {
+						fileList = append(fileList, path)
+						return nil
+					})
+				if err != nil {
+					log.Error(err.Error())
+
+				}
+				err = platform.GenerateDeploymentPlan(restclient,
+					k8siface, fileList,
+					deployment.Application.Namespace, opt, commandFlag)
+				if err != nil {
+					log.Error(err.Error())
+				}
+				//---------------------------------
 			}
-			err = platform.GenerateDeploymentPlan(restclient,
-				k8siface, fileList, deployment.Application.Namespace, opt, commandFlag)
-			if err != nil {
-				log.Error(err.Error())
-			}
-			//---------------------------------
+
 		}
 	}
 	return stateCapture

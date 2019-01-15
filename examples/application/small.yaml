@@ -5,11 +5,20 @@ Strategy:
       Name: "gke_beamery-trials_us-east4_testclusterb"
       Applications:
         - Application:
-           Name: "kubernetes-apache-tika"
-           Namespace: "tika"
-           Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-           Action:
-            - Execute:
-               Shell: "./build_environment.sh default"
-               Kubectl:
-                 Path: deployment
+            Name: "kubernetes-apache-tika"
+            Namespace: "tika"
+            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            Action:
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: pwd
+                    Path: ../ #Optional value
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: ./build_environment.sh default
+              - Execute:
+                  Kind: "kubernetes"
+                  Configuration:
+                    Path: deployment #Optional value

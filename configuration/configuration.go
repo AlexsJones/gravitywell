@@ -23,11 +23,8 @@ type ApplicationCluster struct {
 			Git             string `yaml:"Git"`
 			Action          []struct {
 				Execute struct {
-					Shell   string `yaml:"Shell"`
-					Kubectl struct {
-						Path string `yaml:"Path"`
-						Type string `yaml:"Type"`
-					} `yaml:"Kubectl"`
+					Kind string `yaml:"Kind"`
+					Configuration map[string]string `yaml:"Configuration"`
 				} `yaml:"Execute"`
 			} `yaml:"Action"`
 		} `yaml:"Application"`
