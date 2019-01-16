@@ -168,6 +168,7 @@ replace
 - [x] PodDisruptionBudget
 - [x] ServiceAccounts
 - [x] RoleBinding
+- [x] StorageClass
 - [x] CronJob
 - [x] Secret
 - [ ] PersistantVolume

@@ -23,7 +23,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 		DeploymentState: make(map[string]state.Details),
 	}
 	//---------------------------------
-	log.Warn(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
+	log.Info(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
 	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
 	if err != nil {
 		log.Error(err.Error())

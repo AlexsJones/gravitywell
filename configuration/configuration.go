@@ -17,11 +17,10 @@ type ApplicationCluster struct {
 	Name         string `yaml:"Name"`
 	Applications []struct {
 		Application struct {
-			Name            string `yaml:"Name"`
-			Namespace       string `yaml:"Namespace"`
-			CreateNamespace bool   `yaml:"CreateNamespace"`
-			Git             string `yaml:"Git"`
-			Action          []struct {
+			Name      string `yaml:"Name"`
+			Namespace string `yaml:"Namespace"`
+			Git       string `yaml:"Git"`
+			Action    []struct {
 				Execute struct {
 					Kind string `yaml:"Kind"`
 					Configuration map[string]string `yaml:"Configuration"`

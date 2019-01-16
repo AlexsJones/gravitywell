@@ -11,6 +11,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/apps/v1beta2"
 	batchbeta1 "k8s.io/api/batch/v1beta1"
@@ -18,6 +19,7 @@ import (
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
+	storagev1b1 "k8s.io/api/storage/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -151,6 +153,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment), namespace, opts, commandFlag)
 	case *v1beta1.StatefulSet:
 		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
+	case *appsv1.StatefulSet:
+		response, e = execV1StatefulSetResouce(k, obj.(*appsv1.StatefulSet), namespace, opts, commandFlag)
 	case *v1.Secret:
 		response, e = execV1SecretResouce(k, obj.(*v1.Secret), namespace, opts, commandFlag)
 	case *v1.Service:
@@ -172,6 +176,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1AuthClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	case *v1betav1.DaemonSet:
 		response, e = execV1Beta1DaemonSetResouce(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag)
+	case *storagev1b1.StorageClass:
+		response, e = execV1Beta1StorageResouce(k, obj.(*storagev1b1.StorageClass), namespace, opts, commandFlag)
 	default:
 		log.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
 	}
