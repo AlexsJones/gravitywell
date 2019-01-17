@@ -179,6 +179,8 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1AuthClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	case *v1betav1.DaemonSet:
 		response, e = execV1Beta1DaemonSetResouce(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag)
+	case *v1betav1.Ingress:
+		response, e = execV1Beta1IngressResouce(k, obj.(*v1betav1.Ingress), namespace, opts, commandFlag)
 	case *storagev1b1.StorageClass:
 		response, e = execV1Beta1StorageResouce(k, obj.(*storagev1b1.StorageClass), namespace, opts, commandFlag)
 	default:
