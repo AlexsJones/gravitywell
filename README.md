@@ -162,15 +162,21 @@ replace
 ### Supported Kubernetes resource definition types
 
 - [x] ConfigMap
+- [x] Secret
 - [x] StatefulSet
 - [x] Deployment
+- [x] DaemonSet
 - [x] Service
 - [x] PodDisruptionBudget
 - [x] ServiceAccounts
+- [x] Role
+- [x] ClusterRole
+- [x] ClusterRoleBinding
 - [x] RoleBinding
 - [x] StorageClass
 - [x] CronJob
-- [x] Secret
+- [x] Job
+- [x] Ingress
 - [ ] PersistantVolume
 - [ ] PersistantVolumeClaim
 
