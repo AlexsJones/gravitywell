@@ -13,22 +13,24 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type Application struct {
+	Name      string `yaml:"Name"`
+	Namespace string `yaml:"Namespace"`
+	Git       string `yaml:"Git"`
+	Action    []struct {
+		Execute struct {
+			Kind          string            `yaml:"Kind"`
+			Configuration map[string]string `yaml:"Configuration"`
+		} `yaml:"Execute"`
+	} `yaml:"Action"`
+}
 type ApplicationCluster struct {
 	Name         string `yaml:"Name"`
 	Applications []struct {
-		Application struct {
-			Name      string `yaml:"Name"`
-			Namespace string `yaml:"Namespace"`
-			Git       string `yaml:"Git"`
-			Action    []struct {
-				Execute struct {
-					Kind string `yaml:"Kind"`
-					Configuration map[string]string `yaml:"Configuration"`
-				} `yaml:"Execute"`
-			} `yaml:"Action"`
-		} `yaml:"Application"`
+		Application Application `yaml:"Application"`
 	} `yaml:"Applications"`
 }
+
 type ProviderCluster struct {
 	InitialNodeCount int               `yaml:"InitialNodeCount"`
 	InitialNodeType  string            `yaml:"InitialNodeType"`

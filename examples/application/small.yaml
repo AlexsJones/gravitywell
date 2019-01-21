@@ -22,3 +22,16 @@ Strategy:
                   Kind: "kubernetes"
                   Configuration:
                     Path: deployment #Optional value
+        - Application:
+            Name: "kubernetes-mongodb-cluster"
+            Namespace: "mongodb"
+            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+            Action:
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: ./build_environment.sh dev
+              - Execute:
+                  Kind: "kubernetes"
+                  Configuration:
+                    Path: deployment #Optional value
