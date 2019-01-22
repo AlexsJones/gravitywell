@@ -9,6 +9,7 @@ import (
 	"cloud.google.com/go/container/apiv1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
+	"github.com/AlexsJones/gravitywell/shell"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
@@ -84,7 +85,7 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 				// Run post install -----------------------------------------------------
 				for _, executeCommand := range cluster.Cluster.PostInstallHook {
 					if executeCommand.Execute.Shell != "" {
-						err := ShellCommand(executeCommand.Execute.Shell,
+						err := shell.ShellCommand(executeCommand.Execute.Shell,
 							executeCommand.Execute.Path, false)
 						if err != nil {
 							color.Red(err.Error())
@@ -103,7 +104,7 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 				// Run post delete -----------------------------------------------------
 				for _, executeCommand := range cluster.Cluster.PostDeleteHooak {
 					if executeCommand.Execute.Shell != "" {
-						err := ShellCommand(executeCommand.Execute.Shell,
+						err := shell.ShellCommand(executeCommand.Execute.Shell,
 							executeCommand.Execute.Path, false)
 						if err != nil {
 							color.Red(err.Error())
