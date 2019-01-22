@@ -36,7 +36,7 @@ Spec:
             Path: deployment #Optional value
 
 # Idea:
-# 1- Read all files
+# 1- Read all files and merge all apps together. Example: [App1, App2]
 # 2- Group by cluster.
 #    Example:  { "trials": [App1, App2] }
 # 3- group each cluster by namespace
