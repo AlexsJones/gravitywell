@@ -14,16 +14,16 @@ import (
 )
 
 type Action struct {
-		Execute struct {
-			Kind          string            `yaml:"Kind"`
-			Configuration map[string]string `yaml:"Configuration"`
-		} `yaml:"Execute"`
+	Execute struct {
+		Kind          string            `yaml:"Kind"`
+		Configuration map[string]string `yaml:"Configuration"`
+	} `yaml:"Execute"`
 }
 
 type Application struct {
-	Name      string `yaml:"Name"`
-	Namespace string `yaml:"Namespace"`
-	Git       string `yaml:"Git"`
+	Name      string   `yaml:"Name"`
+	Namespace string   `yaml:"Namespace"`
+	Git       string   `yaml:"Git"`
 	Action    []Action `yaml:"Action"`
 }
 

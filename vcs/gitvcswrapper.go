@@ -1,13 +1,13 @@
 package vcs
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
-  "fmt"
+	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	log "github.com/Sirupsen/logrus"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 func nameForRepository(repoUrl string) string {
