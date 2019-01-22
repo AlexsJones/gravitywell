@@ -74,7 +74,6 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 						if err != nil {
 							log.Error(err.Error())
 							stateCapture.DeploymentState[deployment.Name] = state.Details{State: state.EDeploymentStateError}
-
 						}
 					} else {
 						log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
@@ -90,6 +89,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 							command, ok := a.Execute.Configuration["Command"]
 							if !ok {
 								log.Warn("Could not run the shell step as Command could not be found")
+
 								continue
 							}
 
