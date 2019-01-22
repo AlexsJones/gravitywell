@@ -1,37 +1,39 @@
 APIVersion: "v1"
 Kind: "Application"
-Strategy:
-  - Cluster:
-      Name: "gke_beamery-trials_us-east4_testcluster"
-      Applications:
-        - Application:
-            Name: "kubernetes-apache-tika"
-            Namespace: "tika"
-            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-            Action:
-              - Execute:
-                  Kind: "shell"
-                  Configuration:
-                    Command: pwd
-                    Path: ../ #Optional value
-              - Execute:
-                  Kind: "shell"
-                  Configuration:
-                    Command: ./build_environment.sh default
-              - Execute:
-                  Kind: "kubernetes"
-                  Configuration:
-                    Path: deployment #Optional value
-        - Application:
-            Name: "kubernetes-mongodb-cluster"
-            Namespace: "mongodb"
-            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
-            Action:
-              - Execute:
-                  Kind: "shell"
-                  Configuration:
-                    Command: ./build_environment.sh dev
-              - Execute:
-                  Kind: "kubernetes"
-                  Configuration:
-                    Path: deployment #Optional value
+Spec:
+  - Name: "kubernetes-apache-tika"
+    ClusterName: "gke_beamery-trials_us-east4_testcluster"
+    Namespace: "tika"
+    Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+    Action:
+      - Execute:
+          Kind: "shell"
+          Configuration:
+            Command: pwd
+            Path: ../ #Optional value
+      - Execute:
+          Kind: "shell"
+          Configuration:
+            Command: ./build_environment.sh default
+      - Execute:
+          Kind: "kubernetes"
+          Configuration:
+            Path: deployment #Optional value
+  - Name: "kubernetes-mongodb-cluster"
+    Namespace: "mongodb"
+    Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+    Action:
+      - Execute:
+          Kind: "shell"
+          Configuration:
+            Command: ./build_environment.sh dev
+      - Execute:
+          Kind: "kubernetes"
+          Configuration:
+            Path: deployment #Optional value
+
+# Idea:
+# 1- Read all files
+# 2- Group by cluster. Example:  { "trials": [App1, App2] }
+# 3- group each cluster by namespace { "trials": { "mongo": [App1], "rabbit": [App2] }
+# 4- Deploy each array of applications parallely
