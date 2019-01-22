@@ -20,6 +20,7 @@ Spec:
           Configuration:
             Path: deployment #Optional value
   - Name: "kubernetes-mongodb-cluster"
+    ClusterName: "gke_beamery-trials_us-east4_testcluster"
     Namespace: "mongodb"
     Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
     WaitForNamespace:
