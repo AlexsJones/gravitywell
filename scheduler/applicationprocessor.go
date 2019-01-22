@@ -8,12 +8,39 @@ import (
 	"github.com/AlexsJones/gravitywell/subprocessor"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 )
+
+func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
+	log.Info(fmt.Sprintf("Switching to cluster: %s\n", clusterName))
+	restclient, k8siface, err := platform.GetKubeClient(clusterName)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+	return restclient, k8siface
+}
+
+func groupDeploymentsPerNamespace(cluster configuration.ApplicationCluster) map[string][]configuration.Application {
+	groupedDeployments := make(map[string][]configuration.Application)
+	for _, deployment := range cluster.Applications {
+		groupedDeployments[deployment.Application.Namespace] = append(groupedDeployments[deployment.Application.Namespace], deployment.Application)
+	}
+
+	for namespace, deployments := range groupedDeployments {
+		fmt.Printf("Deployments for namespace %s on cluster %s\t\t\n", namespace, cluster.Name)
+		for _, depl := range deployments {
+			fmt.Printf("\t\t %s\n", depl.Name)
+		}
+	}
+	return groupedDeployments
+}
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	opt configuration.Options, cluster configuration.ApplicationCluster) *state.Capture {
@@ -23,63 +50,45 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 		ClusterName:     cluster.Name,
 		DeploymentState: make(map[string]state.Details),
 	}
-	//---------------------------------
-	log.Info(fmt.Sprintf("Switching to cluster: %s\n", cluster.Name))
-	restclient, k8siface, err := platform.GetKubeClient(cluster.Name)
-	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
-	}
-	//---------------------------------
+	restclient, k8siface := clientForCluster(cluster.Name)
 
 	//Batch actions per namespace
-	groupedDeployments := make(map[string][]configuration.Application)
+	deploymentsPerNamespace := groupDeploymentsPerNamespace(cluster)
 
-	for _, deployment := range cluster.Applications {
-
-		groupedDeployments[deployment.Application.Namespace] = append(groupedDeployments[deployment.Application.Namespace], deployment.Application)
-	}
-
-	for key, value := range groupedDeployments {
-
-		fmt.Printf("Deployments for namespace %s on cluster %s\t\t\n", key, cluster.Name)
-		for _, depl := range value {
-			fmt.Printf("\t\t %s\n", depl.Name)
-		}
-	}
 	//Execute deployments
 	coordinator := subprocessor.NewCoordinator()
 	var wg sync.WaitGroup
 	go coordinator.Run()
 
-	for key, value := range groupedDeployments {
+	for namespace, deployments := range deploymentsPerNamespace {
+		fmt.Printf("Deployments for namespace %s on cluster %s\t\t\n", namespace, cluster.Name)
 
-		fmt.Printf("Deployments for namespace %s on cluster %s\t\t\n", key, cluster.Name)
-		for _, deployment := range value {
+		for _, deploy := range deployments {
+			fmt.Printf("Deploying:\t\t %s\n", deploy.Name)
 			wg.Add(1)
 			coordinator.ResourceChannel <- subprocessor.Resource{
 				Process: func() {
-					log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
+					log.Debug(fmt.Sprintf("Loading deployment %s\n", deploy.Name))
 					//---------------------------------
 					//Generate name from repo
-					var extension = filepath.Ext(deployment.Git)
-					var remoteVCSRepoName = deployment.Git[0 : len(deployment.Git)-len(extension)]
+					var extension = filepath.Ext(deploy.Git)
+					var remoteVCSRepoName = deploy.Git[0 : len(deploy.Git)-len(extension)]
 					splitStrings := strings.Split(remoteVCSRepoName, "/")
 					remoteVCSRepoName = splitStrings[len(splitStrings)-1]
 
 					if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); os.IsNotExist(err) {
 						log.Debug(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 						gvcs := new(vcs.GitVCS)
-						_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deployment.Git, opt.SSHKeyPath)
+						_, err = vcs.Fetch(gvcs, path.Join(opt.TempVCSPath, remoteVCSRepoName), deploy.Git, opt.SSHKeyPath)
 						if err != nil {
 							log.Error(err.Error())
-							stateCapture.DeploymentState[deployment.Name] = state.Details{State: state.EDeploymentStateError}
+							stateCapture.DeploymentState[deploy.Name] = state.Details{State: state.EDeploymentStateError}
 						}
 					} else {
 						log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 					}
 					// Run actions ---------------
-					for _, a := range deployment.Action {
+					for _, a := range deploy.Action {
 
 						// Switch action based on Kind
 						switch strings.ToLower(a.Execute.Kind) {
@@ -127,7 +136,7 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 							}
 							err = platform.GenerateDeploymentPlan(restclient,
 								k8siface, fileList,
-								deployment.Namespace, opt, commandFlag)
+								deploy.Namespace, opt, commandFlag)
 							if err != nil {
 								log.Error(err.Error())
 							}
