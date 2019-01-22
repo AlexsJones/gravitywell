@@ -48,7 +48,7 @@ Spec:
 #                deployAppsInParallel(appSlice, clusterName, namespace)
 #            }}
 #
-#  - Note: Each namespace has a waitgroup { "trials": { "mongo": wg, "rabbit": wg }
+#  - Note: Each namespace has a waitgroup { "mongo": wg, "rabbit": wg }
 #  - Note: Apps that have a dependency, will wait for a waitGroup of that namespace
 #    Example:
 #        waitgroups = {"trials": {"mongo": waitGroup, "rabbit": waitGroup}}
