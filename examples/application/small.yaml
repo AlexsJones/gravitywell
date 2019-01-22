@@ -22,6 +22,8 @@ Spec:
   - Name: "kubernetes-mongodb-cluster"
     Namespace: "mongodb"
     Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+    WaitForNamespace:
+    - "tika"
     Action:
       - Execute:
           Kind: "shell"
@@ -34,6 +36,31 @@ Spec:
 
 # Idea:
 # 1- Read all files
-# 2- Group by cluster. Example:  { "trials": [App1, App2] }
-# 3- group each cluster by namespace { "trials": { "mongo": [App1], "rabbit": [App2] }
+# 2- Group by cluster.
+#    Example:  { "trials": [App1, App2] }
+# 3- group each cluster by namespace
+#    Example: { "trials": { "mongo": [App1], "rabbit": [App2] }
 # 4- Deploy each array of applications parallely
+#    Example:
+#        for clusterNames, namespaces in {"trials": {"mongo": [App1], "rabbit": [App2]}}
+#            for namespace, appSlice in namespaces {
+#                deployAppsInParallel(appSlice, clusterName, namespace)
+#            }}
+#
+#  - Note: Each namespace has a waitgroup { "trials": { "mongo": wg, "rabbit": wg }
+#  - Note: Apps that have a dependency, will wait for a waitGroup of that namespace
+#    Example:
+#        waitgroups = {"trials": {"mongo": waitGroup, "rabbit": waitGroup}}
+#
+#
+#        for clusterNames, namespaces in {"trials": {"mongo": [App1], "rabbit": [App2]}}
+#            namespaceWaits := make([string]waitGroup)
+#            for namespace, appSlice in namespaces {
+#              namespaceWaits[namespace] = waitgroup
+#              namespaceWaits[namespace].Add(1)
+#            }
+#            for namespace, appSlice in namespaces {
+#                deployAppsInParallel(namespaceWaits, appSlice, clusterName, namespace)
+#                namespaceWaits[namespace].Done()
+#            }}
+
