@@ -3,30 +3,14 @@ package scheduler
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
-	"github.com/AlexsJones/gravitywell/platform"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/subprocessor"
 	"github.com/AlexsJones/gravitywell/vcs"
 	"github.com/AlexsJones/gravitywell/actions"
 	log "github.com/Sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 	"sync"
 )
-
-func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
-	log.Info(fmt.Sprintf("Switching to cluster: %s\n", clusterName))
-	restclient, k8siface, err := platform.GetKubeClient(clusterName)
-	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
-	}
-	return restclient, k8siface
-}
 
 func groupDeploymentsPerNamespace(cluster configuration.ApplicationCluster) map[string][]configuration.Application {
 	groupedDeployments := make(map[string][]configuration.Application)
@@ -59,33 +43,7 @@ func executeDeployment(deployment configuration.Application, opt configuration.O
 			actions.ExecuteShellAction(a, opt, remoteVCSRepoName)
 
 		case "kubernetes":
-
-			var deploymentPath = "."
-
-			if tp, ok := a.Execute.Configuration["Path"]; ok && tp != "" {
-				deploymentPath = tp
-
-			}
-			// Deploy -------------------------
-			fileList := []string{}
-			err := filepath.Walk(path.Join(opt.TempVCSPath,
-				remoteVCSRepoName, deploymentPath),
-				func(path string, f os.FileInfo, err error) error {
-					fileList = append(fileList, path)
-					return nil
-				})
-			if err != nil {
-				log.Error(err.Error())
-
-			}
-			restclient, k8siface := clientForCluster(clusterName)
-			err = platform.GenerateDeploymentPlan(restclient,
-				k8siface, fileList,
-				deployment.Namespace, opt, commandFlag)
-			if err != nil {
-				log.Error(err.Error())
-			}
-			//---------------------------------
+			actions.ExecuteKubernetesAction(a, clusterName, deployment, commandFlag, opt, remoteVCSRepoName)
 		}
 
 	}
