@@ -1,6 +1,6 @@
 APIVersion: "v1"
 Kind: "ApplicationList"
-Spec:
+Items:
   - Name: "kubernetes-apache-tika"
     ClusterName: "gke_beamery-trials_us-east4_testcluster"
     Namespace: "tika"
