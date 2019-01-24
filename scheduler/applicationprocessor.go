@@ -2,14 +2,15 @@ package scheduler
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/AlexsJones/gravitywell/actions"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/AlexsJones/gravitywell/subprocessor"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
-	"strings"
-	"sync"
 )
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
@@ -66,7 +67,7 @@ func groupDeploymentsPerNamespace(cluster configuration.ApplicationCluster) map[
 func executeDeployment(deployment configuration.Application, opt configuration.Options, stateCapture *state.Capture, clusterName string, commandFlag configuration.CommandFlag) {
 	log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
-	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, opt)
+	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, opt, "master")
 	if err != nil {
 		log.Error(err.Error())
 		stateCapture.DeploymentState[deployment.Name] = state.Details{State: state.EDeploymentStateError}

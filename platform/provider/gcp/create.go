@@ -5,60 +5,67 @@ import (
 	"fmt"
 	"time"
 
-	"cloud.google.com/go/container/apiv1"
+	container "cloud.google.com/go/container/apiv1"
+	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
-	locationName string, clusterName string, locations []string, initialNodeCount int32,
-	initialNodeType string, clusterLabels map[string]string,
-	nodePools []*containerpb.NodePool) error {
+func Create(c *container.ClusterManagerClient, ctx context.Context, cluster configuration.ProviderCluster, nodePools []*containerpb.NodePool) (string, string, error) {
 
-	var cluster *containerpb.Cluster
+	var CloudCluster *containerpb.Cluster
 	if len(nodePools) == 0 {
 
-		cluster = &containerpb.Cluster{
-			Name:             clusterName,
-			Locations:        locations,
-			InitialNodeCount: initialNodeCount,
+		CloudCluster = &containerpb.Cluster{
+			Name:             cluster.Name,
+			Locations:        cluster.Zones,
+			InitialNodeCount: int32(cluster.InitialNodeCount),
 			NodeConfig: &containerpb.NodeConfig{
-				MachineType: initialNodeType,
+				MachineType: cluster.InitialNodeType,
 			},
-			ResourceLabels: clusterLabels,
+			ResourceLabels: cluster.Labels,
 		}
 
 	} else {
-		cluster = &containerpb.Cluster{
-			Name:           clusterName,
-			Locations:      locations,
+		CloudCluster = &containerpb.Cluster{
+			Name:           cluster.Name,
+			Locations:      cluster.Zones,
 			NodePools:      nodePools,
-			ResourceLabels: clusterLabels,
+			ResourceLabels: cluster.Labels,
 		}
 	}
-	clusterReq := &containerpb.CreateClusterRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectName,
-			locationName),
-		Cluster: cluster,
+	CloudClusterReq := &containerpb.CreateClusterRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", cluster.Project,
+			cluster.Region),
+		Cluster: CloudCluster,
 	}
 
-	clusterResponse, err := c.CreateCluster(ctx, clusterReq)
+	CloudClusterResponse, err := c.CreateCluster(ctx, CloudClusterReq)
 	if err != nil {
 		color.Red(err.Error())
-		return err
-	}
-	color.Blue(fmt.Sprintf("Started cluster build at %s", clusterResponse.StartTime))
 
-	for {
-		clust, err :=
-			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName, clusterName)})
+		clust, err := c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", cluster.Project, cluster.Region, cluster.Name)})
 		if err != nil {
-			return err
+			return "", "", err
 		}
 		if clust.GetStatus() == containerpb.Cluster_RUNNING {
 			color.Green("Cluster running")
-			return nil
+			return clust.Endpoint, clust.MasterAuth.ClusterCaCertificate, nil
+		}
+		return "", "", err
+	}
+	color.Blue(fmt.Sprintf("Started cluster build at %s", CloudClusterResponse.StartTime))
+
+	for {
+		clust, err :=
+			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", cluster.Project,
+				cluster.Region, cluster.Name)})
+		if err != nil {
+			return "", "", err
+		}
+		if clust.GetStatus() == containerpb.Cluster_RUNNING {
+			color.Green("Cluster running")
+			return clust.Endpoint, clust.MasterAuth.ClusterCaCertificate, nil
 		}
 		time.Sleep(time.Second)
 	}

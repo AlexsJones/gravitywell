@@ -61,8 +61,11 @@ type ProviderCluster struct {
 			Path  string `yaml:"Path"`
 		} `yaml:"Execute"`
 	} `yaml:"PostDeleteHook"`
-	Region string   `yaml:"Region"`
-	Zones  []string `yaml:"Zones"`
+	Region   string   `yaml:"Region"`
+	Zones    []string `yaml:"Zones"`
+	Endpoint string
+	CertCa   string
+	Vault    Vault `yaml:"Vault"`
 }
 type Provider struct {
 	Clusters []struct {

@@ -31,7 +31,7 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 	//Cluster ...
 	for _, ck := range s.configuration.ClusterKinds {
 		for _, clusterKind := range ck.Strategy {
-			ClusterProcessor(commandFlag, clusterKind.Provider)
+			ClusterProcessor(commandFlag, opt, clusterKind.Provider)
 		}
 	}
 	//Application ...

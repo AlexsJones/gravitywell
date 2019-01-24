@@ -6,17 +6,19 @@ import (
 	"os"
 	"strings"
 
-	"cloud.google.com/go/container/apiv1"
+	container "cloud.google.com/go/container/apiv1"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/platform"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
 	"github.com/AlexsJones/gravitywell/shell"
+	"github.com/AlexsJones/gravitywell/vault"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
 func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
-	cluster configuration.ProviderCluster) error {
+	cluster configuration.ProviderCluster) (string, string, error) {
 
 	var convertedNodePool []*containerpb.NodePool
 
@@ -45,13 +47,8 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
 
-	return gcp.Create(cmc, ctx, cluster.Project,
-		cluster.Region, cluster.Name,
-		cluster.Zones,
-		int32(cluster.InitialNodeCount),
-		cluster.InitialNodeType,
-		cluster.Labels,
-		convertedNodePool)
+	return gcp.Create(cmc, ctx, cluster, convertedNodePool)
+
 }
 func runGCPDelete(cmc *container.ClusterManagerClient, ctx context.Context,
 	cluster configuration.ProviderCluster) error {
@@ -59,8 +56,9 @@ func runGCPDelete(cmc *container.ClusterManagerClient, ctx context.Context,
 	return gcp.Delete(cmc, ctx, cluster.Project, cluster.Region, cluster.Name)
 
 }
+
 func ClusterProcessor(commandFlag configuration.CommandFlag,
-	provider configuration.Provider) {
+	opt configuration.Options, provider configuration.Provider) {
 
 	if provider.Name == "" {
 		log.Warn("Provider requires a name")
@@ -78,10 +76,22 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 
 		create := func() {
 			for _, cluster := range provider.Clusters {
-				err := runGCPCreate(cmc, ctx, cluster.Cluster)
+				clusterEndpoint, clusterCertCa, err := runGCPCreate(cmc, ctx, cluster.Cluster)
 				if err != nil {
 					color.Red(err.Error())
 				}
+
+				cluster.Cluster.Endpoint = clusterEndpoint
+				cluster.Cluster.CertCa = clusterCertCa
+
+				if err := platform.SetK8SContext(cluster.Cluster); err != nil {
+					color.Red(err.Error())
+				}
+
+				if err := vault.SetVaultConfiguration(opt, cluster.Cluster); err != nil {
+					color.Red(err.Error())
+				}
+
 				// Run post install -----------------------------------------------------
 				for _, executeCommand := range cluster.Cluster.PostInstallHook {
 					if executeCommand.Execute.Shell != "" {
@@ -101,6 +111,15 @@ func ClusterProcessor(commandFlag configuration.CommandFlag,
 					color.Red(err.Error())
 					continue
 				}
+
+				if err := platform.UnSetK8SContext(cluster.Cluster); err != nil {
+					color.Red(err.Error())
+				}
+
+				if err := vault.UnSetVaultConfiguration(opt, cluster.Cluster); err != nil {
+					color.Red(err.Error())
+				}
+
 				// Run post delete -----------------------------------------------------
 				for _, executeCommand := range cluster.Cluster.PostDeleteHooak {
 					if executeCommand.Execute.Shell != "" {
