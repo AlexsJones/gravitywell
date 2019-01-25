@@ -1,4 +1,4 @@
-package types
+package kinds
 
 type Action struct {
 	Execute struct {

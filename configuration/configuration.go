@@ -3,7 +3,7 @@ package configuration
 import (
 	"errors"
 	"fmt"
-	"github.com/AlexsJones/gravitywell/types"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"io/ioutil"
 	"log"
 	"os"
@@ -21,8 +21,8 @@ type GravitywellKind struct {
 }
 
 type Configuration struct {
-	ApplicationKinds []types.ApplicationKind
-	ClusterKinds     []types.ClusterKind
+	ApplicationKinds []kinds.ApplicationKind
+	ClusterKinds     []kinds.ClusterKind
 }
 
 func LoadConfigurationFromFile(path string, c *Configuration) error {
@@ -42,7 +42,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	//Load specific kind
 	switch appc.Kind {
 	case "Application":
-		appc := types.ApplicationKind{}
+		appc := kinds.ApplicationKind{}
 		err = yaml.Unmarshal(bytes, &appc)
 		if err != nil {
 			return err
@@ -51,7 +51,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 		c.ApplicationKinds = append(c.ApplicationKinds, appc)
 
 	case "Cluster":
-		appc := types.ClusterKind{}
+		appc := kinds.ClusterKind{}
 		err = yaml.Unmarshal(bytes, &appc)
 		if err != nil {
 			return err

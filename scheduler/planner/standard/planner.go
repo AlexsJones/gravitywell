@@ -1,8 +1,11 @@
 package standard
 
 import (
+	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
+	"log"
 )
 
 type StandardPlanner struct {
@@ -12,25 +15,36 @@ type StandardPlanner struct {
 func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration) (planner.IPlan, error) {
 	s.plan = NewPlan()
 
-	for _, ck := range configuration.ClusterKinds {
-		for _, clusterKind := range ck.Strategy {
-			//A provider e.g. GCP/AWS/Azure
-			for _, cluster := range clusterKind.Provider.Clusters {
-				//A cluster
+	//Clusters -----------------------------------------------------------------------------------
+	//Generate a map e.g.
+	// Google Cloud platform:< Cluster Data >
+	type ProviderClusterReference struct {
+		ProviderName string
+		Dependencies []kinds.IKind
+	}
 
-				//At this point we want to load applications into a cluster
-				// cluster.Cluster.Applications
-				//This operation requires us to recurse through all applications and map them back
-				//wew hard work!
-				//if err := s.mapApplicationsToCluster(&cluster.Cluster, opt); err != nil {
-				//	color.Yellow(err.Error())
-				//	continue
-				//}
-				//Let's add this cluster to our overall map of how we think about clusters
-				// This means all the GCP clusters are keyed under the GCP provider
-				//ster)
+	clusterSignPosts := make(map[string]*ProviderClusterReference)
+	clusterDeployments := make(map[string][]kinds.IKind)
+
+	for _, clusterKinds := range configuration.ClusterKinds {
+
+		for _, providers := range clusterKinds.Strategy {
+
+			pcr := ProviderClusterReference{ProviderName: providers.Provider.Name}
+
+			clusterSignPosts[providers.Provider.Name] = &pcr
+
+			for _, clusters := range providers.Provider.Clusters {
+				clusterDeployments[pcr.ProviderName] = append(clusterDeployments[pcr.ProviderName], clusters)
 			}
+
 		}
 	}
+	log.Printf(fmt.Sprintf("%+v", clusterDeployments))
+	// -------------------------------------------------------------------------------------------
+
+	// Application -------------------------------------------------------------------------------
+
+	// -------------------------------------------------------------------------------------------
 	return s.plan, nil
 }

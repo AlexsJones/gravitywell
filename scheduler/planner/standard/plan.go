@@ -1,9 +1,13 @@
 package standard
 
-import "github.com/AlexsJones/gravitywell/scheduler/planner"
+import (
+	"github.com/AlexsJones/gravitywell/kinds"
+	"github.com/AlexsJones/gravitywell/scheduler/planner"
+)
 
 type Plan struct {
 	statusWatcher planner.IPlanStatusWatcher
+	sequence      [][]kinds.IKind
 }
 
 type PlanStatus struct {
