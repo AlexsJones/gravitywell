@@ -9,7 +9,7 @@ import (
 	"cloud.google.com/go/container/apiv1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
-	"github.com/AlexsJones/gravitywell/shell"
+	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"

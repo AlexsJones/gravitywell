@@ -86,9 +86,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	tempVCSPath := "./.gravitywell"
+
+	if _, err := os.Stat(tempVCSPath); os.IsNotExist(err) {
+		err = os.Mkdir(tempVCSPath, 0777)
+	} else {
+		err = os.RemoveAll(tempVCSPath)
+		err = os.Mkdir(tempVCSPath, 0777)
+	}
 	if err :=
 		sh.Run(commandFlag, configuration.Options{VCS: "git",
-			TempVCSPath: "./.gravitywell",
+			TempVCSPath: tempVCSPath,
 			APIVersion:  "v1",
 			SSHKeyPath:  Opts.SSHKeyPath,
 		}); err != nil {

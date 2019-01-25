@@ -3,7 +3,7 @@ package actions
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
-	"github.com/AlexsJones/gravitywell/shell"
+	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
 	log "github.com/Sirupsen/logrus"
 	"path"
 )

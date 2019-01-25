@@ -753,6 +753,8 @@
     "github.com/Sirupsen/logrus",
     "github.com/fatih/color",
     "github.com/jessevdk/go-flags",
+    "github.com/mattn/go-colorable",
+    "github.com/mattn/go-isatty",
     "github.com/satori/go.uuid",
     "golang.org/x/crypto/ssh",
     "google.golang.org/genproto/googleapis/container/v1",

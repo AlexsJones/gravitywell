@@ -2,10 +2,10 @@ package scheduler
 
 import (
 	"fmt"
-	"github.com/AlexsJones/gravitywell/actions"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/scheduler/actions"
+	"github.com/AlexsJones/gravitywell/scheduler/subprocessor"
 	"github.com/AlexsJones/gravitywell/state"
-	"github.com/AlexsJones/gravitywell/subprocessor"
 	"github.com/AlexsJones/gravitywell/vcs"
 	log "github.com/Sirupsen/logrus"
 	"strings"

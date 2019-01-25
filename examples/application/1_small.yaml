@@ -1,0 +1,19 @@
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+  - Cluster:
+      Name: "gke_beamery-trials_us-east4_testcluster"
+      Applications:
+        - Application:
+            Name: "kubernetes-mongodb-cluster"
+            Namespace: "mongodb"
+            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+            Action:
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: ./build_environment.sh dev
+              - Execute:
+                  Kind: "kubernetes"
+                  Configuration:
+                    Path: deployment #Optional value
