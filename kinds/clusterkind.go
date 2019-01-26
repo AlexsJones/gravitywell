@@ -12,7 +12,7 @@ type ProviderCluster struct {
 	InitialNodeCount int               `yaml:"InitialNodeCount"`
 	InitialNodeType  string            `yaml:"InitialNodeType"`
 	Labels           map[string]string `yaml:"Labels"`
-	Name             string            `yaml:"Name"`
+	ShortName        string            `yaml:"ShortName"`
 	Project          string            `yaml:"Project"`
 	NodePools        []struct {
 		NodePool struct {

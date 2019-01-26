@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/platform"
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +23,9 @@ func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
 	return restclient, k8siface
 }
 
-func ExecuteKubernetesAction(action configuration.Action, clusterName string, deployment configuration.Application, commandFlag configuration.CommandFlag, opt configuration.Options, repoName string) {
+func ExecuteKubernetesAction(action kinds.Action, clusterName string,
+	deployment kinds.Application,
+	commandFlag configuration.CommandFlag, opt configuration.Options, repoName string) {
 	var deploymentPath = "."
 	if tp, ok := action.Execute.Configuration["Path"]; ok && tp != "" {
 		deploymentPath = tp

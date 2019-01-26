@@ -2,11 +2,9 @@ package scheduler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/AlexsJones/gravitywell/scheduler/planner/standard"
-	"github.com/fatih/color"
 	"log"
 )
 
@@ -24,40 +22,13 @@ func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 		configuration: conf}, nil
 }
 
-func (s *Scheduler) mapApplicationsToCluster(cluster *configuration.ProviderCluster,
-	opt configuration.Options) error {
-
-	clusterName := cluster.Name
-
-	for _, applicationKind := range s.configuration.ApplicationKinds {
-
-		if opt.APIVersion != applicationKind.APIVersion {
-			return errors.New(fmt.Sprintf("Manifest %+v is not supported by the current API: %s\n", applicationKind, opt.APIVersion))
-		}
-		//---------------------------------
-		for _, cluster := range applicationKind.Strategy {
-
-			//Fairly nasty loop  here
-			if clusterName == cluster.Cluster.Name {
-				color.Green(fmt.Sprintf("Found an application for cluster %s", clusterName))
-
-				//Now we have found an array of applications for a given cluster
-				for _, application := range cluster.Cluster.Applications {
-					cluster.Cluster.Applications = append(cluster.Cluster.Applications, application)
-				}
-			}
-		}
-	}
-	return nil
-}
-
 //Run a new scheduler based off of the current configuration
 func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 	opt configuration.Options) error {
 
 	stdplnr := standard.StandardPlanner{}
 
-	plan, err := planner.GeneratePlan(stdplnr, s.configuration)
+	plan, err := planner.GeneratePlan(stdplnr, s.configuration, commandFlag)
 	if err != nil {
 		log.Fatal(err)
 	}

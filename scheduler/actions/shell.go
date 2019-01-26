@@ -3,12 +3,13 @@ package actions
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
 	log "github.com/Sirupsen/logrus"
 	"path"
 )
 
-func ExecuteShellAction(action configuration.Action, opt configuration.Options, repoName string) {
+func ExecuteShellAction(action kinds.Action, opt configuration.Options, repoName string) {
 	command, ok := action.Execute.Configuration["Command"]
 	if !ok {
 		log.Warn("Could not run the shell step as Command could not be found")

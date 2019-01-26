@@ -15,7 +15,8 @@ type Application struct {
 }
 
 type ApplicationCluster struct {
-	Name         string `yaml:"Name"`
+	ShortName    string `yaml:"ShortName"`
+	FullName     string `yaml:"FullName"`
 	Applications []struct {
 		Application Application `yaml:"Application"`
 	} `yaml:"Applications"`
