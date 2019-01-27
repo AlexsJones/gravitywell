@@ -73,12 +73,12 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	for _, file := range files {
 		f, err := os.Open(file)
 		if err != nil {
-			log.Error("Could not open file %s", file)
+			log.Warn("Could not open file %s", file)
 			continue
 		}
 		raw, err := ioutil.ReadAll(f)
 		if err != nil {
-			log.Error("Could not read from file %s", file)
+			log.Warn("Could not read from file %s", file)
 			continue
 		}
 		documents := strings.Split(string(raw), "---")
@@ -87,7 +87,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
 			if err != nil {
-				log.Error(fmt.Sprintf("%s : %s", err.Error(), kind))
+				log.Warn(fmt.Sprintf("%s : %s", err.Error(), file))
 				continue
 			}
 			log.Printf("Decoded Kind: %s", kind.String())
