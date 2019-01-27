@@ -12,9 +12,9 @@ type StandardPlanner struct {
 }
 
 func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration,
-	flag configuration.CommandFlag) (planner.IPlan, error) {
+	flag configuration.CommandFlag, opt configuration.Options) (planner.IPlan, error) {
 
-	s.plan = NewPlan(flag)
+	s.plan = NewPlan(flag, opt)
 
 	//Clusters -----------------------------------------------------------------------------------
 
@@ -35,6 +35,16 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 		}
 	}
 	log.Printf(fmt.Sprintf("%#v", s.plan.clusterDeployments))
+
+	//At this point if there are no clusters, we set a flag to tell the plan to only run applications
+	if len(s.plan.clusterDeployments) == 0 {
+		log.Println("No clusters found to deploy - skipping")
+		s.plan.shouldDeployClusters = false
+	} else {
+		log.Println("Clusters found to deploy - sequencing")
+		s.plan.shouldDeployClusters = true
+	}
+
 	// -------------------------------------------------------------------------------------------
 
 	// Application -------------------------------------------------------------------------------
@@ -44,8 +54,8 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 
 			for _, app := range applicationLists.Cluster.Applications {
 
-				s.plan.clusterApplications[applicationLists.Cluster.ShortName] =
-					append(s.plan.clusterApplications[applicationLists.Cluster.ShortName], app.Application)
+				s.plan.clusterApplications[applicationLists.Cluster.FullName] =
+					append(s.plan.clusterApplications[applicationLists.Cluster.FullName], app.Application)
 			}
 		}
 	}

@@ -14,7 +14,8 @@ func TestPlanner(t *testing.T) {
 	}
 	stdplnr := StandardPlanner{}
 
-	_, err = planner.GeneratePlan(stdplnr, conf)
+	_, err = planner.GeneratePlan(stdplnr, conf, configuration.Create,
+		configuration.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

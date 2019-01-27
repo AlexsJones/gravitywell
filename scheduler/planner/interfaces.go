@@ -24,10 +24,10 @@ func Run(i IPlan) {
 
 //IPlanner ---------------------------------------------------------------------------
 type IPlanner interface {
-	GeneratePlan(configuration *configuration.Configuration, flag configuration.CommandFlag) (IPlan, error)
+	GeneratePlan(configuration *configuration.Configuration, flag configuration.CommandFlag, opt configuration.Options) (IPlan, error)
 }
 
-func GeneratePlan(i IPlanner, configuration *configuration.Configuration, flag configuration.CommandFlag) (IPlan, error) {
+func GeneratePlan(i IPlanner, configuration *configuration.Configuration, flag configuration.CommandFlag, opt configuration.Options) (IPlan, error) {
 
-	return i.GeneratePlan(configuration, flag)
+	return i.GeneratePlan(configuration, flag, opt)
 }
