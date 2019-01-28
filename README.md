@@ -2,7 +2,23 @@
 
 ![gravitywell](resources/bg.png)
 
-_ITS LIKE HELM MEETS TERRAFORM_
+
+
+_Why make this when Helm or Terraform exist?_
+
+No tool I've yet used can deploy concurrently to multiple clusters 
+and then parallel deploy their applications
+
+_But terraform can deploy kubernetes applications right?_
+
+Try using it; you'll find an inconsistent experience with only part of the api supported.
+
+---
+
+
+_What does gravitywell claim to do then?_
+
+
 - Deploy cluster into GCP from yaml
 - Deploy manifests into those clusters from yaml
 

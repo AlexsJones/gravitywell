@@ -2,11 +2,11 @@ package standard
 
 import (
 	"fmt"
-	"github.com/AlexsJones/gravitywell/_vendor-20181210205236/github.com/fatih/color"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
+	"github.com/fatih/color"
 	"log"
 	"strings"
 )
@@ -25,7 +25,6 @@ type Plan struct {
 	clusterApplications      map[string][]kinds.Application
 	commandFlag              configuration.CommandFlag
 	opt                      configuration.Options
-
 	//Sequence control
 	shouldDeployClusters bool
 }
@@ -62,9 +61,12 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				actions.GoogleCloudClusterProcessor(p.commandFlag, clusters)
 
 				//Deploy cluster applications
+
 				for _, application := range p.clusterApplications[clusters.FullName] {
+
 					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
 					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+
 				}
 			}
 		default:
@@ -72,6 +74,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 			p.statusWatcher <- &PlanStatus{ShouldHalt: true}
 		}
 	}
+
 }
 func (p *Plan) applicationFirstDeploymentPlan() {
 
@@ -81,21 +84,23 @@ func (p *Plan) applicationFirstDeploymentPlan() {
 
 			color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterFullName))
 			actions.ApplicationProcessor(p.commandFlag, p.opt, clusterFullName, application)
+
 		}
 	}
 }
 func (p *Plan) run() {
 
-	//0. Check whether to deploy clusters
+	// 1. Check whether to deploy clusters
 	if p.shouldDeployClusters {
-		//1. deploy cluster first then applications.
+		// 2. deploy cluster first then applications.
 		color.Yellow("Running deployment sequence: ClusterFirst")
 		p.clusterFirstDeploymentPlan()
 	} else {
-		//2. Deploy applications if no cluster has been found
+		// 3. Deploy applications if no cluster has been found
 		color.Yellow("Running deployment sequence: ApplicationFirst")
 		p.applicationFirstDeploymentPlan()
 	}
+
 	p.statusWatcher <- &PlanStatus{ShouldHalt: true}
 }
 func (p *Plan) Run() planner.IPlanStatusWatcher {
