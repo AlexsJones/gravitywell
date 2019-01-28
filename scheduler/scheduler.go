@@ -16,7 +16,7 @@ type Scheduler struct {
 //NewScheduler object ...
 func NewScheduler(conf *configuration.Configuration) (*Scheduler, error) {
 	if conf == nil {
-		return nil, errors.New("Invalid configuration")
+		return nil, errors.New("invalid configuration")
 	}
 	return &Scheduler{
 		configuration: conf}, nil
@@ -41,9 +41,7 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 				//Halting
 				log.Fatal("Received halt")
 			}
-
 		}
 	}
 
-	return nil
 }
