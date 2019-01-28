@@ -3,6 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
+	"github.com/AlexsJones/gravitywell/_vendor-20181210205236/github.com/fatih/color"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
@@ -127,10 +128,19 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	//Run all other resources
 	for _, resource := range kubernetesResources {
 
-		_, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag)
+		s, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag)
 		if err != nil {
 			log.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 			continue
+		}
+
+		switch s {
+		case state.EDeploymentStateError:
+			color.Red(fmt.Sprintf("%s STATE: %s",
+				resource.GetObjectKind().GroupVersionKind().Kind, state.Translate(s)))
+		default:
+			color.Green(fmt.Sprintf("%s STATE: %s",
+				resource.GetObjectKind().GroupVersionKind().Kind, state.Translate(s)))
 		}
 	}
 	return nil

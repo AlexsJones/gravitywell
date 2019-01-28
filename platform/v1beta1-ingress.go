@@ -3,6 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -32,7 +33,14 @@ func execV1Beta1IngressResouce(k kubernetes.Interface, ingress *v1beta1.Ingress,
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		dsclient.Delete(ingress.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = dsclient.Delete(ingress.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		for {
+			_, err := dsclient.Get(ingress.Name, meta_v1.GetOptions{})
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
 		_, err := dsclient.Create(ingress)
 		if err != nil {
 			log.Error(fmt.Sprintf("Could not deploy ingress resource %s due to %s", ingress.Name, err.Error()))

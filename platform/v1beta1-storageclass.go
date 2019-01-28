@@ -3,6 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -33,7 +34,14 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, sc *storagev1b1.StorageCl
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		client.Delete(sc.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = client.Delete(sc.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		for {
+			_, err := client.Get(sc.Name, meta_v1.GetOptions{})
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
 		_, err := client.Create(sc)
 		if err != nil {
 			log.Error(fmt.Sprintf("Could not deploy StorageClass resource %s due to %s", sc.Name, err.Error()))

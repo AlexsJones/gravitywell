@@ -3,6 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -32,7 +33,14 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, pdb *v1polbet
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = pdbclient.Delete(pdb.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		for {
+			_, err := pdbclient.Get(pdb.Name, meta_v1.GetOptions{})
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
 		_, err := pdbclient.Create(pdb)
 		if err != nil {
 			log.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", pdb.Name, err.Error()))

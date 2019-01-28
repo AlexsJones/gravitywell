@@ -3,6 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
@@ -32,7 +33,15 @@ func execV1Job(k kubernetes.Interface, job *batchv1.Job, namespace string, opts 
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		client.Delete(job.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = client.Delete(job.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+
+		for {
+			_, err := client.Get(job.Name, meta_v1.GetOptions{})
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
 		_, err := client.Create(job)
 		if err != nil {
 			log.Error(fmt.Sprintf("Could not deploy Job resource %s due to %s", job.Name, err.Error()))
