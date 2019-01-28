@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/AlexsJones/gravitywell/configuration"
@@ -81,7 +82,8 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 			log.Error("Could not read from file %s", file)
 			continue
 		}
-		documents := strings.Split(string(raw), "---")
+		yamldelimiter := regexp.MustCompile("^---$")
+		documents := yamldelimiter.Split(string(raw), -1)
 		for _, doc := range documents {
 			//Decode into kubernetes object
 			decode := scheme.Codecs.UniversalDeserializer().Decode
