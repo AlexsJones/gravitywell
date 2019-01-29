@@ -83,7 +83,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 			log.Warn("Could not read from file %s", file)
 			continue
 		}
-		yamldelimiter := regexp.MustCompile("^---$")
+		yamldelimiter := regexp.MustCompile(`(\A|\n)---`)
 		documents := yamldelimiter.Split(string(raw), -1)
 		for _, doc := range documents {
 			//Decode into kubernetes object
