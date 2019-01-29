@@ -36,7 +36,9 @@ Or `gravitywell delete -f ./`
 
 ## Installation
 
-`go get github.com/AlexsJones/gravitywell`
+Option 1: https://github.com/AlexsJones/gravitywell/releases
+
+Option 2: `go get github.com/AlexsJones/gravitywell`
 
 ## Requirements
 
