@@ -1,4 +1,0 @@
-c82169c626b7a1605fb777dcd72eb3e3b34c3f55d2570c6a00440a10bc71a641  gravitywell_0.1.2_Linux_386.tar.gz
-bb9aa3ec790c1d6a7966b93ed305acd42f97af494fbc7543ef86358c9228f581  gravitywell_0.1.2_Darwin_386.tar.gz
-a61b967753fece4e2f65e1c02a94e1d57eda3d709477174d6267b4f3ff8b095f  gravitywell_0.1.2_Linux_amd64.tar.gz
-cb3d3c49cc0429e0f49d6425d661a41892a9513d32a191a0d5d05b77678f58fe  gravitywell_0.1.2_Darwin_amd64.tar.gz

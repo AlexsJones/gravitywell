@@ -36,6 +36,12 @@ Or `gravitywell delete -f ./`
 
 ## Installation
 
+```
+brew tap AlexsJones/gravitywell
+brew install AlexsJones/gravitywell/gravitywell
+```
+or 
+
 `go get github.com/AlexsJones/gravitywell`
 
 ## Requirements
