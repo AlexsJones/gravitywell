@@ -3,7 +3,7 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"github.com/AlexsJones/gravitywell/_vendor-20181210205236/github.com/fatih/color"
+	"github.com/fatih/color"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
