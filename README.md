@@ -36,8 +36,8 @@ Or `gravitywell delete -f ./`
 
 ## Installation
 ```
-brew tap AlexsJones/gravitywell
-brew install AlexsJones/gravitywell/gravitywell
+brew tap AlexsJones/homebrew-gravitywell
+brew install gravitywell
 ```
 or 
 
