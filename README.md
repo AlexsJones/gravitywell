@@ -35,9 +35,10 @@ Or `gravitywell delete -f ./`
 ![deprovision](resources/deprovision.png)
 
 ## Installation
+
 ```
-brew tap AlexsJones/gravitywell
-brew install AlexsJones/gravitywell/gravitywell
+brew tap AlexsJones/homebrew-gravitywell
+brew install gravitywell
 ```
 or 
 
@@ -204,3 +205,4 @@ replace
 ### Roadmap
 
 - [ ] Depends on Cluster from Application flag
+
