@@ -35,7 +35,6 @@ Or `gravitywell delete -f ./`
 ![deprovision](resources/deprovision.png)
 
 ## Installation
-
 ```
 brew tap AlexsJones/gravitywell
 brew install AlexsJones/gravitywell/gravitywell
