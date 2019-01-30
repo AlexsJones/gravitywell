@@ -2,13 +2,14 @@ package standard
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/fatih/color"
-	"log"
-	"strings"
 )
 
 //Generate a map e.g.
@@ -58,7 +59,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 		case "google cloud platform":
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
-				actions.GoogleCloudClusterProcessor(p.commandFlag, clusters)
+				actions.GoogleCloudClusterProcessor(p.commandFlag, clusters, p.opt)
 
 				//Deploy cluster applications
 
