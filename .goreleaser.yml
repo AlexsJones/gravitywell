@@ -12,7 +12,6 @@ builds:
 archive:
   replacements:
     darwin: Darwin
-    linux: Linux
 checksum:
   name_template: 'checksums.txt'
 snapshot:
