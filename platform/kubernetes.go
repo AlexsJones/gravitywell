@@ -1,16 +1,21 @@
 package platform
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/runtime"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
+	"github.com/fatih/color"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -18,7 +23,7 @@ import (
 	"k8s.io/api/apps/v1beta2"
 	batchv1 "k8s.io/api/batch/v1"
 	batchbeta1 "k8s.io/api/batch/v1beta1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
@@ -28,8 +33,104 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	//This is required for gcp auth provider scope
 )
+
+// Setcontext update the file ~/.kube/config with the context associate with teh cluster.
+func UnSetK8SContext(GRVCluster kinds.ProviderCluster) error {
+
+	// Lets start builing a new config
+	loadingRules := clientcmd.ClientConfigLoadingRules{
+		ExplicitPath: filepath.Join(os.Getenv("HOME"), ".kube", "config"),
+	}
+	config, err := loadingRules.Load()
+	if err != nil {
+		return err
+	}
+
+	_, ok := config.Clusters[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)]
+	if ok {
+		delete(config.Clusters, fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region))
+	}
+
+	_, ok = config.Contexts[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)]
+	if ok {
+		delete(config.Contexts, fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region))
+	}
+
+	_, ok = config.AuthInfos[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)]
+	if ok {
+		delete(config.AuthInfos, fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region))
+	}
+
+	configAccess := clientcmd.NewDefaultClientConfigLoadingRules()
+	if err := clientcmd.ModifyConfig(configAccess, *config, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Setcontext update the file ~/.kube/config with the context associate with teh cluster.
+func SetK8SContext(GRVCluster kinds.ProviderCluster) error {
+
+	// fetch the path to the gcloud tool - assuming it is in your path variable{{{
+	gcloudPath, err := exec.LookPath("gcloud")
+	if err != nil {
+		panic(err)
+		return err
+	}
+
+	// // Lets start builing a new config
+	loadingRules := clientcmd.ClientConfigLoadingRules{
+		ExplicitPath: filepath.Join(os.Getenv("HOME"), ".kube", "config"),
+	}
+	config, err := loadingRules.Load()
+	if err != nil {
+		return err
+	}
+
+	// instantiate the cluster element of the config
+	cluster := clientcmdapi.NewCluster()
+
+	// the master auth retrieved from GCP it is base64 encoded
+	// so it must be decoded first.
+	caCert, err := base64.StdEncoding.DecodeString(GRVCluster.CertCa)
+	if err != nil {
+		return err
+	}
+
+	cluster.CertificateAuthorityData = []byte(caCert)
+	cluster.Server = fmt.Sprintf("https://%v", GRVCluster.Endpoint)
+
+	context := clientcmdapi.NewContext()
+	context.Cluster = fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)
+	context.AuthInfo = fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)
+
+	K8SAuthInfo := clientcmdapi.NewAuthInfo()
+	K8SAuthInfo.AuthProvider = &clientcmdapi.AuthProviderConfig{
+		Name: "gcp",
+		Config: map[string]string{
+			"cmd-args":   "config config-helper --format=json",
+			"cmd-path":   gcloudPath,
+			"expiry-key": "{.credential.token_expiry}",
+			"token-key":  "{.credential.access_token}",
+		},
+	}
+
+	config.Clusters[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)] = cluster
+	config.Contexts[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)] = context
+	config.AuthInfos[fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)] = K8SAuthInfo
+	config.CurrentContext = fmt.Sprintf("%s_%s_%s", GRVCluster.Project, GRVCluster.ShortName, GRVCluster.Region)
+
+	configAccess := clientcmd.NewDefaultClientConfigLoadingRules()
+	if err := clientcmd.ModifyConfig(configAccess, *config, false); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // GetKubeClient creates a Kubernetes config and client for a given kubeconfig context.
 func GetKubeClient(context string) (*rest.Config, kubernetes.Interface, error) {

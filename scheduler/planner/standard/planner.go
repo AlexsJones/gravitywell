@@ -2,9 +2,10 @@ package standard
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
-	"log"
 )
 
 type StandardPlanner struct {

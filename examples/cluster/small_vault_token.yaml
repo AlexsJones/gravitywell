@@ -26,6 +26,10 @@ Strategy:
                   NodeType: "n1-standard-1"
                   Labels:
                     k8s-node-type: "test"
+            Vault:
+              Url: "https://vault.beamery.com"
+              Path: "kubernetes/trials/testcluster"
+              Description: "Kubernetes Cluster testcluster in beamery-trials project"
             PostInstallHook:
               - Execute:
                   Path: "."

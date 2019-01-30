@@ -1,20 +1,23 @@
 package actions
 
 import (
-	"cloud.google.com/go/container/apiv1"
 	"context"
+	"os"
+
+	container "cloud.google.com/go/container/apiv1"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
+	"github.com/AlexsJones/gravitywell/platform"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
+	"github.com/AlexsJones/gravitywell/vault"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
-	"os"
 )
 
 func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
-	cluster kinds.ProviderCluster) error {
+	cluster kinds.ProviderCluster) (string, string, error) {
 
 	var convertedNodePool []*containerpb.NodePool
 
@@ -26,6 +29,9 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 
 		var labels = map[string]string{}
+		cluster.Labels["project"] = cluster.Project
+		cluster.Labels["region"] = cluster.Region
+		cluster.Labels["cluster"] = cluster.ShortName
 
 		if len(cluster.Labels) > 0 {
 			for index, element := range cluster.Labels {
@@ -43,13 +49,7 @@ func runGCPCreate(cmc *container.ClusterManagerClient, ctx context.Context,
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
 
-	return gcp.Create(cmc, ctx, cluster.Project,
-		cluster.Region, cluster.ShortName,
-		cluster.Zones,
-		int32(cluster.InitialNodeCount),
-		cluster.InitialNodeType,
-		cluster.Labels,
-		convertedNodePool)
+	return gcp.Create(cmc, ctx, cluster, convertedNodePool)
 }
 func runGCPDelete(cmc *container.ClusterManagerClient, ctx context.Context,
 	cluster kinds.ProviderCluster) error {
@@ -58,7 +58,7 @@ func runGCPDelete(cmc *container.ClusterManagerClient, ctx context.Context,
 
 }
 func GoogleCloudClusterProcessor(commandFlag configuration.CommandFlag,
-	cluster kinds.ProviderCluster) {
+	cluster kinds.ProviderCluster, opt configuration.Options) {
 
 	ctx := context.Background()
 	cmc, err := container.NewClusterManagerClient(ctx)
@@ -69,10 +69,21 @@ func GoogleCloudClusterProcessor(commandFlag configuration.CommandFlag,
 
 	create := func() {
 
-		err := runGCPCreate(cmc, ctx, cluster)
+		clusterEndpoint, clusterCertCa, err := runGCPCreate(cmc, ctx, cluster)
 		if err != nil {
 			color.Red(err.Error())
 		}
+		cluster.Endpoint = clusterEndpoint
+		cluster.CertCa = clusterCertCa
+
+		if err := platform.SetK8SContext(cluster); err != nil {
+			color.Red(err.Error())
+		}
+
+		if err := vault.SetVaultConfiguration(opt, cluster); err != nil {
+			color.Red(err.Error())
+		}
+
 		// Run post install -----------------------------------------------------
 		for _, executeCommand := range cluster.PostInstallHook {
 			if executeCommand.Execute.Shell != "" {
@@ -86,10 +97,21 @@ func GoogleCloudClusterProcessor(commandFlag configuration.CommandFlag,
 		}
 	}
 	delete := func() {
-		err := runGCPDelete(cmc, ctx, cluster)
-		if err != nil {
+		if err := runGCPDelete(cmc, ctx, cluster); err != nil {
 			color.Red(err.Error())
 		}
+
+		if err := platform.UnSetK8SContext(cluster); err != nil {
+			color.Red(err.Error())
+		}
+
+		if err = vault.UnSetVaultUrl(cluster); err != nil {
+			color.Red(err.Error())
+		}
+		if err = vault.UnSetVaultGit(opt, cluster); err != nil {
+			color.Red(err.Error())
+		}
+
 		// Run post delete -----------------------------------------------------
 		for _, executeCommand := range cluster.PostDeleteHooak {
 			if executeCommand.Execute.Shell != "" {
