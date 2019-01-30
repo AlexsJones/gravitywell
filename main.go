@@ -12,8 +12,6 @@ import (
 
 var (
 	version = "dev"
-	commit  = "none"
-	date    = "unknown"
 )
 
 func init() {
@@ -38,9 +36,12 @@ func Usage() {
 	os.Exit(0)
 }
 func main() {
-	fmt.Printf("%v, commit %v, built at %v", version, commit, date)
 	args := os.Args
 	var command = ""
+	if len(args) == 2 && args[1] == "version" {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 	if len(args) <= 2 {
 		Usage()
 	}
