@@ -40,6 +40,7 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 				break
 			}
 			time.Sleep(time.Second * 1)
+			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {

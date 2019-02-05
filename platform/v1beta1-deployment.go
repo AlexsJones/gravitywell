@@ -15,6 +15,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+func awaitCompletion() {
+
+}
+
 func execV1Beta1DeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deployment, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Debug("Found deployment resource")
 
@@ -40,6 +44,7 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface, objdep *v1beta1.Deploy
 				break
 			}
 			time.Sleep(time.Second * 1)
+			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {

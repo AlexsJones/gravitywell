@@ -15,17 +15,17 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Debug("Found service resource")
 	ssclient := k.CoreV1().Services(namespace)
 
 	if opts.DryRun {
-		_, err := ssclient.Get(ss.Name, v12.GetOptions{})
+		_, err := ssclient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", ss.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: Service resource %s does not exist\n", objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Debug(fmt.Sprintf("DRY-RUN: Service resource %s exists\n", ss.Name))
+			log.Debug(fmt.Sprintf("DRY-RUN: Service resource %s exists\n", objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
@@ -34,17 +34,18 @@ func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace stri
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		_ = ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = ssclient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 		for {
-			_, err := ssclient.Get(ss.Name, meta_v1.GetOptions{})
+			_, err := ssclient.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
 				break
 			}
 			time.Sleep(time.Second * 1)
+			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
-		_, err := ssclient.Create(ss)
+		_, err := ssclient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("Service deployed")
@@ -52,9 +53,9 @@ func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace stri
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := ssclient.Create(ss)
+		_, err := ssclient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", ss.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("Service deployed")
@@ -62,7 +63,7 @@ func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace stri
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := ssclient.Update(ss)
+		_, err := ssclient.Update(objdep)
 		if err != nil {
 			log.Error("Could not update Service")
 			return state.EDeploymentStateCantUpdate, err
@@ -73,12 +74,12 @@ func execV1ServiceResouce(k kubernetes.Interface, ss *v1.Service, namespace stri
 	//Delete -------------------------------------------------------------------
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
-		err := ssclient.Delete(ss.Name, &meta_v1.DeleteOptions{})
+		err := ssclient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s", ss.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug(fmt.Sprintf("%s deleted", ss.Kind))
+		log.Debug(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

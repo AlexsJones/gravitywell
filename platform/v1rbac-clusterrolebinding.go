@@ -15,17 +15,17 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.ClusterRoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, objdep *v1rbac.ClusterRoleBinding, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	log.Info("Found ClusterRoleBinding resource")
 	cmclient := k.RbacV1().ClusterRoleBindings()
 
 	if opts.DryRun {
-		_, err := cmclient.Get(cm.Name, v12.GetOptions{})
+		_, err := cmclient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s does not exist\n", cm.Name))
+			log.Error(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s does not exist\n", objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Info(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s exists\n", cm.Name))
+			log.Info(fmt.Sprintf("DRY-RUN: ClusterRoleBinding resource %s exists\n", objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
@@ -34,17 +34,18 @@ func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.Clus
 	if commandFlag == configuration.Replace {
 		log.Debug("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		_ = cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		_ = cmclient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 		for {
-			_, err := cmclient.Get(cm.Name, meta_v1.GetOptions{})
+			_, err := cmclient.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
 				break
 			}
 			time.Sleep(time.Second * 1)
+			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
-		_, err := cmclient.Create(cm)
+		_, err := cmclient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", cm.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("Deployment deployed")
@@ -52,9 +53,9 @@ func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.Clus
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := cmclient.Create(cm)
+		_, err := cmclient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", cm.Name, err.Error()))
+			log.Error(fmt.Sprintf("Could not deploy ClusterRoleBinding resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("ClusterRoleBinding deployed")
@@ -62,7 +63,7 @@ func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.Clus
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := cmclient.Update(cm)
+		_, err := cmclient.Update(objdep)
 		if err != nil {
 			log.Error("Could not update ClusterRoleBinding")
 			return state.EDeploymentStateCantUpdate, err
@@ -72,12 +73,12 @@ func execV1RbacClusterRoleBindingResouce(k kubernetes.Interface, cm *v1rbac.Clus
 	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
-		err := cmclient.Delete(cm.Name, &meta_v1.DeleteOptions{})
+		err := cmclient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s", cm.Kind))
+			log.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug(fmt.Sprintf("%s deleted", cm.Kind))
+		log.Debug(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")
