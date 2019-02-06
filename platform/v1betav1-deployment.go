@@ -19,6 +19,22 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 	log.Debug("Found deployment resource")
 
 	deploymentClient := k.ExtensionsV1beta1().Deployments(namespace)
+
+	awaitReady := func() error {
+		for {
+			stsResponse, err := deploymentClient.Get(objdep.Name, meta_v1.GetOptions{})
+			if err != nil {
+				return errors.New("failed to get deployment")
+			}
+			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.Replicas {
+				return nil
+			}
+			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
+				stsResponse.Status.ReadyReplicas,
+				stsResponse.Status.Replicas))
+			time.Sleep(time.Second)
+		}
+	}
 	if opts.DryRun {
 		_, err := deploymentClient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
@@ -47,6 +63,9 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
+		if err := awaitReady(); err != nil {
+			return state.EDeploymentStateError, nil
+		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -57,6 +76,9 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
+		if err := awaitReady(); err != nil {
+			return state.EDeploymentStateError, nil
+		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -66,6 +88,9 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 		if err != nil {
 			log.Error("Could not update Deployment")
 			return state.EDeploymentStateCantUpdate, err
+		}
+		if err := awaitReady(); err != nil {
+			return state.EDeploymentStateError, nil
 		}
 		log.Debug("Deployment updated")
 		return state.EDeploymentStateUpdated, nil
