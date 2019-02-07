@@ -18,3 +18,4 @@ Strategy:
                   Kind: "kubernetes"
                   Configuration:
                     Path: deployment #Optional value
+                    AwaitDeployment: true #Optional defaults to false

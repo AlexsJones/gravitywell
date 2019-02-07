@@ -15,10 +15,28 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Deployment, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Deployment,
+	namespace string, opts configuration.Options,
+	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 	log.Debug("Found deployment resource")
 
 	deploymentClient := k.ExtensionsV1beta1().Deployments(namespace)
+
+	awaitReady := func() error {
+		for {
+			stsResponse, err := deploymentClient.Get(objdep.Name, meta_v1.GetOptions{})
+			if err != nil {
+				return errors.New("failed to get deployment")
+			}
+			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.Replicas {
+				return nil
+			}
+			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
+				stsResponse.Status.ReadyReplicas,
+				stsResponse.Status.Replicas))
+			time.Sleep(time.Second)
+		}
+	}
 	if opts.DryRun {
 		_, err := deploymentClient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
@@ -40,11 +58,17 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 				break
 			}
 			time.Sleep(time.Second * 1)
+			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
+		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
@@ -56,6 +80,11 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
+		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -65,6 +94,11 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 		if err != nil {
 			log.Error("Could not update Deployment")
 			return state.EDeploymentStateCantUpdate, err
+		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
 		log.Debug("Deployment updated")
 		return state.EDeploymentStateUpdated, nil

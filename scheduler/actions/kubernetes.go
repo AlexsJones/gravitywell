@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 )
 
 func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
@@ -27,8 +28,16 @@ func ExecuteKubernetesAction(action kinds.Action, clusterName string,
 	deployment kinds.Application,
 	commandFlag configuration.CommandFlag, opt configuration.Options, repoName string) {
 	var deploymentPath = "."
+	shouldAwaitDeployment := false
 	if tp, ok := action.Execute.Configuration["Path"]; ok && tp != "" {
 		deploymentPath = tp
+	}
+	if tp, ok := action.Execute.Configuration["AwaitDeployment"]; ok && tp != "" {
+		b, err := strconv.ParseBool(tp)
+		if err != nil {
+			log.Error(err.Error())
+		}
+		shouldAwaitDeployment = b
 	}
 
 	fileList := []string{}
@@ -40,12 +49,11 @@ func ExecuteKubernetesAction(action kinds.Action, clusterName string,
 		})
 	if err != nil {
 		log.Error(err.Error())
-
 	}
 	restclient, k8siface := clientForCluster(clusterName)
 	err = platform.GenerateDeploymentPlan(restclient,
 		k8siface, fileList,
-		deployment.Namespace, opt, commandFlag)
+		deployment.Namespace, opt, commandFlag, shouldAwaitDeployment)
 	if err != nil {
 		log.Error(err.Error())
 	}
