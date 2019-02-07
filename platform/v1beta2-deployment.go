@@ -15,7 +15,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deployment, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deployment,
+	namespace string, opts configuration.Options,
+	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 	log.Debug("Found deployment resource")
 
 	deploymentClient := k.AppsV1beta2().Deployments(namespace)
@@ -64,8 +66,10 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
@@ -77,8 +81,10 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
 		log.Debug("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
@@ -90,8 +96,10 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 			log.Error("Could not update Deployment")
 			return state.EDeploymentStateCantUpdate, err
 		}
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
 		log.Debug("Deployment updated")
 		return state.EDeploymentStateUpdated, nil

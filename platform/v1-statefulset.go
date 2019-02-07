@@ -15,7 +15,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet, namespace string,
+	opts configuration.Options, commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 	log.Debug("Found statefulset resource")
 
 	stsclient := k.AppsV1().StatefulSets(namespace)
@@ -64,11 +65,11 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			log.Error(fmt.Sprintf("Could not deploy objdep resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
-
 		log.Debug("Statefulset deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -80,11 +81,11 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			return state.EDeploymentStateError, err
 		}
 		log.Debug("Statefulset deployed")
-
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
-
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
@@ -94,11 +95,11 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			log.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err
 		}
-
-		if err := awaitReady(); err != nil {
-			return state.EDeploymentStateError, nil
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, nil
+			}
 		}
-
 		log.Debug("Statefulset updated")
 		return state.EDeploymentStateUpdated, nil
 	}

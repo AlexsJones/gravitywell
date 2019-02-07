@@ -96,26 +96,28 @@ APIVersion: "v1"
 Kind: "Application"
 Strategy:
   - Cluster:
-      Name: "minikube"
+      FullName: "gke_beamery-trials_us-east4_testcluster"
+      ShortName: "testcluster"
       Applications:
         - Application:
-           Name: "kubernetes-nifi-cluster"
-           Namespace: "nifi"
-           Git: "git@github.com:AlexsJones/kubernetes-nifi-cluster.git"
-           Action:
-            - Execute:
-               Shell: "ls -la"
-               Kubectl:
-                 Path: statefulset
-        - Application:
-            Name: "kubernetes-zookeeper-cluster"
-            Namespace: "zk"
-            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+            Name: "kubernetes-apache-tika"
+            Namespace: "tika"
+            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
             Action:
-             - Execute:
-                Shell: "./build_environment.sh small"
-                Kubectl:
-                  Path: deployment
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: pwd
+                    Path: ../ #Optional value
+              - Execute:
+                  Kind: "shell"
+                  Configuration:
+                    Command: ./build_environment.sh default
+              - Execute:
+                  Kind: "kubernetes"
+                  Configuration:
+                    Path: deployment #Optional value
+                    AwaitDeployment: true #Optional defaults to false
 
 ```
 Command output `gravitywell create -f examples/`

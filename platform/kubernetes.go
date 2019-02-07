@@ -69,7 +69,7 @@ func getConfig(context string) clientcmd.ClientConfig {
 //GenerateDeploymentPlan
 func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	files []string, namespace string, opts configuration.Options,
-	commandFlag configuration.CommandFlag) error {
+	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) error {
 
 	var kubernetesResources []runtime.Object
 	for _, file := range files {
@@ -130,7 +130,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	//Run all other resources
 	for _, resource := range kubernetesResources {
 
-		s, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag)
+		s, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag, shouldAwaitDeployment)
 		if err != nil {
 			log.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 			continue
@@ -151,7 +151,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 //DeployFromObject ...
 func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.Object,
 	namespace string, opts configuration.Options,
-	commandFlag configuration.CommandFlag) (state.State, error) {
+	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 
 	var response state.State
 	var e error
@@ -161,15 +161,19 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 	case *batchv1.Job:
 		response, e = execV1Job(k, obj.(*batchv1.Job), namespace, opts, commandFlag)
 	case *v1betav1.Deployment:
-		response, e = execV1Betav1DeploymentResouce(k, obj.(*v1betav1.Deployment), namespace, opts, commandFlag)
+		response, e = execV1Betav1DeploymentResouce(k, obj.(*v1betav1.Deployment),
+			namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1beta1.Deployment:
-		response, e = execV1Beta1DeploymentResouce(k, obj.(*v1beta1.Deployment), namespace, opts, commandFlag)
+		response, e = execV1Beta1DeploymentResouce(k, obj.(*v1beta1.Deployment),
+			namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1beta2.Deployment:
-		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment), namespace, opts, commandFlag)
+		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment),
+			namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1beta1.StatefulSet:
 		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
 	case *appsv1.StatefulSet:
-		response, e = execV1StatefulSetResouce(k, obj.(*appsv1.StatefulSet), namespace, opts, commandFlag)
+		response, e = execV1StatefulSetResouce(k, obj.(*appsv1.StatefulSet),
+			namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1.Secret:
 		response, e = execV1SecretResouce(k, obj.(*v1.Secret), namespace, opts, commandFlag)
 	case *v1.Service:
