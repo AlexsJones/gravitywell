@@ -49,6 +49,8 @@ vortex --output examples/deployment --template examples/templates \
 
 gravitywell create -f examples/deployment
 
+# This will now start to provision any clusters that are required and deploy applications
+
 ```
 
 
