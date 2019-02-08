@@ -5,8 +5,8 @@ Strategy:
       Name: "Google Cloud Platform"
       Clusters:
         - Cluster:
-            FullName: "gke_beamery-trials_us-east4_testcluster"
-            ShortName: "testcluster"
+            FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+            ShortName: "{{.clustername}}"
             Project: "beamery-trials"
             Region: "us-east4"
             Zones: ["us-east4-a"]

@@ -2,8 +2,8 @@ APIVersion: "v1"
 Kind: "Application"
 Strategy:
   - Cluster:
-      FullName: "gke_beamery-trials_us-east4_testcluster"
-      ShortName: "testcluster"
+      FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+      ShortName: "{{.clustername}}"
       Applications:
         - Application:
             Name: "kubernetes-apache-tika"

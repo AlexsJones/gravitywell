@@ -1,210 +1,76 @@
-# gravitywell
+# Gravitywell
 
-![gravitywell](resources/bg.png)
+Gravitywell is designed to deploy kubernetes clusters and their applications.
+It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
+Operating on a simple concurrency model it allows you to deploy in parallel to save time.
+## Getting Started
+
+To get started you'll need golang installed or to fetch the binary from homebrew/releases page (OSX)
+
+- Get with golang: 
+    - `go get github.com/AlexsJones/gravitywell`
+- Download with homebrew: `brew tap AlexsJones/homebrew-gravitywell && brew install gravitywell`
+- Download as a cross-platform release: `https://github.com/AlexsJones/gravitywell/releases`
+
+### Prerequisites
+
+The current implementation works with Google Cloud Platform.
+This means you'll need a service account with at least Kubernetes cluster admin scopes.
+
+- See more here:`https://cloud.google.com/iam/docs/creating-managing-service-accounts`
+
+For working with templates as per the examples you'll also need [vortex](`go get github.com/AlexsJones/gravitywell`)
+_This can be installed either via golang or as a binary also_
+
+### Installing
+
+Once you have the service account you'll want to export the path:
+
+`export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/alex-example-e28058e8985b.json`
 
 
+At this point you are ready to run gravitywell.
+Remember to have [vortex](`go get github.com/AlexsJones/gravitywell`) installed if you want to avoid hand writing manifests.
 
-_Why make this when Helm or Terraform exist?_
-
-No tool I've yet used can deploy concurrently to multiple clusters 
-and then parallel deploy their applications
-
-_But terraform can deploy kubernetes applications right?_
-
-Try using it; you'll find an inconsistent experience with only part of the api supported.
-
----
-
-
-_What does gravitywell claim to do then?_
-
-
-- Deploy cluster into GCP from yaml
-- Deploy manifests into those clusters from yaml
-
-Pull all your Kubernetes deployment configuration into one place.
-
-Run one command and one manifest to switch clusters, deploy services and be the boss of your infrastructure.
-
-It's as easy as `gravitywell create -f ./`
-
-![provision](resources/provision.png)
-
-Or `gravitywell delete -f ./`
-
-![deprovision](resources/deprovision.png)
-
-## Installation
+_Lets take it for a spin_
 
 ```
-brew tap AlexsJones/homebrew-gravitywell
-brew install gravitywell
-```
-or 
+#If you've looked at the templates you'll see a helmesque style of interpolation
+# "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
 
-`go get github.com/AlexsJones/gravitywell`
+vortex --output examples/deployment --template examples/templates \
+--set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=testcluster"
 
-## Requirements
+# Now an examples/templates folder exists you simple run...
 
-- Golang 1.10
-
-- `go get github.com/AlexsJones/vortex`
-- `export GOOGLE_APPLICATION_CREDENTIALS=somegooglecloudserviceaccountfile.json` (_This needs to be set to a valid service account for the project you with to perform GCP operations on_)
-
-
-## Example overview Manifest
-
-There are two kinds of manifest.
-`Cluster` and `Application`
+gravitywell create -f examples/deployment
 
 ```
-APIVersion: "v1"
-Kind: "Cluster"
-Strategy:
-  - Provider:
-      Name: "Google Cloud Platform"
-      Clusters:
-        - Cluster:
-            Name: "testclustera"
-            Project: "beamery-trials"
-            Region: "us-east4"
-            Zones: ["us-east4-a"]
-            Labels:
-                A: "B"
-                Foo: "Bar"
-            InitialNodeCount: 1
-            InitialNodeType: "n1-standard-1"
-            OauthScopes: "https://www.googleapis.com/auth/monitoring.write,
-            https://www.googleapis.com/auth/logging.write,
-            https://www.googleapis.com/auth/trace.append,
-            https://www.googleapis.com/auth/devstorage.full_control,
-            https://www.googleapis.com/auth/compute"
-            NodePools:
-              - NodePool:
-                  Name: "Pool-A"
-                  Count: 3
-                  NodeType: "n1-standard-1"
-                  Labels:
-                    Foo: "Bar"
-            PostInstallHook:
-              - Execute:
-                  Shell: "gcloud container clusters get-credentials TestClusterA --region=us-east4 --zone=a"
-```
 
-```
-APIVersion: "v1"
-Kind: "Application"
-Strategy:
-  - Cluster:
-      FullName: "gke_beamery-trials_us-east4_testcluster"
-      ShortName: "testcluster"
-      Applications:
-        - Application:
-            Name: "kubernetes-apache-tika"
-            Namespace: "tika"
-            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-            Action:
-              - Execute:
-                  Kind: "shell"
-                  Configuration:
-                    Command: pwd
-                    Path: ../ #Optional value
-              - Execute:
-                  Kind: "shell"
-                  Configuration:
-                    Command: ./build_environment.sh default
-              - Execute:
-                  Kind: "kubernetes"
-                  Configuration:
-                    Path: deployment #Optional value
-                    AwaitDeployment: true #Optional defaults to false
 
-```
-Command output `gravitywell create -f examples/`
+## Running the tests
 
-```
-go run main.go create -f examples/       ✔  2846  15:06:38
-2019/01/02 15:07:02 Loading examples/
-2019/01/02 15:07:02 Loading examples/application
-2019/01/02 15:07:02 Loading examples/application/small.yaml
-Application kind found
-2019/01/02 15:07:02 Loading examples/cluster
-2019/01/02 15:07:02 Loading examples/cluster/small.yaml
-Cluster kind found
-Started cluster build at 2019-01-02T15:07:04.790122357Z
-Cluster running
-Fetching cluster endpoint and auth data.
-kubeconfig entry generated for testclusterb.
-WARN[0154] Switching to cluster: gke_beamery-trials_us-east4_testclusterb
-DEBU[0154] Loading deployment kubernetes-apache-tika
-DEBU[0154] Fetching deployment kubernetes-apache-tika into .gravitywell/kubernetes-apache-tika
-Enumerating objects: 45, done.
-Total 45 (delta 0), reused 0 (delta 0), pack-reused 45
-WARN[0155] Running shell command ./build_environment.sh default
-Building for environment default
-DEBU[0155] Successful
-ERRO[0155] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment
-ERRO[0155] Could not read from file %s.gravitywell/kubernetes-apache-tika/deployment/tika
-INFO[0155] Decoded Kind: extensions/v1beta1, Kind=Deployment
-INFO[0155] Decoded Kind: /v1, Kind=Namespace
-INFO[0155] Decoded Kind: /v1, Kind=Service
-Found Namespace resource
-DEBU[0156] Namespace deployed
-DEBU[0156] Found deployment resource
-DEBU[0157] Deployment deployed
-DEBU[0157] Found service resource
-DEBU[0157] Service deployed
- alexjones@Alexs-MBP-2  ~/Go/src/github.com/AlexsJones/gravitywell   master  kubectl get ns                           ✔  2847  15:09:39
-NAME          STATUS   AGE
-default       Active   1m
-kube-public   Active   1m
-kube-system   Active   1m
-tika          Active   48s
- alexjones@Alexs-MBP-2  ~/Go/src/github.com/AlexsJones/gravitywell   master  kubectl get pods -n tika                 ✔  2848  15:10:26
-NAME                   READY   STATUS              RESTARTS   AGE
-tika-db84b854c-45r6p   0/1     ContainerCreating   0          52s
-tika-db84b854c-lxj6v   0/1     ContainerCreating   0          52s
-tika-db84b854c-qrl8p   0/1     ContainerCreating   0          52s
-```
+`go test ./... -v` from the gravitywell directory on your gopath
 
-## Commands
 
-_We support four kubectl commands currently_
+## Contributing
 
-```
-delete
-apply
-create
-replace
-```
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-### Supported Cloud providers
+## Versioning
 
-- [x] Google cloud platform 
-- [ ] Amazon Web Services
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/AlexsJones/gravitywell/tags). 
 
-### Supported Kubernetes resource definition types
+## Authors
 
-- [x] ConfigMap
-- [x] Secret
-- [x] StatefulSet
-- [x] Deployment
-- [x] DaemonSet
-- [x] Service
-- [x] PodDisruptionBudget
-- [x] ServiceAccounts
-- [x] Role
-- [x] ClusterRole
-- [x] ClusterRoleBinding
-- [x] RoleBinding
-- [x] StorageClass
-- [x] CronJob
-- [x] Job
-- [x] Ingress
-- [ ] PersistantVolume
-- [ ] PersistantVolumeClaim
+* **Alex Jones** - *Initial work* 
 
-### Roadmap
+See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
-- [ ] Depends on Cluster from Application flag
+## License
 
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+* Helm & terraform both great projects
