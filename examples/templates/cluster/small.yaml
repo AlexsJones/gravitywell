@@ -7,7 +7,7 @@ Strategy:
         - Cluster:
             FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
             ShortName: "{{.clustername}}"
-            Project: "beamery-trials"
+            Project: "{{.projectname}}"
             Region: "us-east4"
             Zones: ["us-east4-a"]
             Labels:
