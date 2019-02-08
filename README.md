@@ -1,5 +1,9 @@
 # Gravitywell
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/a6cd570642c5aeeedaf9/maintainability)](https://codeclimate.com/github/AlexsJones/gravitywell/maintainability)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
+
 Gravitywell is designed to deploy kubernetes clusters and their applications.
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
 Operating on a simple concurrency model it allows you to deploy in parallel to save time.
