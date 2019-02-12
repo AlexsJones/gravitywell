@@ -29,7 +29,7 @@ Strategy:
             PostInstallHook:
               - Execute:
                   Path: "."
-                  Shell: "gcloud container clusters get-credentials testcluster --region=us-east4 --project=beamery-trials"
+                  Shell: "gcloud container clusters get-credentials {{.clustername}} --region={{.projectregion}} --project={{.projectname}}"
             PostDeleteHook:
               - Execute:
                   Path: "."
