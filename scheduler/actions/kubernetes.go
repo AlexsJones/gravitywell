@@ -50,8 +50,8 @@ func ExecuteKubernetesAction(action kinds.Action, clusterName string,
 	if err != nil {
 		log.Error(err.Error())
 	}
-	restclient, k8siface := clientForCluster(clusterName)
-	err = platform.GenerateDeploymentPlan(restclient,
+	_, k8siface := clientForCluster(clusterName)
+	err = platform.GenerateDeploymentPlan(
 		k8siface, fileList,
 		deployment.Namespace, opt, commandFlag, shouldAwaitDeployment)
 	if err != nil {

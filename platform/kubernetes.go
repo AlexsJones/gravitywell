@@ -67,7 +67,7 @@ func getConfig(context string) clientcmd.ClientConfig {
 }
 
 //GenerateDeploymentPlan
-func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
+func GenerateDeploymentPlan(k kubernetes.Interface,
 	files []string, namespace string, opts configuration.Options,
 	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) error {
 
@@ -130,7 +130,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 	//Run all other resources
 	for _, resource := range kubernetesResources {
 
-		s, err := DeployFromObject(config, k, resource, namespace, opts, commandFlag, shouldAwaitDeployment)
+		s, err := DeployFromObject(k, resource, namespace, opts, commandFlag, shouldAwaitDeployment)
 		if err != nil {
 			log.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 			continue
@@ -149,7 +149,7 @@ func GenerateDeploymentPlan(config *rest.Config, k kubernetes.Interface,
 }
 
 //DeployFromObject ...
-func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.Object,
+func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	namespace string, opts configuration.Options,
 	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 
