@@ -3,21 +3,47 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	"github.com/jpillora/backoff"
 	"k8s.io/api/apps/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"time"
 )
 
-func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.StatefulSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
+func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.StatefulSet, namespace string, opts configuration.Options,
+	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
 	log.Debug("Found statefulset resource")
 	stsclient := k.AppsV1beta1().StatefulSets(namespace)
+
+	awaitReady := func() error {
+
+		b := &backoff.Backoff{
+			Max:    15 * time.Second,
+			Jitter: true,
+		}
+		for {
+			stsResponse, err := stsclient.Get(objdep.Name, meta_v1.GetOptions{})
+			if err != nil {
+				return errors.New("failed to get deployment")
+			}
+			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.Replicas {
+				return nil
+			}
+			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
+				stsResponse.Status.ReadyReplicas,
+				stsResponse.Status.Replicas))
+
+			time.Sleep(b.Duration())
+			if b.Attempt() >= 3 {
+				return errors.New("max retry attempts hit")
+			}
+		}
+	}
 
 	if opts.DryRun {
 		_, err := stsclient.Get(objdep.Name, v12.GetOptions{})
@@ -47,6 +73,11 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.State
 			log.Error(fmt.Sprintf("Could not deploy objdep resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, err
+			}
+		}
 		log.Debug("Statefulset deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -57,6 +88,11 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.State
 			log.Error(fmt.Sprintf("Could not deploy objdep resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, err
+			}
+		}
 		log.Debug("Statefulset deployed")
 		return state.EDeploymentStateOkay, nil
 	}
@@ -66,6 +102,11 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.State
 		if err != nil {
 			log.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err
+		}
+		if shouldAwaitDeployment {
+			if err := awaitReady(); err != nil {
+				return state.EDeploymentStateError, err
+			}
 		}
 		log.Debug("Statefulset updated")
 		return state.EDeploymentStateUpdated, nil

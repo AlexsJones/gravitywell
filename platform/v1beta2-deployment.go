@@ -3,16 +3,16 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	"github.com/jpillora/backoff"
 	"k8s.io/api/apps/v1beta2"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"time"
 )
 
 func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deployment,
@@ -23,6 +23,11 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 	deploymentClient := k.AppsV1beta2().Deployments(namespace)
 
 	awaitReady := func() error {
+
+		b := &backoff.Backoff{
+			Max:    15 * time.Second,
+			Jitter: true,
+		}
 		for {
 			stsResponse, err := deploymentClient.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
@@ -34,7 +39,11 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
 				stsResponse.Status.ReadyReplicas,
 				stsResponse.Status.Replicas))
-			time.Sleep(time.Second)
+
+			time.Sleep(b.Duration())
+			if b.Attempt() >= 3 {
+				return errors.New("max retry attempts hit")
+			}
 		}
 	}
 

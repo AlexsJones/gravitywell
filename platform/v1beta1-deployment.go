@@ -3,16 +3,16 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	"github.com/jpillora/backoff"
 	"k8s.io/api/apps/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"time"
 )
 
 func execV1Beta1DeploymentResouce(k kubernetes.Interface,
@@ -23,6 +23,11 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 	deploymentClient := k.AppsV1beta1().Deployments(namespace)
 
 	awaitReady := func() error {
+
+		b := &backoff.Backoff{
+			Max:    15 * time.Second,
+			Jitter: true,
+		}
 		for {
 			stsResponse, err := deploymentClient.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
@@ -34,7 +39,11 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
 				stsResponse.Status.ReadyReplicas,
 				stsResponse.Status.Replicas))
-			time.Sleep(time.Second)
+
+			time.Sleep(b.Duration())
+			if b.Attempt() >= 3 {
+				return errors.New("max retry attempts hit")
+			}
 		}
 	}
 
@@ -68,7 +77,7 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 		}
 		if shouldAwaitDeployment {
 			if err := awaitReady(); err != nil {
-				return state.EDeploymentStateError, nil
+				return state.EDeploymentStateError, err
 			}
 		}
 		log.Debug("Deployment deployed")
@@ -83,7 +92,7 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 		}
 		if shouldAwaitDeployment {
 			if err := awaitReady(); err != nil {
-				return state.EDeploymentStateError, nil
+				return state.EDeploymentStateError, err
 			}
 		}
 		log.Debug("Deployment deployed")
@@ -98,7 +107,7 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 		}
 		if shouldAwaitDeployment {
 			if err := awaitReady(); err != nil {
-				return state.EDeploymentStateError, nil
+				return state.EDeploymentStateError, err
 			}
 		}
 		log.Debug("Deployment updated")

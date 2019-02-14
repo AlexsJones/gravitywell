@@ -170,7 +170,7 @@ func DeployFromObject(config *rest.Config, k kubernetes.Interface, obj runtime.O
 		response, e = execV1Beta2DeploymentResouce(k, obj.(*v1beta2.Deployment),
 			namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1beta1.StatefulSet:
-		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag)
+		response, e = execV1Beta1StatefulSetResouce(k, obj.(*v1beta1.StatefulSet), namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *appsv1.StatefulSet:
 		response, e = execV1StatefulSetResouce(k, obj.(*appsv1.StatefulSet),
 			namespace, opts, commandFlag, shouldAwaitDeployment)
