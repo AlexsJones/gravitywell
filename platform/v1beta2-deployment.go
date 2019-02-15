@@ -25,7 +25,8 @@ func execV1Beta2DeploymentResouce(k kubernetes.Interface, objdep *v1beta2.Deploy
 	awaitReady := func() error {
 
 		b := &backoff.Backoff{
-			Max:    15 * time.Second,
+			Min:    10 * time.Second,
+			Max:    60 * time.Second,
 			Jitter: true,
 		}
 		for {

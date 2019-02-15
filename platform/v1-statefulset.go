@@ -3,16 +3,17 @@ package platform
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	"github.com/fatih/color"
+	"github.com/jpillora/backoff"
 	appsv1 "k8s.io/api/apps/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"time"
 )
 
 func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet, namespace string,
@@ -22,6 +23,13 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 	stsclient := k.AppsV1().StatefulSets(namespace)
 
 	awaitReady := func() error {
+
+		color.Yellow("Awaiting readiness...")
+		b := &backoff.Backoff{
+			Min:    10 * time.Second,
+			Max:    60 * time.Second,
+			Jitter: true,
+		}
 		for {
 			stsResponse, err := stsclient.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
@@ -33,10 +41,13 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
 				stsResponse.Status.ReadyReplicas,
 				stsResponse.Status.Replicas))
-			time.Sleep(time.Second)
+
+			time.Sleep(b.Duration())
+			if b.Attempt() >= 3 {
+				return errors.New("max retry attempts hit")
+			}
 		}
 	}
-
 	if opts.DryRun {
 		_, err := stsclient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {

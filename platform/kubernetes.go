@@ -156,6 +156,8 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	var response state.State
 	var e error
 	switch obj.(type) {
+	case *v1.Pod:
+		response, e = execV1Pod(k, obj.(*v1.Pod), namespace, opts, commandFlag)
 	case *batchbeta1.CronJob:
 		response, e = execV1Beta1CronJob(k, obj.(*batchbeta1.CronJob), namespace, opts, commandFlag)
 	case *batchv1.Job:
