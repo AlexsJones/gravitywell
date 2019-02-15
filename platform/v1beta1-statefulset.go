@@ -22,11 +22,10 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.State
 	stsclient := k.AppsV1beta1().StatefulSets(namespace)
 
 	awaitReady := func() error {
-
 		color.Yellow("Awaiting readiness...")
 		b := &backoff.Backoff{
 			Min:    10 * time.Second,
-			Max:    60 * time.Second,
+			Max:    opts.MaxBackOffDuration,
 			Jitter: true,
 		}
 		for {

@@ -8,6 +8,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -27,11 +28,13 @@ var Opts struct {
 	DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
 	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
 	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
+	MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
 }
 
 func Usage() {
 
 	fmt.Println("...Usage...")
+
 	fmt.Println("create/delete/replace/apply e.g. gravitywell create -f folder/")
 	os.Exit(0)
 }
@@ -56,6 +59,7 @@ func main() {
 	args = args[2:len(args)]
 
 	_, err := flags.ParseArgs(&Opts, os.Args)
+
 	if err != nil {
 		panic(err)
 	}
@@ -87,20 +91,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	tempVCSPath := "./.gravitywell"
+	defaultMaxTimeout := time.Second * 60
 
-	if _, err := os.Stat(tempVCSPath); os.IsNotExist(err) {
-		err = os.Mkdir(tempVCSPath, 0777)
+	d, err := time.ParseDuration(Opts.MaxTimeout)
+	if err == nil {
+		defaultMaxTimeout = d
+	}
+
+	cf := configuration.Options{VCS: "git",
+		TempVCSPath:        "./.gravitywell",
+		APIVersion:         "v1",
+		SSHKeyPath:         Opts.SSHKeyPath,
+		MaxBackOffDuration: defaultMaxTimeout,
+	}
+
+	if _, err := os.Stat(cf.TempVCSPath); os.IsNotExist(err) {
+		err = os.Mkdir(cf.TempVCSPath, 0777)
 	} else {
-		err = os.RemoveAll(tempVCSPath)
-		err = os.Mkdir(tempVCSPath, 0777)
+		err = os.RemoveAll(cf.TempVCSPath)
+		err = os.Mkdir(cf.TempVCSPath, 0777)
 	}
 	if err :=
-		sh.Run(commandFlag, configuration.Options{VCS: "git",
-			TempVCSPath: tempVCSPath,
-			APIVersion:  "v1",
-			SSHKeyPath:  Opts.SSHKeyPath,
-		}); err != nil {
+		sh.Run(commandFlag, cf); err != nil {
 		log.Warn(err.Error())
 		os.Exit(1)
 	}

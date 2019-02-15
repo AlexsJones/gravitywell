@@ -27,7 +27,7 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 		color.Yellow("Awaiting readiness...")
 		b := &backoff.Backoff{
 			Min:    10 * time.Second,
-			Max:    60 * time.Second,
+			Max:    opts.MaxBackOffDuration,
 			Jitter: true,
 		}
 		for {

@@ -53,6 +53,14 @@ gravitywell create -f examples/deployment
 
 ```
 
+### Flags
+
+```go
+DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
+FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
+SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
+MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
+```
 
 ## Running the tests
 

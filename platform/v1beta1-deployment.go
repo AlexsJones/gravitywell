@@ -6,6 +6,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	log "github.com/Sirupsen/logrus"
+	"github.com/fatih/color"
 	"github.com/jpillora/backoff"
 	"k8s.io/api/apps/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,9 +24,10 @@ func execV1Beta1DeploymentResouce(k kubernetes.Interface,
 	deploymentClient := k.AppsV1beta1().Deployments(namespace)
 
 	awaitReady := func() error {
-
+		color.Yellow("Awaiting readiness...")
 		b := &backoff.Backoff{
-			Max:    15 * time.Second,
+			Min:    10 * time.Second,
+			Max:    opts.MaxBackOffDuration,
 			Jitter: true,
 		}
 		for {
