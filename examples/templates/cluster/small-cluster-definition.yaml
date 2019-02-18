@@ -7,6 +7,7 @@ Strategy:
     Project: "{{.projectname}}"
     Provider: [ "gce_test","aws_test" ]
     Continant: [ "us","europe","asia" ]
+    Version: "1.11"
     ZonePerRegion: 2
     Labels:
       type: "test"
