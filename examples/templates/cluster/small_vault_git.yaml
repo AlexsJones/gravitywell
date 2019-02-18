@@ -5,9 +5,9 @@ Strategy:
       Name: "Google Cloud Platform"
       Clusters:
         - Cluster:
-            FullName: "gke_beamery-trials_us-east4_testcluster"
-            ShortName: "testcluster"
-            Project: "beamery-trials"
+            FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+            ShortName: "{{.clustername}}"
+            Project: "{{.projectname}}"
             Region: "us-east4"
             Zones: ["us-east4-a"]
             Labels:
@@ -27,9 +27,12 @@ Strategy:
                   Labels:
                     k8s-node-type: "test"
             Vault:
-              Url: "https://vault.beamery.com"
-              Path: "kubernetes/trials/testcluster"
-              Description: "Kubernetes Cluster testcluster in beamery-trials project"
+              Path: "kubernetes/{{.projectenvironment}}/{{.clustername}}"
+              Description: "Kubernetes Cluster {{.clustername}} in {{.projectname}} project"
+              Repo:
+                Url: "git@github.com:Compagny/vault.git"
+                Branch: "master"
+                Path: "files"
             PostInstallHook:
               - Execute:
                   Path: "."

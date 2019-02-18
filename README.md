@@ -43,7 +43,7 @@ _Lets take it for a spin_
 # "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
 
 vortex --output examples/deployment --template examples/templates \
---set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=testcluster"
+--set "projectname=alex-example" --set "projectregion=us-east4" --set "projectenvironment=test" --set "clustername=testcluster"
 
 # Now an examples/templates folder exists you simple run...
 
