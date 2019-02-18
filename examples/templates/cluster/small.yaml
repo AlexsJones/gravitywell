@@ -1,3 +1,56 @@
+---
+APIVersion: "v1"
+Kind: "Provider"
+name: "aws"
+locations:
+- us:
+  - us-central1
+  - us-east1
+  - us-east4
+  - us-west1
+  - us-west2
+- europe:
+  - europe-north1
+  - europe-west1
+  - europe-west2
+  - europe-west3
+  - europe-west4
+- asia:
+  - asia-east1
+  - asia-northeast1
+  - asia-south1
+  - asia-southeast1
+- others:
+  - southamerica-east1
+  - northamerica-northeast1
+  - australia-southeast1
+---
+APIVersion: "v1"
+Kind: "Provider"
+name: "gce"
+locations:
+- us:
+  - us-central1
+  - us-east1
+  - us-east4
+  - us-west1
+  - us-west2
+- europe:
+  - europe-north1
+  - europe-west1
+  - europe-west2
+  - europe-west3
+  - europe-west4
+- asia:
+  - asia-east1
+  - asia-northeast1
+  - asia-south1
+  - asia-southeast1
+- others:
+  - southamerica-east1
+  - northamerica-northeast1
+  - australia-southeast1
+---
 APIVersion: "v1"
 Kind: "Cluster"
 Strategy:
@@ -8,8 +61,10 @@ Strategy:
             FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
             ShortName: "{{.clustername}}"
             Project: "{{.projectname}}"
-            Region: "us-east4"
-            Zones: ["us-east4-a"]
+            # Region: "us-east4"
+            # Zones: ["us-east4-a"]
+            Continant: [ "us","europe","asia" ]
+            NbZonePerRegion: 2
             Labels:
               type: "test"
             InitialNodeCount: 1
