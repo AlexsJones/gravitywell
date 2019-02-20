@@ -22,6 +22,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:58dfcf4a67f825775a6c7d7d08f52f77ff4978c7b41072b7f7fa07f8699bd43b"
+  name = "github.com/dimiro1/banner"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c2f858997d49ffd03f84818bef3c25c2fcc67e16"
+
+[[projects]]
   digest = "1:b498b36dbb2b306d1c5205ee5236c9e60352be8f9eea9bf08186723a9f75b4f3"
   name = "github.com/emirpasic/gods"
   packages = [
@@ -759,11 +767,10 @@
   input-imports = [
     "cloud.google.com/go/container/apiv1",
     "github.com/Sirupsen/logrus",
+    "github.com/dimiro1/banner",
     "github.com/fatih/color",
     "github.com/jessevdk/go-flags",
     "github.com/jpillora/backoff",
-    "github.com/mattn/go-colorable",
-    "github.com/mattn/go-isatty",
     "github.com/satori/go.uuid",
     "golang.org/x/crypto/ssh",
     "google.golang.org/genproto/googleapis/container/v1",
