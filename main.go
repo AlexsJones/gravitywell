@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler"
 	log "github.com/Sirupsen/logrus"
+	"github.com/dimiro1/banner"
 	"github.com/jessevdk/go-flags"
 	"os"
 	"strings"
@@ -14,6 +16,16 @@ import (
 var (
 	version = "dev"
 )
+
+var b = `
+{{ .AnsiColor.Red }}                               .__  __                         .__  .__   
+{{ .AnsiColor.Blue }}        ________________ ___  _|__|/  |_ ___.__.__  _  __ ____ |  | |  |  
+{{ .AnsiColor.Yellow }}       / ___\_  __ \__  \\  \/ /  \   __<   |  |\ \/ \/ // __ \|  | |  |  
+{{ .AnsiColor.Green }}      / /_/  >  | \// __ \\   /|  ||  |  \___  | \     /\  ___/|  |_|  |__
+{{ .AnsiColor.Magenta }}      \___  /|__|  (____  /\_/ |__||__|  / ____|  \/\_/  \___  >____/____/
+{{ .AnsiColor.Cyan }}     /_____/            \/               \/                  \/           
+{{ .AnsiColor.Default }}
+`
 
 func init() {
 	// Output to stdout instead of the default stderr
@@ -39,6 +51,9 @@ func Usage() {
 	os.Exit(0)
 }
 func main() {
+	isEnabled := true
+	isColorEnabled := true
+	banner.Init(os.Stdout, isEnabled, isColorEnabled, bytes.NewBufferString(b))
 	args := os.Args
 	var command = ""
 	if len(args) == 2 && args[1] == "version" {
