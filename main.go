@@ -103,6 +103,7 @@ func main() {
 		APIVersion:         "v1",
 		SSHKeyPath:         Opts.SSHKeyPath,
 		MaxBackOffDuration: defaultMaxTimeout,
+		DryRun:             Opts.DryRun,
 	}
 
 	if _, err := os.Stat(cf.TempVCSPath); os.IsNotExist(err) {
