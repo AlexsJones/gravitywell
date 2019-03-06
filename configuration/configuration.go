@@ -3,11 +3,12 @@ package configuration
 import (
 	"errors"
 	"fmt"
-	"github.com/AlexsJones/gravitywell/kinds"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/AlexsJones/gravitywell/kinds"
 
 	"github.com/fatih/color"
 

@@ -26,6 +26,13 @@ Strategy:
                   NodeType: "n1-standard-1"
                   Labels:
                     k8s-node-type: "test"
+            Vault:
+              Path: "kubernetes/{{.projectenvironment}}/{{.clustername}}"
+              Description: "Kubernetes Cluster {{.clustername}} in {{.projectname}} project"
+              Repo:
+                Url: "git@github.com:Compagny/vault.git"
+                Branch: "master"
+                Path: "files"
             PostInstallHook:
               - Execute:
                   Path: "."
