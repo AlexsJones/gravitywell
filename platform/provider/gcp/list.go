@@ -8,7 +8,7 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func List(c *container.ClusterManagerClient, ctx context.Context, projectName string) {
+func (GCPProvider)List(c *container.ClusterManagerClient, ctx context.Context, projectName string) error {
 
 	clusterReq := &containerpb.ListClustersRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/-", projectName),
@@ -18,7 +18,7 @@ func List(c *container.ClusterManagerClient, ctx context.Context, projectName st
 	if err != nil {
 		// TODO: Handle error.
 		color.Red(err.Error())
-		return
+		return err
 	}
 
 	for _, cluster := range clusterResponse.Clusters {
@@ -36,4 +36,5 @@ func List(c *container.ClusterManagerClient, ctx context.Context, projectName st
 
 		}
 	}
+	return nil
 }

@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"time"
 
 	"cloud.google.com/go/container/apiv1"
@@ -10,11 +11,40 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
+func (GCPProvider)Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string, clusterLabels map[string]string,
-	nodePools []*containerpb.NodePool) error {
+	nodePools []kinds.NodePool) error {
 
+	//Convert generic node pool type into a specific GCP resource
+	var convertedNodePool []*containerpb.NodePool
+
+	for _, model := range nodePools {
+		nodePool := new(containerpb.NodePool)
+		nodePool.Name = model.Name
+		nodePool.Config = new(containerpb.NodeConfig)
+		nodePool.Config.MachineType = model.NodeType
+		nodePool.InitialNodeCount = int32(model.Count)
+
+		var labels = map[string]string{}
+
+		if len(clusterLabels) > 0 {
+			for index, element := range clusterLabels {
+				labels[index] = element
+			}
+		}
+
+		if len(model.Labels) > 0 {
+			for index, element := range model.Labels {
+				labels[index] = element
+			}
+		}
+		nodePool.Config.Labels = labels
+
+		convertedNodePool = append(convertedNodePool, nodePool)
+	}
+
+	// ----------------------------------------------------------------
 	var cluster *containerpb.Cluster
 	if len(nodePools) == 0 {
 
@@ -32,7 +62,7 @@ func Create(c *container.ClusterManagerClient, ctx context.Context, projectName 
 		cluster = &containerpb.Cluster{
 			Name:           clusterName,
 			Locations:      locations,
-			NodePools:      nodePools,
+			NodePools:      convertedNodePool,
 			ResourceLabels: clusterLabels,
 		}
 	}

@@ -8,6 +8,13 @@ type ClusterKind struct {
 		Provider Provider `yaml:"Provider"`
 	} `yaml:"Strategy"`
 }
+type NodePool struct {
+		Count    int               `yaml:"Count"`
+		Name     string            `yaml:"Name"`
+		NodeType string            `yaml:"NodeType"`
+		Labels   map[string]string `yaml:"Labels"`
+}
+
 type ProviderCluster struct {
 	InitialNodeCount int               `yaml:"InitialNodeCount"`
 	InitialNodeType  string            `yaml:"InitialNodeType"`
@@ -15,14 +22,7 @@ type ProviderCluster struct {
 	FullName         string            `yaml:"FullName"`
 	ShortName        string            `yaml:"ShortName"`
 	Project          string            `yaml:"Project"`
-	NodePools        []struct {
-		NodePool struct {
-			Count    int               `yaml:"Count"`
-			Name     string            `yaml:"Name"`
-			NodeType string            `yaml:"NodeType"`
-			Labels   map[string]string `yaml:"Labels"`
-		} `yaml:"NodePool"`
-	} `yaml:"NodePools"`
+	NodePools        []NodePool `yaml:"NodePools"`
 	OauthScopes     string `yaml:"OauthScopes"`
 	PostInstallHook []struct {
 		Execute struct {

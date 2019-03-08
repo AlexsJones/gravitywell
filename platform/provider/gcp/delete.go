@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Delete(c *container.ClusterManagerClient, ctx context.Context, projectName string,
+func (GCPProvider)Delete(c *container.ClusterManagerClient, ctx context.Context, projectName string,
 	locationName string,
 	clusterName string) error {
 
