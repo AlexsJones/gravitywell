@@ -55,11 +55,34 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 		log.Println(p.providerClusterReference[k].ProviderName)
 
 		switch strings.ToLower(p.providerClusterReference[k].ProviderName) {
+
+		case "amazon web services":
+			//Configure session
+			config, err := actions.NewAmazonWebServicesConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, clusters := range p.providerClusterReference[k].Dependencies {
+				//Deploy cluster
+				err = actions.AmazonWebServicesClusterProcessor(config,p.commandFlag, clusters)
+				if err != nil {
+					log.Fatal(err)
+				}
+				//Deploy cluster applications
+				for _, application := range p.clusterApplications[clusters.FullName] {
+
+					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+
+				}
+			}
 		case "google cloud platform":
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
-				actions.GoogleCloudClusterProcessor(p.commandFlag, clusters)
-
+				err := actions.GoogleCloudPlatformClusterProcessor(p.commandFlag, clusters)
+				if err != nil {
+					log.Fatal(err)
+				}
 				//Deploy cluster applications
 
 				for _, application := range p.clusterApplications[clusters.FullName] {

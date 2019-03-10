@@ -1,5 +1,9 @@
 package aws
 
-type AWSProvider struct {
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+)
 
+type AWSProvider struct {
+	AWSClient *session.Session
 }

@@ -11,5 +11,7 @@ func (AWSProvider) Create(c *container.ClusterManagerClient, ctx context.Context
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string, clusterLabels map[string]string,
 	nodePools []kinds.NodePool) error {
+
+
 return nil
 }
