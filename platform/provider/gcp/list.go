@@ -1,20 +1,18 @@
 package gcp
 
 import (
-	"cloud.google.com/go/container/apiv1"
-	"context"
 	"fmt"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (GCPProvider)List(c *container.ClusterManagerClient, ctx context.Context, projectName string) error {
+func (g *GCPProvider)List(projectName string) error {
 
 	clusterReq := &containerpb.ListClustersRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/-", projectName),
 	}
 
-	clusterResponse, err := c.ListClusters(ctx, clusterReq)
+	clusterResponse, err := g.ClusterManagerClient.ListClusters(g.Context, clusterReq)
 	if err != nil {
 		// TODO: Handle error.
 		color.Red(err.Error())
@@ -27,7 +25,7 @@ func (GCPProvider)List(c *container.ClusterManagerClient, ctx context.Context, p
 		}
 
 		color.Green(fmt.Sprintf("Cluster %s located in %s status: %s\n", cluster.Name, cluster.Location, cluster.Status))
-		resp, err := c.ListNodePools(ctx, req)
+		resp, err := g.ClusterManagerClient.ListNodePools(g.Context, req)
 		if err != nil {
 			continue
 		}

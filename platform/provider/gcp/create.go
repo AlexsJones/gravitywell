@@ -1,17 +1,15 @@
 package gcp
 
 import (
-	"context"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"time"
 
-	"cloud.google.com/go/container/apiv1"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (GCPProvider)Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
+func (g *GCPProvider)Create(projectName string,
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string, clusterLabels map[string]string,
 	nodePools []kinds.NodePool) error {
@@ -72,7 +70,7 @@ func (GCPProvider)Create(c *container.ClusterManagerClient, ctx context.Context,
 		Cluster: cluster,
 	}
 
-	clusterResponse, err := c.CreateCluster(ctx, clusterReq)
+	clusterResponse, err := g.ClusterManagerClient.CreateCluster(g.Context, clusterReq)
 	if err != nil {
 		color.Red(err.Error())
 		return err
@@ -81,7 +79,7 @@ func (GCPProvider)Create(c *container.ClusterManagerClient, ctx context.Context,
 
 	for {
 		clust, err :=
-			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
+			g.ClusterManagerClient.GetCluster(g.Context, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
 				locationName, clusterName)})
 		if err != nil {
 			return err

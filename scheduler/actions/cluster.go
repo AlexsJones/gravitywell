@@ -36,16 +36,10 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	commandFlag configuration.CommandFlag,
 	cluster kinds.ProviderCluster) error {
 
-	ctx := context.Background()
-	cmc, err := container.NewClusterManagerClient(ctx)
-	if err != nil {
-		log.Error(err)
-		os.Exit(1)
-	}
 
 	create := func() {
 
-		err := provider.Create(awsprovider,cmc, ctx, cluster.Project,
+		err := provider.Create(awsprovider,cluster.Project,
 			cluster.Region, cluster.ShortName,
 			cluster.Zones,
 			int32(cluster.InitialNodeCount),
@@ -68,7 +62,7 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 		}
 	}
 	delete := func(){
-		err := provider.Delete(awsprovider,cmc, ctx, cluster.Project,
+		err := provider.Delete(awsprovider,cluster.Project,
 			cluster.Region, cluster.ShortName)
 		if err != nil {
 			color.Red(err.Error())
@@ -98,21 +92,33 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	return nil
 }
 
-func GoogleCloudPlatformClusterProcessor(commandFlag configuration.CommandFlag,
-	cluster kinds.ProviderCluster) error {
+
+func NewGoogleCloudPlatformConfig() (*gcp.GCPProvider,error) {
 
 	gcpProviderClient := &gcp.GCPProvider{}
 
-	ctx := context.Background()
-	cmc, err := container.NewClusterManagerClient(ctx)
+	gcpProviderClient.Context = context.Background()
+
+	cmc, err := container.NewClusterManagerClient(gcpProviderClient.Context)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
+	gcpProviderClient.ClusterManagerClient = cmc
+
+	return gcpProviderClient,nil
+}
+
+
+func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
+	commandFlag configuration.CommandFlag,
+	cluster kinds.ProviderCluster) error {
+
+
 
 	create := func() {
 
-		err := provider.Create(gcpProviderClient,cmc, ctx, cluster.Project,
+		err := provider.Create(gcpProvider,cluster.Project,
 			cluster.Region, cluster.ShortName,
 			cluster.Zones,
 			int32(cluster.InitialNodeCount),
@@ -135,7 +141,7 @@ func GoogleCloudPlatformClusterProcessor(commandFlag configuration.CommandFlag,
 		}
 	}
 	delete := func() {
-		err := provider.Delete(gcpProviderClient,cmc, ctx, cluster.Project,
+		err := provider.Delete(gcpProvider, cluster.Project,
 			cluster.Region, cluster.ShortName)
 		if err != nil {
 			color.Red(err.Error())

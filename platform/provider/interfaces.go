@@ -1,37 +1,33 @@
 package provider
 
 import (
-	"cloud.google.com/go/container/apiv1"
-	"context"
 	"github.com/AlexsJones/gravitywell/kinds"
 )
 
 type IProvider interface {
-	Create(c *container.ClusterManagerClient, ctx context.Context, projectName string,
+	Create(projectName string,
 		locationName string, clusterName string, locations []string, initialNodeCount int32,
 		initialNodeType string, clusterLabels map[string]string, nodePools []kinds.NodePool) error
-	Delete(c *container.ClusterManagerClient, ctx context.Context, projectName string,
-		locationName string, clusterName string) error
-	List(c *container.ClusterManagerClient, ctx context.Context, projectName string) error
+	Delete(projectName string, locationName string, clusterName string) error
+	List(projectName string) error
 }
 
-func Create(i IProvider,c *container.ClusterManagerClient, ctx context.Context, projectName string,
+func Create(i IProvider,  projectName string,
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string, clusterLabels map[string]string, nodePools []kinds.NodePool) error{
 
-	return i.Create(c,ctx,projectName,
+	return i.Create(projectName,
 		locationName,clusterName,
 		locations,initialNodeCount,
 		initialNodeType,
 		clusterLabels,nodePools)
 }
 
-func Delete(i IProvider, c *container.ClusterManagerClient, ctx context.Context, projectName string,
-	locationName string, clusterName string) error {
+func Delete(i IProvider, projectName string, locationName string, clusterName string) error {
 
-		return i.Delete(c,ctx,projectName,locationName,clusterName)
+	return i.Delete(projectName,locationName,clusterName)
 }
 
-func List(i IProvider, c *container.ClusterManagerClient, ctx context.Context, projectName string) error {
-	return i.List(c,ctx,projectName)
+func List(i IProvider,  projectName string) error {
+	return i.List(projectName)
 }

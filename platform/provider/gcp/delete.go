@@ -1,15 +1,13 @@
 package gcp
 
 import (
-	"cloud.google.com/go/container/apiv1"
-	"context"
 	"fmt"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"time"
 )
 
-func (GCPProvider)Delete(c *container.ClusterManagerClient, ctx context.Context, projectName string,
+func (g *GCPProvider)Delete(projectName string,
 	locationName string,
 	clusterName string) error {
 
@@ -18,7 +16,7 @@ func (GCPProvider)Delete(c *container.ClusterManagerClient, ctx context.Context,
 		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName, locationName, clusterName),
 	}
 
-	clusterResponse, err := c.DeleteCluster(ctx, clusterReq)
+	clusterResponse, err := g.ClusterManagerClient.DeleteCluster(g.Context, clusterReq)
 	if err != nil {
 		color.Red(err.Error())
 		return err
@@ -27,7 +25,9 @@ func (GCPProvider)Delete(c *container.ClusterManagerClient, ctx context.Context,
 
 	for {
 		_, err :=
-			c.GetCluster(ctx, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
+			g.ClusterManagerClient.GetCluster(g.Context,
+				&containerpb.GetClusterRequest{Name:
+					fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
 				locationName, clusterName)})
 
 		if err != nil {
