@@ -5,11 +5,12 @@ import (
 )
 
 
-func (AWSProvider) Create(sprojectName string,
+func (awsp *AWSProvider) Create(sprojectName string,
 	locationName string, clusterName string, locations []string, initialNodeCount int32,
 	initialNodeType string, clusterLabels map[string]string,
 	nodePools []kinds.NodePool) error {
 
+	
 
 return nil
 }
