@@ -5,29 +5,23 @@ import (
 )
 
 type IProvider interface {
-	Create(projectName string,
-		locationName string, clusterName string, locations []string, initialNodeCount int32,
-		initialNodeType string, clusterLabels map[string]string, nodePools []kinds.NodePool) error
-	Delete(projectName string, locationName string, clusterName string) error
-	List(projectName string) error
+	Create(cluster kinds.ProviderCluster) error
+
+	Delete(cluster kinds.ProviderCluster) error
+
+	List(cluster kinds.ProviderCluster) error
 }
 
-func Create(i IProvider,  projectName string,
-	locationName string, clusterName string, locations []string, initialNodeCount int32,
-	initialNodeType string, clusterLabels map[string]string, nodePools []kinds.NodePool) error{
+func Create(i IProvider, cluster kinds.ProviderCluster) error{
 
-	return i.Create(projectName,
-		locationName,clusterName,
-		locations,initialNodeCount,
-		initialNodeType,
-		clusterLabels,nodePools)
+	return i.Create(cluster)
 }
 
-func Delete(i IProvider, projectName string, locationName string, clusterName string) error {
+func Delete(i IProvider, cluster kinds.ProviderCluster) error {
 
-	return i.Delete(projectName,locationName,clusterName)
+	return i.Delete(cluster)
 }
 
-func List(i IProvider,  projectName string) error {
-	return i.List(projectName)
+func List(i IProvider,  cluster kinds.ProviderCluster) error {
+	return i.List(cluster)
 }

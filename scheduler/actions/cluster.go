@@ -3,6 +3,7 @@ package actions
 import (
 	"cloud.google.com/go/container/apiv1"
 	"context"
+	"errors"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/platform/provider"
@@ -20,9 +21,13 @@ import (
 func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider,error){
 	awsp := awsprovider.AWSProvider{}
 
+	awsP := os.Getenv("AWS_PROFILE_NAME")
+	if awsP == "" {
+		return nil,errors.New("no AWS_PROFILE_NAME")
+	}
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-west-2"),
-		Credentials: credentials.NewSharedCredentials("", "test-account"),
+		Credentials: credentials.NewSharedCredentials("",awsP),
 	})
 	if err != nil {
 		return nil,err
@@ -39,12 +44,7 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 
 	create := func() {
 
-		err := provider.Create(awsprovider,cluster.Project,
-			cluster.Region, cluster.ShortName,
-			cluster.Zones,
-			int32(cluster.InitialNodeCount),
-			cluster.InitialNodeType,
-			cluster.Labels, cluster.NodePools)
+		err := provider.Create(awsprovider,cluster)
 
 		if err != nil {
 			color.Red(err.Error())
@@ -62,13 +62,12 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 		}
 	}
 	delete := func(){
-		err := provider.Delete(awsprovider,cluster.Project,
-			cluster.Region, cluster.ShortName)
+		err := provider.Delete(awsprovider,cluster)
 		if err != nil {
 			color.Red(err.Error())
 		}
 		// Run post delete -----------------------------------------------------
-		for _, executeCommand := range cluster.PostDeleteHooak {
+		for _, executeCommand := range cluster.PostDeleteHook {
 			if executeCommand.Execute.Shell != "" {
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
@@ -114,16 +113,9 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 	commandFlag configuration.CommandFlag,
 	cluster kinds.ProviderCluster) error {
 
-
-
 	create := func() {
 
-		err := provider.Create(gcpProvider,cluster.Project,
-			cluster.Region, cluster.ShortName,
-			cluster.Zones,
-			int32(cluster.InitialNodeCount),
-			cluster.InitialNodeType,
-			cluster.Labels, cluster.NodePools)
+		err := provider.Create(gcpProvider,cluster)
 
 		if err != nil {
 			color.Red(err.Error())
@@ -141,13 +133,12 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 		}
 	}
 	delete := func() {
-		err := provider.Delete(gcpProvider, cluster.Project,
-			cluster.Region, cluster.ShortName)
+		err := provider.Delete(gcpProvider, cluster)
 		if err != nil {
 			color.Red(err.Error())
 		}
 		// Run post delete -----------------------------------------------------
-		for _, executeCommand := range cluster.PostDeleteHooak {
+		for _, executeCommand := range cluster.PostDeleteHook {
 			if executeCommand.Execute.Shell != "" {
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)

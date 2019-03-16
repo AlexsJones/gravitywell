@@ -2,14 +2,15 @@ package gcp
 
 import (
 	"fmt"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (g *GCPProvider)List(projectName string) error {
+func (g *GCPProvider)List(clusterp kinds.ProviderCluster) error {
 
 	clusterReq := &containerpb.ListClustersRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/-", projectName),
+		Parent: fmt.Sprintf("projects/%s/locations/-", clusterp.Project),
 	}
 
 	clusterResponse, err := g.ClusterManagerClient.ListClusters(g.Context, clusterReq)
@@ -21,7 +22,7 @@ func (g *GCPProvider)List(projectName string) error {
 
 	for _, cluster := range clusterResponse.Clusters {
 		req := &containerpb.ListNodePoolsRequest{
-			Parent: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName, cluster.Location, cluster.Name),
+			Parent: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project, cluster.Location, cluster.Name),
 		}
 
 		color.Green(fmt.Sprintf("Cluster %s located in %s status: %s\n", cluster.Name, cluster.Location, cluster.Status))

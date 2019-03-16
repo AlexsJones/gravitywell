@@ -7,3 +7,4 @@ staging
 .gravitywell
 deployment
 _config.yml
+example-*/deployment/*

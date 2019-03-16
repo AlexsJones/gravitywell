@@ -23,6 +23,10 @@ type ProviderCluster struct {
 	ShortName        string            `yaml:"ShortName"`
 	Project          string            `yaml:"Project"`
 	NodePools        []NodePool `yaml:"NodePools"`
+	RoleARN         string   `yaml:"RoleARN"`
+	KubernetesVersion string `yaml:"KubernetesVersion"`
+	SecurityGroupID []string `yaml:"SecurityGroupId"`
+	SubnetID        []string `yaml:"SubnetId"`
 	OauthScopes     string `yaml:"OauthScopes"`
 	PostInstallHook []struct {
 		Execute struct {
@@ -30,7 +34,7 @@ type ProviderCluster struct {
 			Path  string `yaml:"Path"`
 		} `yaml:"Execute"`
 	} `yaml:"PostInstallHook"`
-	PostDeleteHooak []struct {
+	PostDeleteHook []struct {
 		Execute struct {
 			Shell string `yaml:"Shell"`
 			Path  string `yaml:"Path"`

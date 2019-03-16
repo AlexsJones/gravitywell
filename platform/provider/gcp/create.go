@@ -9,15 +9,12 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (g *GCPProvider)Create(projectName string,
-	locationName string, clusterName string, locations []string, initialNodeCount int32,
-	initialNodeType string, clusterLabels map[string]string,
-	nodePools []kinds.NodePool) error {
+func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 
 	//Convert generic node pool type into a specific GCP resource
 	var convertedNodePool []*containerpb.NodePool
 
-	for _, model := range nodePools {
+	for _, model := range clusterp.NodePools {
 		nodePool := new(containerpb.NodePool)
 		nodePool.Name = model.Name
 		nodePool.Config = new(containerpb.NodeConfig)
@@ -26,8 +23,8 @@ func (g *GCPProvider)Create(projectName string,
 
 		var labels = map[string]string{}
 
-		if len(clusterLabels) > 0 {
-			for index, element := range clusterLabels {
+		if len(clusterp.Labels) > 0 {
+			for index, element := range clusterp.Labels {
 				labels[index] = element
 			}
 		}
@@ -44,29 +41,29 @@ func (g *GCPProvider)Create(projectName string,
 
 	// ----------------------------------------------------------------
 	var cluster *containerpb.Cluster
-	if len(nodePools) == 0 {
+	if len(clusterp.NodePools) == 0 {
 
 		cluster = &containerpb.Cluster{
-			Name:             clusterName,
-			Locations:        locations,
-			InitialNodeCount: initialNodeCount,
+			Name:             clusterp.ShortName,
+			Locations:        clusterp.Zones,
+			InitialNodeCount: int32(clusterp.InitialNodeCount),
 			NodeConfig: &containerpb.NodeConfig{
-				MachineType: initialNodeType,
+				MachineType: clusterp.InitialNodeType,
 			},
-			ResourceLabels: clusterLabels,
+			ResourceLabels: clusterp.Labels,
 		}
 
 	} else {
 		cluster = &containerpb.Cluster{
-			Name:           clusterName,
-			Locations:      locations,
+			Name:             clusterp.ShortName,
+			Locations:        clusterp.Zones,
 			NodePools:      convertedNodePool,
-			ResourceLabels: clusterLabels,
+			ResourceLabels: clusterp.Labels,
 		}
 	}
 	clusterReq := &containerpb.CreateClusterRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectName,
-			locationName),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", clusterp.Project,
+			clusterp.Region),
 		Cluster: cluster,
 	}
 
@@ -79,8 +76,8 @@ func (g *GCPProvider)Create(projectName string,
 
 	for {
 		clust, err :=
-			g.ClusterManagerClient.GetCluster(g.Context, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName, clusterName)})
+			g.ClusterManagerClient.GetCluster(g.Context, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
+				clusterp.Region, clusterp.ShortName)})
 		if err != nil {
 			return err
 		}

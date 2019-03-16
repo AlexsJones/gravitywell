@@ -6,6 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
 
+**Update** AWS API now in Alpha for simultaneous GCP/AWS cluster builds
+
 Gravitywell is designed to create kubernetes clusters and deploy your applications.
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
 It lets you store your entire container infrastructure as code.
@@ -55,7 +57,7 @@ _Lets take it for a spin_
 #If you've looked at the templates you'll see a helmesque style of interpolation
 # "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
 
-vortex --output examples-0/deployment --template examples-0/templates \
+vortex --output example-0/deployment --template example-0/templates \
 --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=testcluster"
 
 # Now an examples/templates folder exists you simple run...

@@ -1,0 +1,22 @@
+APIVersion: "v1"
+Kind: "Cluster"
+Strategy:
+  - Provider:
+      Name: "Amazon Web Services"
+      Clusters:
+        - Cluster:
+            FullName: "{{.projectname}}_{{.clustername}}"
+            ShortName: "{{.clustername}}"
+            Project: "{{.projectname}}"
+            #Example ARN
+            RoleARN: "arn:aws:iam::976358786557:role/EKSRole"
+            KubernetesVersion: "1.11"
+            #Example SG
+            SecurityGroupId: ["sg-c76452b6"]
+            #Example Subnets
+            SubnetId: ["subnet-7d52a956","subnet-980d99d3","subnet-dec28384","subnet-644e241d"]
+
+            PostInstallHook:
+                - Execute:
+                      Path: "."
+                      Shell: "aws eks --region {{.projectregion}} update-kubeconfig --name {{.clustername}}"

@@ -2,18 +2,18 @@ package gcp
 
 import (
 	"fmt"
+	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/fatih/color"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"time"
 )
 
-func (g *GCPProvider)Delete(projectName string,
-	locationName string,
-	clusterName string) error {
+func (g *GCPProvider)Delete(clusterp kinds.ProviderCluster) error {
 
 	clusterReq := &containerpb.DeleteClusterRequest{
 
-		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName, locationName, clusterName),
+		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
+			clusterp.Region, clusterp.ShortName),
 	}
 
 	clusterResponse, err := g.ClusterManagerClient.DeleteCluster(g.Context, clusterReq)
@@ -27,8 +27,8 @@ func (g *GCPProvider)Delete(projectName string,
 		_, err :=
 			g.ClusterManagerClient.GetCluster(g.Context,
 				&containerpb.GetClusterRequest{Name:
-					fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectName,
-				locationName, clusterName)})
+					fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
+						clusterp.Region, clusterp.ShortName)})
 
 		if err != nil {
 			//I know this looks awful but you need to test if the cluster is alive

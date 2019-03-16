@@ -85,14 +85,18 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 					color.Red(fmt.Sprintf("Skipping empty file %s", info.Name()))
 					return nil
 				}
-				LoadConfigurationFromFile(path, conf)
+				if err := LoadConfigurationFromFile(path, conf); err != nil {
+					color.Red(fmt.Sprintf(err.Error()))
+				}
 				return nil
 			})
 		if err != nil {
 			return nil, err
 		}
 	case mode.IsRegular():
-		LoadConfigurationFromFile(path, conf)
+		if err := LoadConfigurationFromFile(path, conf); err != nil {
+			color.Red(fmt.Sprintf(err.Error()))
+		}
 	}
 	return conf, nil
 }
