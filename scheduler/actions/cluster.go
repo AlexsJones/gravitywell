@@ -21,12 +21,17 @@ import (
 func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider,error){
 	awsp := awsprovider.AWSProvider{}
 
-	awsP := os.Getenv("AWS_PROFILE_NAME")
+	awsP := os.Getenv("AWS_DEFAULT_PROFILE")
 	if awsP == "" {
-		return nil,errors.New("no AWS_PROFILE_NAME")
+		return nil,errors.New("no AWS_DEFAULT_PROFILE")
 	}
+	awsR := os.Getenv("AWS_DEFAULT_REGION")
+	if awsR == "" {
+		return nil,errors.New("no AWS_DEFAULT_REGION")
+	}
+	awsp.Region = awsR
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-west-2"),
+		Region:      aws.String(awsR),
 		Credentials: credentials.NewSharedCredentials("",awsP),
 	})
 	if err != nil {

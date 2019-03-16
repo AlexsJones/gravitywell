@@ -33,23 +33,27 @@ To get started you'll need golang installed or to fetch the binary from homebrew
 
 ### Prerequisites
 
-The current implementation works with Google Cloud Platform.
-This means you'll need a service account with at least Kubernetes cluster admin scopes.
+The current implementation works with Google Cloud Platform & Amazon web services.
 
-- See more here:`https://cloud.google.com/iam/docs/creating-managing-service-accounts`
+_For Google Cloud Platform please set your service account for the right project_
+
+`export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/alex-example-e28058e8985b.json`
+
+_For Amazon Web Services please set the aws profile name and region_
+
+`export AWS_DEFAULT_PROFILE=alexprod`
+`export AWS_DEFAULT_REGION=us-west-2`
+
+Aws also requires additional tools for authentication found [here](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
+
+
+### Running
+
+At this point you are ready to run gravitywell.
 
 For working with templates as per the examples you'll also need [vortex](`go get github.com/AlexsJones/gravitywell`)
 _This can be installed either via golang or as a binary also_
 
-### Running
-
-Once you have the service account you'll want to export the path:
-
-`export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/alex-example-e28058e8985b.json`
-
-
-At this point you are ready to run gravitywell.
-Remember to have [vortex](`go get github.com/AlexsJones/gravitywell`) installed if you want to avoid hand writing manifests.
 
 _Lets take it for a spin_
 
