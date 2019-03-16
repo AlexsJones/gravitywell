@@ -16,10 +16,10 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 
 	for _, model := range clusterp.NodePools {
 		nodePool := new(containerpb.NodePool)
-		nodePool.Name = model.Name
+		nodePool.Name = model.NodePool.Name
 		nodePool.Config = new(containerpb.NodeConfig)
-		nodePool.Config.MachineType = model.NodeType
-		nodePool.InitialNodeCount = int32(model.Count)
+		nodePool.Config.MachineType = model.NodePool.NodeType
+		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 
 		var labels = map[string]string{}
 
@@ -29,8 +29,8 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 			}
 		}
 
-		if len(model.Labels) > 0 {
-			for index, element := range model.Labels {
+		if len(model.NodePool.Labels) > 0 {
+			for index, element := range model.NodePool.Labels {
 				labels[index] = element
 			}
 		}

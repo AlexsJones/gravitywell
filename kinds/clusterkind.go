@@ -8,12 +8,7 @@ type ClusterKind struct {
 		Provider Provider `yaml:"Provider"`
 	} `yaml:"Strategy"`
 }
-type NodePool struct {
-		Count    int               `yaml:"Count"`
-		Name     string            `yaml:"Name"`
-		NodeType string            `yaml:"NodeType"`
-		Labels   map[string]string `yaml:"Labels"`
-}
+
 
 type ProviderCluster struct {
 	InitialNodeCount int               `yaml:"InitialNodeCount"`
@@ -22,7 +17,14 @@ type ProviderCluster struct {
 	FullName         string            `yaml:"FullName"`
 	ShortName        string            `yaml:"ShortName"`
 	Project          string            `yaml:"Project"`
-	NodePools        []NodePool `yaml:"NodePools"`
+	NodePools []struct {
+		NodePool struct {
+			Count  int `yaml:"Count"`
+			Labels   map[string]string `yaml:"Labels"`
+			Name     string `yaml:"Name"`
+			NodeType string `yaml:"NodeType"`
+		} `yaml:"NodePool"`
+	} `yaml:"NodePools"`
 	RoleARN         string   `yaml:"RoleARN"`
 	KubernetesVersion string `yaml:"KubernetesVersion"`
 	SecurityGroupID []string `yaml:"SecurityGroupId"`

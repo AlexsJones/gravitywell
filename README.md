@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
 
-**Update** AWS API now in Alpha for simultaneous GCP/AWS cluster builds
+**Update** AWS API now in Alpha for GCP/AWS cluster builds
 
 Gravitywell is designed to create kubernetes clusters and deploy your applications.
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
@@ -55,18 +55,18 @@ For working with templates as per the examples you'll also need [vortex](`go get
 _This can be installed either via golang or as a binary also_
 
 
-_Lets take it for a spin_
+_Lets take it for a spin using the gcp example_
 
 ```
 #If you've looked at the templates you'll see a helmesque style of interpolation
 # "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
 
-vortex --output example-0/deployment --template example-0/templates \
+vortex --output example-gcp/deployment --template example-gcp/templates \
 --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=testcluster"
 
 # Now an examples/templates folder exists you simple run...
 
-gravitywell create -f examples-0/deployment
+gravitywell create -f examples-gcp/deployment
 
 # This will now start to provision any clusters that are required and deploy applications
 
