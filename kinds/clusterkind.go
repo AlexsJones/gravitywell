@@ -29,7 +29,7 @@ type ProviderCluster struct {
 	KubernetesVersion string `yaml:"KubernetesVersion"`
 	SecurityGroupID []string `yaml:"SecurityGroupId"`
 	SubnetID        []string `yaml:"SubnetId"`
-	OauthScopes     string `yaml:"OauthScopes"`
+	OauthScopes     []string `yaml:"OauthScopes"`
 	PostInstallHook []struct {
 		Execute struct {
 			Shell string `yaml:"Shell"`

@@ -22,6 +22,48 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:b3a9767c1e12650867eb77a6df98c1798be77a9e35a3144c09082336949f11ed"
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/awsutil",
+    "aws/client",
+    "aws/client/metadata",
+    "aws/corehandlers",
+    "aws/credentials",
+    "aws/credentials/ec2rolecreds",
+    "aws/credentials/endpointcreds",
+    "aws/credentials/processcreds",
+    "aws/credentials/stscreds",
+    "aws/csm",
+    "aws/defaults",
+    "aws/ec2metadata",
+    "aws/endpoints",
+    "aws/request",
+    "aws/session",
+    "aws/signer/v4",
+    "internal/ini",
+    "internal/sdkio",
+    "internal/sdkrand",
+    "internal/sdkuri",
+    "internal/shareddefaults",
+    "private/protocol",
+    "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/restjson",
+    "private/protocol/xml/xmlutil",
+    "service/eks",
+    "service/sts",
+  ]
+  pruneopts = "UT"
+  revision = "faec342d9a8d588e9d06be4516fe1bbefbae195d"
+  version = "v1.19.7"
+
+[[projects]]
   branch = "master"
   digest = "1:58dfcf4a67f825775a6c7d7d08f52f77ff4978c7b41072b7f7fa07f8699bd43b"
   name = "github.com/dimiro1/banner"
@@ -156,6 +198,13 @@
   pruneopts = "UT"
   revision = "c6ca198ec95c841fdb89fc0de7496fed11ab854e"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c2b33e84"
 
 [[projects]]
   digest = "1:b6bbd2f9e0724bd81890c8644259f920c6d61c08453978faff0bebd25f3e7d3e"
@@ -767,6 +816,11 @@
   input-imports = [
     "cloud.google.com/go/container/apiv1",
     "github.com/Sirupsen/logrus",
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/awserr",
+    "github.com/aws/aws-sdk-go/aws/credentials",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/eks",
     "github.com/dimiro1/banner",
     "github.com/fatih/color",
     "github.com/jessevdk/go-flags",

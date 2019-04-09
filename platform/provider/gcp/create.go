@@ -20,7 +20,6 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 		nodePool.Config = new(containerpb.NodeConfig)
 		nodePool.Config.MachineType = model.NodePool.NodeType
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
-
 		var labels = map[string]string{}
 
 		if len(clusterp.Labels) > 0 {
@@ -49,6 +48,7 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 			InitialNodeCount: int32(clusterp.InitialNodeCount),
 			NodeConfig: &containerpb.NodeConfig{
 				MachineType: clusterp.InitialNodeType,
+				OauthScopes: clusterp.OauthScopes,
 			},
 			ResourceLabels: clusterp.Labels,
 		}
