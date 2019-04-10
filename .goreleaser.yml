@@ -5,9 +5,10 @@ before:
     # you may remove this if you don't use vgo
     - dep ensure -v
 builds:
-- main: ./cmd/binone/main.go
-  ldflags: -s -w -X "main.version={{.Env.VERSION}}"
-  env: CGO_ENABLED=0
+- ldflags:
+  - -s -w -X "main.version={{.Env.VERSION}}"
+- env:
+  - CGO_ENABLED=0
   goos:
     - linux
     - darwin
