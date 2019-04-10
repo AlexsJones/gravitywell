@@ -22,7 +22,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:b3a9767c1e12650867eb77a6df98c1798be77a9e35a3144c09082336949f11ed"
+  digest = "1:aaff76607b70f6d897984d27bbd2b1c62e4818378773b5efee9f7398759bbb4e"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -56,6 +56,7 @@
     "private/protocol/rest",
     "private/protocol/restjson",
     "private/protocol/xml/xmlutil",
+    "service/cloudformation",
     "service/eks",
     "service/sts",
   ]
@@ -820,6 +821,7 @@
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/cloudformation",
     "github.com/aws/aws-sdk-go/service/eks",
     "github.com/dimiro1/banner",
     "github.com/fatih/color",

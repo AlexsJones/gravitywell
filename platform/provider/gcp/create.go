@@ -59,6 +59,10 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 			Locations:        clusterp.Zones,
 			NodePools:      convertedNodePool,
 			ResourceLabels: clusterp.Labels,
+			NodeConfig: &containerpb.NodeConfig{
+				MachineType: clusterp.InitialNodeType,
+				OauthScopes: clusterp.OauthScopes,
+			},
 		}
 	}
 	clusterReq := &containerpb.CreateClusterRequest{

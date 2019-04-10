@@ -88,6 +88,9 @@ func (awsp *AWSProvider) Create(clusterp kinds.ProviderCluster) error {
 
 		if *do.Cluster.Status == "ACTIVE" {
 			color.Green("Cluster running")
+
+			//Build node groups
+
 			return nil
 		}
 
