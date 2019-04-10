@@ -5,16 +5,11 @@ before:
     # you may remove this if you don't use vgo
     - dep ensure -v
 builds:
-- ldflags:
-  - -s -w -X "main.version={{.Env.VERSION}}"
-- env:
-  - CGO_ENABLED=0
-  goos:
-    - linux
-    - darwin
-archive:
-  replacements:
-    darwin: Darwin
+  - main: main.go
+    ldflags:
+      - -s -w -X "main.version={{.Env.VERSION}}"
+    env:
+      - CGO_ENABLED=0
 checksum:
   name_template: 'checksums.txt'
 snapshot:

@@ -17,8 +17,6 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 	for _, model := range clusterp.NodePools {
 		nodePool := new(containerpb.NodePool)
 		nodePool.Name = model.NodePool.Name
-		nodePool.Config = new(containerpb.NodeConfig)
-		nodePool.Config.MachineType = model.NodePool.NodeType
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
 		nodePool.Config =  &containerpb.NodeConfig{
 			MachineType: clusterp.InitialNodeType,
