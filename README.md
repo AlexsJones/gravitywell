@@ -12,6 +12,13 @@ Gravitywell is designed to create kubernetes clusters and deploy your applicatio
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
 It lets you store your entire container infrastructure as code.
 
+Supported providers:
+
+- [x] Google Cloud Platform
+- [ ] Amazon Web Services (Only partially at this time)
+
+
+
 
 ![flowexample](resources/gravitywellflow.png)
 
