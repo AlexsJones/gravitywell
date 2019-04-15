@@ -2,6 +2,8 @@
 
 <img src="https://github.com/ashleymcnamara/gophers/blob/master/SPACEGIRL_GOPHER.png?raw=true" alt="drawing" width="200"/>
 
+![ProjectStatus](https://img.shields.io/badge/project%20status-Alpha-yellow.svg)
+
 [![Maintainability](https://api.codeclimate.com/v1/badges/a6cd570642c5aeeedaf9/maintainability)](https://codeclimate.com/github/AlexsJones/gravitywell/maintainability)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
