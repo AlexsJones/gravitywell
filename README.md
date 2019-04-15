@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
 
-**Update** AWS API now in Alpha for GCP/AWS cluster builds
+**Update** AWS API now in Alpha for AWS EKS - Still building a CFN for auto node pool creation. For decent results use a more mature tool for AWS such as [eksctl](https://github.com/weaveworks/eksctl)
 
 Gravitywell is designed to create kubernetes clusters and deploy your applications.
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
