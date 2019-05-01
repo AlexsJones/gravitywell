@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/AlexsJones/gravitywell/scheduler/planner/standard"
@@ -39,9 +40,9 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 		case msg := <-statusWatcher:
 			if msg.Halt() {
 				//Halting
-				log.Fatal("Received halt")
+				fmt.Println("Received halt")
+				return nil
 			}
 		}
 	}
-
 }
