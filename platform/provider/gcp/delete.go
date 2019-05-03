@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (g *GCPProvider)Delete(clusterp kinds.ProviderCluster) error {
+func (g *GCPProvider) Delete(clusterp kinds.ProviderCluster) error {
 
 	clusterReq := &containerpb.DeleteClusterRequest{
 
@@ -26,9 +26,8 @@ func (g *GCPProvider)Delete(clusterp kinds.ProviderCluster) error {
 	for {
 		_, err :=
 			g.ClusterManagerClient.GetCluster(g.Context,
-				&containerpb.GetClusterRequest{Name:
-					fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
-						clusterp.Region, clusterp.ShortName)})
+				&containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
+					clusterp.Region, clusterp.ShortName)})
 
 		if err != nil {
 			//I know this looks awful but you need to test if the cluster is alive

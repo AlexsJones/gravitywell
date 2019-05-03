@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/color"
+	"github.com/google/logger"
 	"github.com/jpillora/backoff"
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +19,7 @@ import (
 func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Deployment,
 	namespace string, opts configuration.Options,
 	commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
-	log.Debug("Found deployment resource")
+	logger.Info("Found deployment resource")
 
 	deploymentClient := k.ExtensionsV1beta1().Deployments(namespace)
 
@@ -38,7 +38,7 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.Replicas {
 				return nil
 			}
-			log.Debug(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
+			logger.Info(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
 				stsResponse.Status.ReadyReplicas,
 				stsResponse.Status.Replicas))
 
@@ -52,16 +52,16 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 	if opts.DryRun {
 		_, err := deploymentClient.Get(objdep.Name, v12.GetOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("DRY-RUN: Deployment resource %s does not exist\n", objdep.Name))
+			logger.Error(fmt.Sprintf("DRY-RUN: Deployment resource %s does not exist\n", objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			log.Debug(fmt.Sprintf("DRY-RUN: Deployment resource %s exists\n", objdep.Name))
+			logger.Info(fmt.Sprintf("DRY-RUN: Deployment resource %s exists\n", objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
 	//Replace -------------------------------------------------------------------
 	if commandFlag == configuration.Replace {
-		log.Debug("Removing resource in preparation for redeploy")
+		logger.Info("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
 		_ = deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 		for {
@@ -70,11 +70,11 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 				break
 			}
 			time.Sleep(time.Second * 1)
-			log.Debug(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
+			logger.Info(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
+			logger.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		if shouldAwaitDeployment {
@@ -82,14 +82,14 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 				return state.EDeploymentStateError, nil
 			}
 		}
-		log.Debug("Deployment deployed")
+		logger.Info("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
 		_, err := deploymentClient.Create(objdep)
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
+			logger.Error(fmt.Sprintf("Could not deploy Deployment resource %s due to %s", objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		if shouldAwaitDeployment {
@@ -97,14 +97,14 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 				return state.EDeploymentStateError, nil
 			}
 		}
-		log.Debug("Deployment deployed")
+		logger.Info("Deployment deployed")
 		return state.EDeploymentStateOkay, nil
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 		_, err := deploymentClient.Update(objdep)
 		if err != nil {
-			log.Error("Could not update Deployment")
+			logger.Error("Could not update Deployment")
 			return state.EDeploymentStateCantUpdate, err
 		}
 		if shouldAwaitDeployment {
@@ -112,17 +112,17 @@ func execV1Betav1DeploymentResouce(k kubernetes.Interface, objdep *v1betav1.Depl
 				return state.EDeploymentStateError, nil
 			}
 		}
-		log.Debug("Deployment updated")
+		logger.Info("Deployment updated")
 		return state.EDeploymentStateUpdated, nil
 	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
 		err := deploymentClient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
-			log.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
+			logger.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
 		}
-		log.Debug(fmt.Sprintf("%s deleted", objdep.Kind))
+		logger.Info(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
 	return state.EDeploymentStateNil, errors.New("No kubectl command")

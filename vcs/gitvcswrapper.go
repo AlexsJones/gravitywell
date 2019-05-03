@@ -3,7 +3,7 @@ package vcs
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,10 +20,10 @@ func nameForRepository(repoUrl string) string {
 func FetchRepo(remote string, opt configuration.Options) (string, error) {
 	remoteVCSRepoName := nameForRepository(remote)
 	if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); !os.IsNotExist(err) {
-		log.Debug(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
+		logger.Info(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 		return remoteVCSRepoName, nil
 	}
-	log.Debug(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
+	logger.Info(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 	gvcs := new(GitVCS)
 	_, err := gvcs.Fetch(path.Join(opt.TempVCSPath, remoteVCSRepoName), remote, opt.SSHKeyPath)
 	return remoteVCSRepoName, err

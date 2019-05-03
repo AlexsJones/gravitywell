@@ -5,7 +5,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/platform"
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"os"
@@ -15,10 +15,10 @@ import (
 )
 
 func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
-	log.Info(fmt.Sprintf("Switching to cluster: %s\n", clusterName))
+	logger.Info(fmt.Sprintf("Switching to cluster: %s\n", clusterName))
 	restclient, k8siface, err := platform.GetKubeClient(clusterName)
 	if err != nil {
-		log.Error(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	return restclient, k8siface
@@ -35,7 +35,7 @@ func ExecuteKubernetesAction(action kinds.Action, clusterName string,
 	if tp, ok := action.Execute.Configuration["AwaitDeployment"]; ok && tp != "" {
 		b, err := strconv.ParseBool(tp)
 		if err != nil {
-			log.Error(err.Error())
+			logger.Error(err.Error())
 		}
 		shouldAwaitDeployment = b
 	}
@@ -48,14 +48,14 @@ func ExecuteKubernetesAction(action kinds.Action, clusterName string,
 			return nil
 		})
 	if err != nil {
-		log.Error(err.Error())
+		logger.Error(err.Error())
 	}
 	_, k8siface := clientForCluster(clusterName)
 	err = platform.GenerateDeploymentPlan(
 		k8siface, fileList,
 		deployment.Namespace, opt, commandFlag, shouldAwaitDeployment)
 	if err != nil {
-		log.Error(err.Error())
+		logger.Error(err.Error())
 	}
 	//---------------------------------
 }

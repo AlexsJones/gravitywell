@@ -12,7 +12,7 @@ type IProvider interface {
 	List(cluster kinds.ProviderCluster) error
 }
 
-func Create(i IProvider, cluster kinds.ProviderCluster) error{
+func Create(i IProvider, cluster kinds.ProviderCluster) error {
 
 	return i.Create(cluster)
 }
@@ -22,6 +22,6 @@ func Delete(i IProvider, cluster kinds.ProviderCluster) error {
 	return i.Delete(cluster)
 }
 
-func List(i IProvider,  cluster kinds.ProviderCluster) error {
+func List(i IProvider, cluster kinds.ProviderCluster) error {
 	return i.List(cluster)
 }

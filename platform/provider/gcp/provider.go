@@ -6,6 +6,6 @@ import (
 )
 
 type GCPProvider struct {
-	Context context.Context
+	Context              context.Context
 	ClusterManagerClient *container.ClusterManagerClient
 }

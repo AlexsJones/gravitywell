@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler"
-	log "github.com/Sirupsen/logrus"
 	"github.com/dimiro1/banner"
+	"github.com/google/logger"
 	"github.com/jessevdk/go-flags"
 	"os"
 	"strings"
@@ -26,15 +26,6 @@ var b = `
 {{ .AnsiColor.Cyan }}     /_____/            \/               \/                  \/           
 {{ .AnsiColor.Default }}
 `
-
-func init() {
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	log.SetOutput(os.Stdout)
-
-	// Only log the warning severity or above.
-	log.SetLevel(log.DebugLevel)
-}
 
 var Opts struct {
 	DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
@@ -81,14 +72,12 @@ func main() {
 
 	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
 	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
+		logger.Fatalf(err.Error())
 	}
 
 	sh, err := scheduler.NewScheduler(conf)
 	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
+		logger.Fatalf(err.Error())
 	}
 
 	var commandFlag configuration.CommandFlag
@@ -129,8 +118,7 @@ func main() {
 	}
 	if err :=
 		sh.Run(commandFlag, cf); err != nil {
-		log.Warn(err.Error())
-		os.Exit(1)
+		logger.Fatalf(err.Error())
 	}
 
 }

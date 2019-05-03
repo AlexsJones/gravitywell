@@ -4,7 +4,7 @@ FROM debian:stretch
 
 ENV GOPATH="/go"
 
-ENV PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin:/opt/google-cloud-sdk/bin"
+ENV PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin:/opt/google-cloud-sdk/bin:"
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
@@ -27,6 +27,8 @@ RUN export CLOUDSDK_INSTALL_DIR=/opt && \
     curl -fsSl -o go.tar.gz https://dl.google.com/go/go1.10.4.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go.tar.gz && \
     rm -f go.tar.gz
+
+RUN gcloud components install kubectl
 
 RUN mkdir -p ${GOPATH}/src/github.com/AlexsJones/ ${GOPATH}/bin && \
     curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh && \

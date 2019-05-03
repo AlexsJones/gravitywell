@@ -6,5 +6,5 @@ import (
 
 type AWSProvider struct {
 	AWSClient *session.Session
-	Region string
+	Region    string
 }

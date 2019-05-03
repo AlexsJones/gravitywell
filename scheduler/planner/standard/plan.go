@@ -64,7 +64,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 			}
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
-				err = actions.AmazonWebServicesClusterProcessor(config,p.commandFlag, clusters)
+				err = actions.AmazonWebServicesClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -77,14 +77,14 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				}
 			}
 		case "google cloud platform":
-				//Configure session
-				config, err := actions.NewGoogleCloudPlatformConfig()
-				if err != nil {
-					log.Fatal(err)
-				}
+			//Configure session
+			config, err := actions.NewGoogleCloudPlatformConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
-				err := actions.GoogleCloudPlatformClusterProcessor(config,p.commandFlag, clusters)
+				err := actions.GoogleCloudPlatformClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
 					log.Fatal(err)
 				}

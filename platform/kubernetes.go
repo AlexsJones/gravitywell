@@ -6,13 +6,14 @@ import (
 	"github.com/fatih/color"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
+	"log"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/apps/v1beta2"
@@ -75,12 +76,12 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 	for _, file := range files {
 		f, err := os.Open(file)
 		if err != nil {
-			log.Warn("Could not open file %s", file)
+			logger.Warning(fmt.Sprintf("Could not open from file %s", file))
 			continue
 		}
 		raw, err := ioutil.ReadAll(f)
 		if err != nil {
-			log.Warn("Could not read from file %s", file)
+			logger.Warning(fmt.Sprintf("Could not read from file %s", file))
 			continue
 		}
 		yamldelimiter := regexp.MustCompile(`(\A|\n)---`)
@@ -90,7 +91,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
 			if err != nil {
-				log.Warn(fmt.Sprintf("%s : %s", err.Error(), file))
+				logger.Warning(fmt.Sprintf("%s : %s", err.Error(), file))
 				continue
 			}
 			log.Printf("Decoded Kind: %s", kind.String())
@@ -117,7 +118,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			//Remove the namespace from the array and run first
 			_, err := execV1NamespaceResource(k, resource.(*v1.Namespace), namespace, opts, commandFlag)
 			if err != nil {
-				log.Error(err.Error())
+				logger.Error(err.Error())
 				continue
 			}
 		default:
@@ -132,7 +133,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 
 		s, err := DeployFromObject(k, resource, namespace, opts, commandFlag, shouldAwaitDeployment)
 		if err != nil {
-			log.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
+			logger.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 			continue
 		}
 
@@ -202,7 +203,7 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	case *storagev1b1.StorageClass:
 		response, e = execV1Beta1StorageResouce(k, obj.(*storagev1b1.StorageClass), namespace, opts, commandFlag)
 	default:
-		log.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
+		logger.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
 	}
 
 	return response, e

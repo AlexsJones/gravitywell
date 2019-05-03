@@ -5,14 +5,14 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 	"path"
 )
 
 func ExecuteShellAction(action kinds.Action, opt configuration.Options, repoName string) {
 	command, ok := action.Execute.Configuration["Command"]
 	if !ok {
-		log.Warn("Could not run the shell step as Command could not be found")
+		logger.Warning("Could not run the shell step as Command could not be found")
 		return
 	}
 
@@ -23,8 +23,8 @@ func ExecuteShellAction(action kinds.Action, opt configuration.Options, repoName
 		p = tp
 	}
 
-	log.Warn(fmt.Sprintf("Running shell command %s\n", command))
+	logger.Warning(fmt.Sprintf("Running shell command %s\n", command))
 	if err := shell.ShellCommand(command, p, true); err != nil {
-		log.Error(err.Error())
+		logger.Error(err.Error())
 	}
 }
