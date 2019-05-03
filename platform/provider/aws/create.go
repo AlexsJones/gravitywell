@@ -84,7 +84,7 @@ func (awsp *AWSProvider) Create(clusterp kinds.ProviderCluster) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%v",do)
+		fmt.Printf("%v", do)
 
 		if *do.Cluster.Status == "ACTIVE" {
 			color.Green("Cluster running")

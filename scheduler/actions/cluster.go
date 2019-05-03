@@ -10,46 +10,45 @@ import (
 	awsprovider "github.com/AlexsJones/gravitywell/platform/provider/aws"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
-	log "github.com/Sirupsen/logrus"
-	"github.com/fatih/color"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/fatih/color"
+	"github.com/google/logger"
 	"os"
 )
 
-func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider,error){
+func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider, error) {
 	awsp := awsprovider.AWSProvider{}
 
 	awsP := os.Getenv("AWS_DEFAULT_PROFILE")
 	if awsP == "" {
-		return nil,errors.New("no AWS_DEFAULT_PROFILE")
+		return nil, errors.New("no AWS_DEFAULT_PROFILE")
 	}
 	awsR := os.Getenv("AWS_DEFAULT_REGION")
 	if awsR == "" {
-		return nil,errors.New("no AWS_DEFAULT_REGION")
+		return nil, errors.New("no AWS_DEFAULT_REGION")
 	}
 	awsp.Region = awsR
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(awsR),
-		Credentials: credentials.NewSharedCredentials("",awsP),
+		Credentials: credentials.NewSharedCredentials("", awsP),
 	})
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	awsp.AWSClient = sess
 
-	return &awsp,err
+	return &awsp, err
 }
 func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	commandFlag configuration.CommandFlag,
 	cluster kinds.ProviderCluster) error {
 
-
 	create := func() {
 
-		err := provider.Create(awsprovider,cluster)
+		err := provider.Create(awsprovider, cluster)
 
 		if err != nil {
 			color.Red(err.Error())
@@ -66,8 +65,8 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 			}
 		}
 	}
-	delete := func(){
-		err := provider.Delete(awsprovider,cluster)
+	delete := func() {
+		err := provider.Delete(awsprovider, cluster)
 		if err != nil {
 			color.Red(err.Error())
 		}
@@ -96,8 +95,7 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	return nil
 }
 
-
-func NewGoogleCloudPlatformConfig() (*gcp.GCPProvider,error) {
+func NewGoogleCloudPlatformConfig() (*gcp.GCPProvider, error) {
 
 	gcpProviderClient := &gcp.GCPProvider{}
 
@@ -105,14 +103,13 @@ func NewGoogleCloudPlatformConfig() (*gcp.GCPProvider,error) {
 
 	cmc, err := container.NewClusterManagerClient(gcpProviderClient.Context)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
 	gcpProviderClient.ClusterManagerClient = cmc
 
-	return gcpProviderClient,nil
+	return gcpProviderClient, nil
 }
-
 
 func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 	commandFlag configuration.CommandFlag,
@@ -120,7 +117,7 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 
 	create := func() {
 
-		err := provider.Create(gcpProvider,cluster)
+		err := provider.Create(gcpProvider, cluster)
 
 		if err != nil {
 			color.Red(err.Error())

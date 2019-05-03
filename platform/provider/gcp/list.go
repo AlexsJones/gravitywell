@@ -7,7 +7,7 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (g *GCPProvider)List(clusterp kinds.ProviderCluster) error {
+func (g *GCPProvider) List(clusterp kinds.ProviderCluster) error {
 
 	clusterReq := &containerpb.ListClustersRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/-", clusterp.Project),

@@ -9,7 +9,7 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 )
 
-func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
+func (g *GCPProvider) Create(clusterp kinds.ProviderCluster) error {
 
 	//Convert generic node pool type into a specific GCP resource
 	var convertedNodePool []*containerpb.NodePool
@@ -18,7 +18,7 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 		nodePool := new(containerpb.NodePool)
 		nodePool.Name = model.NodePool.Name
 		nodePool.InitialNodeCount = int32(model.NodePool.Count)
-		nodePool.Config =  &containerpb.NodeConfig{
+		nodePool.Config = &containerpb.NodeConfig{
 			MachineType: clusterp.InitialNodeType,
 			OauthScopes: clusterp.OauthScopes,
 		}
@@ -57,8 +57,8 @@ func (g *GCPProvider)Create(clusterp kinds.ProviderCluster) error {
 
 	} else {
 		cluster = &containerpb.Cluster{
-			Name:             clusterp.ShortName,
-			Locations:        clusterp.Zones,
+			Name:           clusterp.ShortName,
+			Locations:      clusterp.Zones,
 			NodePools:      convertedNodePool,
 			ResourceLabels: clusterp.Labels,
 		}

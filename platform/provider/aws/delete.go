@@ -4,19 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
-	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/fatih/color"
 	"github.com/jpillora/backoff"
 	"time"
 )
-func (awsp *AWSProvider)Delete(clusterp kinds.ProviderCluster) error {
+
+func (awsp *AWSProvider) Delete(clusterp kinds.ProviderCluster) error {
 
 	ec := eks.New(awsp.AWSClient)
 
 	_, err := ec.DeleteCluster(&eks.DeleteClusterInput{
-		Name:aws.String(clusterp.ShortName),
+		Name: aws.String(clusterp.ShortName),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -58,7 +59,7 @@ func (awsp *AWSProvider)Delete(clusterp kinds.ProviderCluster) error {
 		if err != nil {
 			return nil
 		}
-		fmt.Printf("%v",do)
+		fmt.Printf("%v", do)
 
 		time.Sleep(b.Duration())
 		if b.Attempt() >= 20 {

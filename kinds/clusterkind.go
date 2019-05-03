@@ -9,7 +9,6 @@ type ClusterKind struct {
 	} `yaml:"Strategy"`
 }
 
-
 type ProviderCluster struct {
 	InitialNodeCount int               `yaml:"InitialNodeCount"`
 	InitialNodeType  string            `yaml:"InitialNodeType"`
@@ -17,20 +16,20 @@ type ProviderCluster struct {
 	FullName         string            `yaml:"FullName"`
 	ShortName        string            `yaml:"ShortName"`
 	Project          string            `yaml:"Project"`
-	NodePools []struct {
+	NodePools        []struct {
 		NodePool struct {
-			Count  int `yaml:"Count"`
+			Count    int               `yaml:"Count"`
 			Labels   map[string]string `yaml:"Labels"`
-			Name     string `yaml:"Name"`
-			NodeType string `yaml:"NodeType"`
+			Name     string            `yaml:"Name"`
+			NodeType string            `yaml:"NodeType"`
 		} `yaml:"NodePool"`
 	} `yaml:"NodePools"`
-	RoleARN         string   `yaml:"RoleARN"`
-	KubernetesVersion string `yaml:"KubernetesVersion"`
-	SecurityGroupID []string `yaml:"SecurityGroupId"`
-	SubnetID        []string `yaml:"SubnetId"`
-	OauthScopes     []string `yaml:"OauthScopes"`
-	PostInstallHook []struct {
+	RoleARN           string   `yaml:"RoleARN"`
+	KubernetesVersion string   `yaml:"KubernetesVersion"`
+	SecurityGroupID   []string `yaml:"SecurityGroupId"`
+	SubnetID          []string `yaml:"SubnetId"`
+	OauthScopes       []string `yaml:"OauthScopes"`
+	PostInstallHook   []struct {
 		Execute struct {
 			Shell string `yaml:"Shell"`
 			Path  string `yaml:"Path"`

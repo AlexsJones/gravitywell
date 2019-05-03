@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 )
 
 //ShellCommand ...
@@ -37,7 +37,7 @@ func ShellCommand(command string, path string, validated bool) error {
 		return err
 	} else {
 		if validated {
-			log.Debug("Successful")
+			logger.Info("Successful")
 		}
 	}
 	return nil

@@ -5,7 +5,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/vcs"
-	log "github.com/Sirupsen/logrus"
+	"github.com/google/logger"
 	"strings"
 )
 
@@ -17,11 +17,11 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 
 func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
-	log.Debug(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
+	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
 	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, opt)
 	if err != nil {
-		log.Error(err.Error())
+		logger.Error(err.Error())
 
 		return
 	}
