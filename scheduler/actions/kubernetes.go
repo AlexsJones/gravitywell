@@ -24,15 +24,15 @@ func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
 	return restclient, k8siface
 }
 
-func ExecuteKubernetesAction(action kinds.Action, clusterName string,
+func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 	deployment kinds.Application,
 	commandFlag configuration.CommandFlag, opt configuration.Options, repoName string) {
 	var deploymentPath = "."
 	shouldAwaitDeployment := false
-	if tp, ok := action.Execute.Configuration["Path"]; ok && tp != "" {
+	if tp, ok := action.Configuration["Path"]; ok && tp != "" {
 		deploymentPath = tp
 	}
-	if tp, ok := action.Execute.Configuration["AwaitDeployment"]; ok && tp != "" {
+	if tp, ok := action.Configuration["AwaitDeployment"]; ok && tp != "" {
 		b, err := strconv.ParseBool(tp)
 		if err != nil {
 			logger.Error(err.Error())

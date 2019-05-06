@@ -1,0 +1,12 @@
+APIVersion: "v1"
+Kind: "ActionList"
+Executions:
+  - Execute:
+    Kind: "shell"
+    Configuration:
+      Command: ./build_environment.sh default
+  - Execute:
+    Kind: "kubernetes"
+    Configuration:
+      Path: deployment #Optional value
+      AwaitDeployment: true #Optional defaults to false

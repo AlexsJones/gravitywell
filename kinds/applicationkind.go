@@ -1,17 +1,10 @@
 package kinds
 
-type Action struct {
-	Execute struct {
-		Kind          string            `yaml:"Kind"`
-		Configuration map[string]string `yaml:"Configuration"`
-	} `yaml:"Execute"`
-}
-
 type Application struct {
-	Name      string   `yaml:"Name"`
-	Namespace string   `yaml:"Namespace"`
-	Git       string   `yaml:"Git"`
-	Action    []Action `yaml:"Action"`
+	Name       string     `yaml:"Name"`
+	Namespace  string     `yaml:"Namespace"`
+	Git        string     `yaml:"Git"`
+	ActionList ActionList `yaml:"ActionList"`
 }
 
 type ApplicationCluster struct {

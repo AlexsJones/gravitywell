@@ -142,7 +142,7 @@ Strategy:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
             Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-            Action:
+            ActionList:
               - Execute:
                   Kind: "shell"
                   Configuration:
@@ -157,6 +157,45 @@ Strategy:
                   Configuration:
                     Path: deployment #Optional value
                     AwaitDeployment: true #Optional defaults to false
+```
+
+Action lists can also be seperated into the repositories being deployed to keep things clean!
+
+e.g.
+
+```
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+  - Cluster:
+      FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+      ShortName: "{{.clustername}}"
+      Applications:
+        - Application:
+            Name: "kubernetes-apache-tika"
+            Namespace: "tika"
+            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            ActionList:
+               RemotePath: ./templates/external
+```
+
+Where you can have an action list defined..
+
+```
+#./templates/external/gwdeploymentconfig.yaml
+
+APIVersion: "v1"
+Kind: "ActionList"
+ActionList:
+    - Execute:
+      Kind: "shell"
+      Configuration:
+        Command: ./build_environment.sh default
+    - Execute:
+      Kind: "kubernetes"
+      Configuration:
+        Path: deployment #Optional value
+        AwaitDeployment: true #Optional defaults to false
 ```
 
 ### Flags

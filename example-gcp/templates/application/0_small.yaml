@@ -9,7 +9,7 @@ Strategy:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
             Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-            Action:
+            ActionList:
               - Execute:
                   Kind: "shell"
                   Configuration:

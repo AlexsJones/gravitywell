@@ -58,7 +58,8 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 		}
 		color.Yellow("Cluster kind found")
 		c.ClusterKinds = append(c.ClusterKinds, appc)
-
+	case "ActionList":
+		color.Yellow("ActionList kind found")
 	default:
 		color.Red("Kind not supported")
 		return errors.New("kind not supported")

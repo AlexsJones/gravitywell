@@ -9,7 +9,7 @@ Strategy:
             Name: "kubernetes-zookeeper-cluster"
             Namespace: "zk"
             Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
-            Action:
+            ActionList:
               - Execute:
                   Kind: "shell"
                   Configuration:

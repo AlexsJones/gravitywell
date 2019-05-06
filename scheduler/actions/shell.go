@@ -9,8 +9,8 @@ import (
 	"path"
 )
 
-func ExecuteShellAction(action kinds.Action, opt configuration.Options, repoName string) {
-	command, ok := action.Execute.Configuration["Command"]
+func ExecuteShellAction(action kinds.Execute, opt configuration.Options, repoName string) {
+	command, ok := action.Configuration["Command"]
 	if !ok {
 		logger.Warning("Could not run the shell step as Command could not be found")
 		return
@@ -18,7 +18,7 @@ func ExecuteShellAction(action kinds.Action, opt configuration.Options, repoName
 
 	p := path.Join(opt.TempVCSPath, repoName)
 
-	tp, ok := action.Execute.Configuration["Path"]
+	tp, ok := action.Configuration["Path"]
 	if ok {
 		p = tp
 	}
