@@ -159,8 +159,9 @@ Strategy:
                     AwaitDeployment: true #Optional defaults to false
 ```
 
-Action lists can also be seperated into the repositories being deployed to keep things clean!
+Action lists can also be moved into the repositories being deployed to keep things clean!
 
+_Or a combination of inline, local and remote..._
 e.g.
 
 ```
@@ -175,8 +176,19 @@ Strategy:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
             Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            
+            # In this example we execute the inline action
+            # Then execute the localpath
+            # And then execute the remote path
             ActionList:
-               RemotePath: ./templates/external
+               LocalPath: ./templates/external/gwdeploymentconfig.yaml
+               RemotePath: ./someexternalpathonrepo/external
+               Executions:
+                 - Execute:
+                   Kind: "shell"
+                   Configuration:
+                   Command: ./build_environment.sh small
+               
 ```
 
 Where you can have an action list defined..
@@ -205,6 +217,7 @@ DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
 FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
 SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
+Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
 ```
 
 ## Running the tests
