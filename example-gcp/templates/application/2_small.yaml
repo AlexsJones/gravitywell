@@ -10,11 +10,12 @@ Strategy:
             Namespace: "zk"
             Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
             ActionList:
-              - Execute:
+              Executions:
+                - Execute:
                   Kind: "Shell"
                   Configuration:
                     Command: ./build_environment.sh small
-              - Execute:
+                - Execute:
                   Kind: "RunActionList"
                   Configuration:
                     Path: example-gcp/templates/actionlist/actionlist-deployment.yaml

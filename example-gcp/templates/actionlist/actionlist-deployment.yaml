@@ -2,7 +2,7 @@ APIVersion: "v1"
 Kind: "ActionList"
 Executions:
   - Execute:
-    Kind: "RunActionList"
+    Kind: "Kubernetes"
     Configuration:
       Path: deployment #Optional value
       AwaitDeployment: true #Optional defaults to false
