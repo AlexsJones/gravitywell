@@ -14,8 +14,8 @@ Strategy:
                 - Execute:
                   Kind: "Shell"
                   Configuration:
-                    Command: ./build_environment.sh small
+                    Command: kubectl create ns zk
                 - Execute:
                   Kind: "RunActionList"
                   Configuration:
-                    Path: example-gcp/templates/actionlist/actionlist-deployment.yaml
+                    Path: example-gcp/templates/actionlist/actionlist-zookeeper-config.yaml

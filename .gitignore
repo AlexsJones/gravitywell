@@ -8,3 +8,4 @@ staging
 deployment
 _config.yml
 example-*/deployment/*
+logs

@@ -11,7 +11,7 @@
 
 **Update** AWS API now in Alpha for AWS EKS - Still building a CFN for auto node pool creation. For decent results use a more mature tool for AWS such as [eksctl](https://github.com/weaveworks/eksctl)
 
-Gravitywell is designed to create kubernetes clusters and deploy your applications.
+Gravitywell is designed to *create kubernetes clusters and deploy your applications.
 It uses YAML to store deployments and supports multiple versions of kubernetes resource definitions.
 It lets you store your entire container infrastructure as code.
 
@@ -142,7 +142,7 @@ Strategy:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
             Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-            Action:
+            ActionList:
               - Execute:
                   Kind: "shell"
                   Configuration:
@@ -159,13 +159,70 @@ Strategy:
                     AwaitDeployment: true #Optional defaults to false
 ```
 
+Action lists can also be moved into the repositories being deployed to keep things clean!
+
+_Or a combination of inline, local and remote..._
+e.g.
+
+```
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+  - Cluster:
+      FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+      ShortName: "{{.clustername}}"
+      Applications:
+        - Application:
+            Name: "kubernetes-apache-tika"
+            Namespace: "tika"
+            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            ActionList:
+              Executions:
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: kubectl create ns zk
+                - Execute:
+                  Kind: "RunActionList"
+                  Configuration:
+                    LocalPath: templates/external/gwdeploymentconfig.yaml
+                - Execute:
+                  Kind: "RunActionList"
+                  Configuration:
+                    RemotePath: tika-extras/additional-actionlist.yaml
+               
+```
+
+Where you can have an action list defined..
+
+*actions lists can call other action lists in a chain - helping to create templated commands*
+
+[See an example here](example-gcp/templates/application/3_small.yaml)
+
+```
+#./templates/external/gwdeploymentconfig.yaml
+
+APIVersion: "v1"
+Kind: "ActionList"
+ActionList:
+    - Execute:
+      Kind: "shell"
+      Configuration:
+        Command: ./build_environment.sh default
+    - Execute:
+      Kind: "RunActionList"
+      Configuration:
+        Path: example-gcp/templates/actionlist/actionlist-deployment.yaml
+```
+
 ### Flags
 
-```go
+```
 DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
 FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
 SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
+Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
 ```
 
 ## Running the tests

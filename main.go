@@ -8,6 +8,8 @@ import (
 	"github.com/dimiro1/banner"
 	"github.com/google/logger"
 	"github.com/jessevdk/go-flags"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -15,6 +17,7 @@ import (
 
 var (
 	version = "dev"
+	logDir  = "logs"
 )
 
 var b = `
@@ -32,6 +35,7 @@ var Opts struct {
 	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
 	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 	MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
+	Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
 }
 
 func Usage() {
@@ -41,10 +45,12 @@ func Usage() {
 	fmt.Println("create/delete/replace/apply e.g. gravitywell create -f folder/")
 	os.Exit(0)
 }
+
 func main() {
 	isEnabled := true
 	isColorEnabled := true
 	banner.Init(os.Stdout, isEnabled, isColorEnabled, bytes.NewBufferString(b))
+	//Parse Args-----------------------------------------------------------------------
 	args := os.Args
 	var command = ""
 	if len(args) == 2 && args[1] == "version" {
@@ -69,7 +75,30 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	//Configure logger ----------------------------------------------------------------
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		if err := os.Mkdir(logDir, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+	}
+	file, err := ioutil.TempFile(logDir, "gravitywell.*.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+	lf, err := os.OpenFile(file.Name(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer func() {
+		if err := lf.Close(); err != nil {
+		}
+	}()
 
+	defer logger.Init("Gravitywell", Opts.Verbose, true, lf).Close()
+	//----------------------------------------------------------------------------------
 	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
 	if err != nil {
 		logger.Fatalf(err.Error())

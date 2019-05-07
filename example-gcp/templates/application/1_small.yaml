@@ -9,13 +9,13 @@ Strategy:
             Name: "kubernetes-mongodb-cluster"
             Namespace: "mongodb"
             Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
-            Action:
-              - Execute:
-                  Kind: "shell"
+            ActionList:
+              Executions:
+                - Execute:
+                  Kind: "Shell"
                   Configuration:
                     Command: ./build_environment.sh dev
-              - Execute:
-                  Kind: "kubernetes"
+                - Execute:
+                  Kind: "RunActionList"
                   Configuration:
-                    Path: deployment #Optional value
-                    AwaitDeployment: false #Optional defaults to false
+                    Path: example-gcp/templates/actionlist/actionlist-deployment.yaml
