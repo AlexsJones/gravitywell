@@ -4,7 +4,11 @@ Executions:
   - Execute:
     Kind: "shell"
     Configuration:
-      Command: ./build_environment.sh default
+      Command: ./build_environment.sh small
+  - Execute:
+    Kind: "shell"
+    Configuration:
+      Command: kubectl create ns zk
   - Execute:
     Kind: "kubernetes"
     Configuration:
