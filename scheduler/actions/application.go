@@ -8,7 +8,6 @@ import (
 	"github.com/google/logger"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"path"
 	"strings"
 )
 
@@ -18,17 +17,6 @@ func ApplicationProcessor(commandFlag configuration.CommandFlag,
 	executeDeployment(application, opt, clusterName, commandFlag)
 }
 
-func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
-
-	switch strings.ToLower(execute.Kind) {
-	case "shell":
-		ExecuteShellAction(execute, opt, repoName)
-
-	case "kubernetes":
-		ExecuteKubernetesAction(execute, clusterName, deployment, commandFlag, opt, repoName)
-	}
-}
 func loadActionList(path string) kinds.ActionList {
 
 	logger.Info(fmt.Sprintf("Loading %s", path))
@@ -44,6 +32,36 @@ func loadActionList(path string) kinds.ActionList {
 	return appc
 }
 
+func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
+	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
+
+	switch strings.ToLower(execute.Kind) {
+	case "shell":
+		ExecuteShellAction(execute, opt, repoName)
+
+	case "kubernetes":
+		ExecuteKubernetesAction(execute, clusterName, deployment, commandFlag, opt, repoName)
+
+	case "runactionlist":
+		tp, ok := execute.Configuration["Path"]
+		if !ok {
+			logger.Error("Could not find RunActionList Path")
+			return
+		}
+		al := loadActionList(tp)
+
+		executeActionList(al, deployment, opt, clusterName, commandFlag, repoName)
+	}
+}
+
+func executeActionList(actionList kinds.ActionList, deployment kinds.Application, opt configuration.Options,
+	clusterName string, commandFlag configuration.CommandFlag, remoteVCSRepoName string) {
+	for _, a := range actionList.Executions {
+
+		selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
+	}
+}
+
 func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
 	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
@@ -54,32 +72,6 @@ func executeDeployment(deployment kinds.Application, opt configuration.Options,
 
 		return
 	}
-	//1. Run inline action lists first
 
-	for _, a := range deployment.ActionList.Executions {
-
-		selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
-	}
-
-	//2. Run local path action lists second
-	if deployment.ActionList.LocalPath != "" {
-
-		appc := loadActionList(deployment.ActionList.LocalPath)
-
-		for _, a := range appc.Executions {
-
-			selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
-		}
-	}
-	//3. Run remote action lists last
-	if deployment.ActionList.RemotePath != "" {
-
-		appc := loadActionList(path.Join(opt.TempVCSPath, deployment.Name, deployment.ActionList.RemotePath))
-
-		for _, a := range appc.Executions {
-
-			selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
-		}
-	}
-
+	executeActionList(deployment.ActionList, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
 }

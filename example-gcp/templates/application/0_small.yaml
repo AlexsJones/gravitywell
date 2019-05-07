@@ -11,16 +11,15 @@ Strategy:
             Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
             ActionList:
               - Execute:
-                  Kind: "shell"
+                  Kind: "Shell"
                   Configuration:
                     Command: pwd
                     Path: ../ #Optional value
               - Execute:
-                  Kind: "shell"
+                  Kind: "Shell"
                   Configuration:
                     Command: ./build_environment.sh default
               - Execute:
-                  Kind: "kubernetes"
+                  Kind: "RunActionList"
                   Configuration:
-                    Path: deployment #Optional value
-                    AwaitDeployment: true #Optional defaults to false
+                    Path: example-gcp/templates/actionlist/actionlist-deployment.yaml

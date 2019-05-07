@@ -9,6 +9,13 @@ Strategy:
             Name: "kubernetes-zookeeper-cluster"
             Namespace: "zk"
             Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
-            ActionList: #Example external action list
-              LocalPath: example-gcp/templates/actionlist/zookeeper.yaml
-              #RemotePath: ./templates #Reads from the remote git directory
+            ActionList:
+              Executions:
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: kubectl create ns zk
+                - Execute:
+                  Kind: "RunActionList"
+                  Configuration:
+                    Path: example-gcp/templates/actionlist/actionlist-zookeeper-config.yaml
