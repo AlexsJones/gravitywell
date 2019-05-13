@@ -17,7 +17,7 @@ import (
 
 func execV1Beta1DaemonSetResouce(k kubernetes.Interface, objdep *v1beta1.DaemonSet, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
 	logger.Info("Found statefulset resource")
-	dsclient := k.Extensions().DaemonSets(namespace)
+	dsclient := k.ExtensionsV1beta1().DaemonSets(namespace)
 
 	if opts.DryRun {
 		_, err := dsclient.Get(objdep.Name, v12.GetOptions{})
@@ -62,7 +62,7 @@ func execV1Beta1DaemonSetResouce(k kubernetes.Interface, objdep *v1beta1.DaemonS
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := dsclient.UpdateStatus(objdep)
+		_, err := dsclient.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err

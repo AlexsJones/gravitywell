@@ -63,7 +63,7 @@ func execV1Job(k kubernetes.Interface, objdep *batchv1.Job, namespace string, op
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := client.UpdateStatus(objdep)
+		_, err := client.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update Job")
 			return state.EDeploymentStateCantUpdate, err

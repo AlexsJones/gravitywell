@@ -18,6 +18,7 @@ It lets you store your entire container infrastructure as code.
 Supported providers:
 
 - [x] Google Cloud Platform
+- [x] Minikube
 - [ ] Amazon Web Services (Only partially at this time)
 
 

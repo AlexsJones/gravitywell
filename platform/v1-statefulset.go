@@ -101,7 +101,7 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := stsclient.UpdateStatus(objdep)
+		_, err := stsclient.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err

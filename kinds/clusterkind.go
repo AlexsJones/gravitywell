@@ -24,6 +24,16 @@ type ProviderCluster struct {
 			NodeType string            `yaml:"NodeType"`
 		} `yaml:"NodePool"`
 	} `yaml:"NodePools"`
+	//Typically used for Minikube configuration at the node level
+	NodeConfiguration struct {
+		CPU                int    `yaml:"CPU"`
+		DiskSize           string `yaml:"DiskSize"`
+		ExtraConfiguration struct {
+			ApiserverEnableAdmissionPlugins []string `yaml:"apiserver.enable-admission-plugins"`
+		} `yaml:"ExtraConfiguration"`
+		Memory   int    `yaml:"Memory"`
+		VMDriver string `yaml:"VMDriver"`
+	} `yaml:"NodeConfiguration"`
 	RoleARN           string   `yaml:"RoleARN"`
 	KubernetesVersion string   `yaml:"KubernetesVersion"`
 	SecurityGroupID   []string `yaml:"SecurityGroupId"`

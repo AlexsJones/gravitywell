@@ -62,7 +62,7 @@ func execV1Beta1CronJob(k kubernetes.Interface, objdep *v1beta1.CronJob, namespa
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := dsclient.UpdateStatus(objdep)
+		_, err := dsclient.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update CronJob")
 			return state.EDeploymentStateCantUpdate, err

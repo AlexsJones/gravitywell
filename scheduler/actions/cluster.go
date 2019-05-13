@@ -9,6 +9,7 @@ import (
 	"github.com/AlexsJones/gravitywell/platform/provider"
 	awsprovider "github.com/AlexsJones/gravitywell/platform/provider/aws"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
+	"github.com/AlexsJones/gravitywell/platform/provider/minikube"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -18,6 +19,64 @@ import (
 	"os"
 )
 
+func NewMinikubeConfig() (*minikube.MiniKubeProvider, error) {
+
+
+	return nil, nil
+}
+func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
+	commandFlag configuration.CommandFlag, cluster kinds.ProviderCluster) error {
+
+	create := func() {
+
+		err := provider.Create(minikubeprovider, cluster)
+
+		if err != nil {
+			color.Red(err.Error())
+		}
+		// Run post install -----------------------------------------------------
+		for _, executeCommand := range cluster.PostInstallHook {
+			if executeCommand.Execute.Shell != "" {
+				err := shell.ShellCommand(executeCommand.Execute.Shell,
+					executeCommand.Execute.Path, false)
+				if err != nil {
+					color.Red(err.Error())
+				}
+
+			}
+		}
+	}
+	delete := func() {
+		err := provider.Delete(minikubeprovider, cluster)
+		if err != nil {
+			color.Red(err.Error())
+		}
+		// Run post delete -----------------------------------------------------
+		for _, executeCommand := range cluster.PostDeleteHook {
+			if executeCommand.Execute.Shell != "" {
+				err := shell.ShellCommand(executeCommand.Execute.Shell,
+					executeCommand.Execute.Path, false)
+				if err != nil {
+					color.Red(err.Error())
+				}
+			}
+		}
+
+	}
+	// Run Command ------------------------------------------------------------------
+	switch commandFlag {
+	case configuration.Create:
+		create()
+	case configuration.Apply:
+		create()
+	case configuration.Replace:
+		delete()
+		create()
+	case configuration.Delete:
+		delete()
+	}
+	return nil
+}
 func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider, error) {
 	awsp := awsprovider.AWSProvider{}
 
