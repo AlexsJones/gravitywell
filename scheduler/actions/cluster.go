@@ -9,6 +9,7 @@ import (
 	"github.com/AlexsJones/gravitywell/platform/provider"
 	awsprovider "github.com/AlexsJones/gravitywell/platform/provider/aws"
 	"github.com/AlexsJones/gravitywell/platform/provider/gcp"
+	"github.com/AlexsJones/gravitywell/platform/provider/minikube"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -18,6 +19,15 @@ import (
 	"os"
 )
 
+func NewMinikubeConfig() (*minikube.MiniKubeProvider, error) {
+
+	return nil, nil
+}
+func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
+	commandFlag configuration.CommandFlag, cluster kinds.ProviderCluster) error {
+
+	return nil
+}
 func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider, error) {
 	awsp := awsprovider.AWSProvider{}
 

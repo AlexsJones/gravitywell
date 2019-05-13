@@ -149,5 +149,4 @@ func main() {
 		sh.Run(commandFlag, cf); err != nil {
 		logger.Fatalf(err.Error())
 	}
-
 }

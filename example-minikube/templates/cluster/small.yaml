@@ -1,0 +1,29 @@
+APIVersion: "v1"
+Kind: "Cluster"
+# minikube start --memory=8192 --cpus=4   --kubernetes-version=v1.12.0
+# --vm-driver=kvm2   --disk-size=30g
+# --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook"
+Strategy:
+  - Provider:
+      Name: "Minikube"
+      Clusters:
+        - Cluster:
+            FullName: "minikube"
+            ShortName: "minikube"
+            Labels:
+              type: "test"
+            NodeConfiguration:
+              VMDriver: kvm2
+              DiskSize: 30g
+              Memory: 8192
+              CPU: 4
+              ExtraConfiguration:
+                apiserver.enable-admission-plugins: ["LimitRanger","NamespaceExists","NamespaceLifecycle","ResourceQuota","ServiceAccount","DefaultStorageClass","MutatingAdmissionWebhook"]
+            PostInstallHook:
+              - Execute:
+                  Path: "."
+                  Shell: "minikube status"
+            PostDeleteHook:
+              - Execute:
+                  Path: "."
+                  Shell: "minikube status"

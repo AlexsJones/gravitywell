@@ -56,6 +56,25 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 
 		switch strings.ToLower(p.providerClusterReference[k].ProviderName) {
 
+		case "minikube":
+			config, err := actions.NewMinikubeConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, clusters := range p.providerClusterReference[k].Dependencies {
+				//Deploy cluster
+				err = actions.MinikubeClusterProcessor(config, p.commandFlag, clusters)
+				if err != nil {
+					log.Fatal(err)
+				}
+				//Deploy cluster applications
+				for _, application := range p.clusterApplications[clusters.FullName] {
+
+					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+
+				}
+			}
 		case "amazon web services":
 			//Configure session
 			config, err := actions.NewAmazonWebServicesConfig()
