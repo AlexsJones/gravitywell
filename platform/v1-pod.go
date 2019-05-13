@@ -62,7 +62,7 @@ func execV1Pod(k kubernetes.Interface, objdep *v1.Pod, namespace string, opts co
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := client.UpdateStatus(objdep)
+		_, err := client.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update Pod")
 			return state.EDeploymentStateCantUpdate, err

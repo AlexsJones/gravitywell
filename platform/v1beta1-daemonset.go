@@ -62,7 +62,7 @@ func execV1Beta1DaemonSetResouce(k kubernetes.Interface, objdep *v1beta1.DaemonS
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := dsclient.UpdateStatus(objdep)
+		_, err := dsclient.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update Statefulset")
 			return state.EDeploymentStateCantUpdate, err
