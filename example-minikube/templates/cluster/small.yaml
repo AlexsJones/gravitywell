@@ -8,8 +8,8 @@ Strategy:
       Name: "Minikube"
       Clusters:
         - Cluster:
-            FullName: "minikube"
-            ShortName: "minikube"
+            FullName: "minikube-test"
+            ShortName: "minikube-test"
             Labels:
               type: "test"
             NodeConfiguration:

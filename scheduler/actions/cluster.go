@@ -21,11 +21,60 @@ import (
 
 func NewMinikubeConfig() (*minikube.MiniKubeProvider, error) {
 
+
 	return nil, nil
 }
 func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
 	commandFlag configuration.CommandFlag, cluster kinds.ProviderCluster) error {
 
+	create := func() {
+
+		err := provider.Create(minikubeprovider, cluster)
+
+		if err != nil {
+			color.Red(err.Error())
+		}
+		// Run post install -----------------------------------------------------
+		for _, executeCommand := range cluster.PostInstallHook {
+			if executeCommand.Execute.Shell != "" {
+				err := shell.ShellCommand(executeCommand.Execute.Shell,
+					executeCommand.Execute.Path, false)
+				if err != nil {
+					color.Red(err.Error())
+				}
+
+			}
+		}
+	}
+	delete := func() {
+		err := provider.Delete(minikubeprovider, cluster)
+		if err != nil {
+			color.Red(err.Error())
+		}
+		// Run post delete -----------------------------------------------------
+		for _, executeCommand := range cluster.PostDeleteHook {
+			if executeCommand.Execute.Shell != "" {
+				err := shell.ShellCommand(executeCommand.Execute.Shell,
+					executeCommand.Execute.Path, false)
+				if err != nil {
+					color.Red(err.Error())
+				}
+			}
+		}
+
+	}
+	// Run Command ------------------------------------------------------------------
+	switch commandFlag {
+	case configuration.Create:
+		create()
+	case configuration.Apply:
+		create()
+	case configuration.Replace:
+		delete()
+		create()
+	case configuration.Delete:
+		delete()
+	}
 	return nil
 }
 func NewAmazonWebServicesConfig() (*awsprovider.AWSProvider, error) {
