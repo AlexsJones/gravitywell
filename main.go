@@ -9,7 +9,6 @@ import (
 	"github.com/google/logger"
 	"github.com/jessevdk/go-flags"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -78,19 +77,19 @@ func main() {
 	//Configure logger ----------------------------------------------------------------
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
 		if err := os.Mkdir(logDir, os.ModePerm); err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}
 	file, err := ioutil.TempFile(logDir, "gravitywell.*.log")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	if err := file.Close(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	lf, err := os.OpenFile(file.Name(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
+		logger.Fatalf("Failed to open log file: %v", err)
 	}
 	defer func() {
 		if err := lf.Close(); err != nil {

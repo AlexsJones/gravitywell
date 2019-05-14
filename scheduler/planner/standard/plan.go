@@ -8,7 +8,6 @@ import (
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/fatih/color"
 	"github.com/google/logger"
-	"log"
 	"os"
 	"strings"
 )
@@ -54,20 +53,20 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 
 	for k, _ := range p.providerClusterReference {
 		//Cloud provider name
-		log.Println(p.providerClusterReference[k].ProviderName)
+		logger.Info(p.providerClusterReference[k].ProviderName)
 
 		switch strings.ToLower(p.providerClusterReference[k].ProviderName) {
 
 		case "minikube":
 			config, err := actions.NewMinikubeConfig()
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err)
 			}
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
 				err = actions.MinikubeClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 
 				if p.commandFlag == configuration.Delete{
@@ -78,7 +77,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.FullName] {
 
-					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
 					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
 
 				}
@@ -87,24 +86,24 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 			//Configure session
 			config, err := actions.NewAmazonWebServicesConfig()
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err)
 			}
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
 				err = actions.AmazonWebServicesClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 
 				if p.commandFlag == configuration.Delete{
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-				
+
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.FullName] {
 
-					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
 					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
 
 				}
@@ -113,13 +112,13 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 			//Configure session
 			config, err := actions.NewGoogleCloudPlatformConfig()
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err)
 			}
 			for _, clusters := range p.providerClusterReference[k].Dependencies {
 				//Deploy cluster
 				err := actions.GoogleCloudPlatformClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 
 				if p.commandFlag == configuration.Delete{
@@ -131,13 +130,13 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 
 				for _, application := range p.clusterApplications[clusters.FullName] {
 
-					color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
 					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
 
 				}
 			}
 		default:
-			log.Fatal(fmt.Sprintf("Provider %s unsupported", p.providerClusterReference[k].ProviderName))
+			logger.Warning(fmt.Sprintf("Provider %s unsupported", p.providerClusterReference[k].ProviderName))
 			p.statusWatcher <- &PlanStatus{ShouldHalt: true}
 		}
 	}

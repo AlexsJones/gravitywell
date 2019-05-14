@@ -6,7 +6,6 @@ import (
 	"github.com/fatih/color"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -94,7 +93,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 				logger.Warning(fmt.Sprintf("%s : %s", err.Error(), file))
 				continue
 			}
-			log.Printf("Decoded Kind: %s", kind.String())
+			logger.Infof("Decoded Kind: %s", kind.String())
 
 			kubernetesResources = append(kubernetesResources, obj)
 		}

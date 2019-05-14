@@ -6,7 +6,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/AlexsJones/gravitywell/scheduler/planner/standard"
-	"log"
+	"github.com/google/logger"
 )
 
 //Scheduler object ...
@@ -31,7 +31,7 @@ func (s *Scheduler) Run(commandFlag configuration.CommandFlag,
 
 	plan, err := planner.GeneratePlan(stdplnr, s.configuration, commandFlag, opt)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	statusWatcher := plan.Run()

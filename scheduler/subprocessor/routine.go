@@ -28,11 +28,11 @@ func (r *Routine) Start() {
 		panic(err)
 	}
 	r.id = fmt.Sprintf("%s", uuid)
-	log.Printf("Starting routine %s", r.id)
+	logger.Infof("Starting routine %s", r.id)
 
 	go func() {
 		defer func() {
-			log.Printf("Shutting down routine %s", r.id)
+			logger.Infof("Shutting down routine %s", r.id)
 		}()
 		for {
 			// Add my channel into the pool

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
-	"log"
+	"github.com/google/logger"
 )
 
 type StandardPlanner struct {
@@ -34,14 +34,14 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 
 		}
 	}
-	log.Printf(fmt.Sprintf("%#v", s.plan.clusterDeployments))
+	logger.Infof(fmt.Sprintf("%#v", s.plan.clusterDeployments))
 
 	//At this point if there are no clusters, we set a flag to tell the plan to only run applications
 	if len(s.plan.clusterDeployments) == 0 {
-		log.Println("No clusters found to deploy - skipping")
+		logger.Info("No clusters found to deploy - skipping")
 		s.plan.shouldDeployClusters = false
 	} else {
-		log.Println("Clusters found to deploy - sequencing")
+		logger.Info("Clusters found to deploy - sequencing")
 		s.plan.shouldDeployClusters = true
 	}
 
@@ -60,7 +60,7 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 		}
 	}
 	// -------------------------------------------------------------------------------------------
-	log.Printf(fmt.Sprintf("%#v", s.plan.clusterApplications))
+	logger.Infof(fmt.Sprintf("%#v", s.plan.clusterApplications))
 	// -------------------------------------------------------------------------------------------
 	return s.plan, nil
 }

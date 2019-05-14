@@ -31,7 +31,7 @@ func NewCoordinator() *Coordinator {
 		panic(err)
 	}
 	coordinator.id = fmt.Sprintf("%s", uuid)
-	log.Printf("Starting coordinator: %s", coordinator.id)
+	logger.Infof("Starting coordinator: %s", coordinator.id)
 	//Create channels
 	//Two way coordination channel
 	coordinator.coordinationPool = make(chan chan Resource, defaultRoutineCount)
@@ -47,12 +47,12 @@ func NewCoordinator() *Coordinator {
 		coordinator.routines = append(coordinator.routines, rt)
 		rt.Start() //Start each routine
 	}
-	log.Printf("Finished building coordinator: %s", coordinator.id)
+	logger.Infof("Finished building coordinator: %s", coordinator.id)
 	return coordinator
 }
 func (coordinator *Coordinator) Destroy() {
 	go func() {
-		log.Printf("Coordinator %s is being destroyed", coordinator.id)
+		logger.Infof("Coordinator %s is being destroyed", coordinator.id)
 		coordinator.stop()
 
 		for _, routine := range coordinator.routines {
@@ -63,7 +63,7 @@ func (coordinator *Coordinator) Destroy() {
 func (coordinator *Coordinator) stop() {
 
 	coordinator.quit <- true
-	log.Printf("Coordinator %s will stop receiving input", coordinator.id)
+	logger.Infof("Coordinator %s will stop receiving input", coordinator.id)
 }
 func (coordinator *Coordinator) Run() {
 
@@ -73,7 +73,7 @@ func (coordinator *Coordinator) Run() {
 			go func(msg Resource) {
 				next := <-coordinator.coordinationPool
 				next <- msg
-				log.Println("Processed new message!")
+				logger.Info("Processed new message!")
 			}(msg)
 		case _ = <-coordinator.quit:
 			return
