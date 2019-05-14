@@ -3,13 +3,14 @@
 before:
   hooks:
     # you may remove this if you don't use vgo
-    - dep ensure -v
+    - go mod download
 builds:
   - main: main.go
     ldflags:
       - -s -w -X "main.version={{.Env.VERSION}}"
     env:
       - CGO_ENABLED=0
+      - GO111MODULE=on
 checksum:
   name_template: 'checksums.txt'
 snapshot:
