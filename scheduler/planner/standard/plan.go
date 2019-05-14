@@ -7,7 +7,9 @@ import (
 	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/fatih/color"
+	"github.com/google/logger"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -67,6 +69,12 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				if err != nil {
 					log.Fatal(err)
 				}
+
+				if p.commandFlag == configuration.Delete{
+					logger.Info("Cluster deleted will not continue")
+					os.Exit(0)
+				}
+
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.FullName] {
 
@@ -87,6 +95,12 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				if err != nil {
 					log.Fatal(err)
 				}
+
+				if p.commandFlag == configuration.Delete{
+					logger.Info("Cluster deleted will not continue")
+					os.Exit(0)
+				}
+				
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.FullName] {
 
@@ -107,6 +121,12 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				if err != nil {
 					log.Fatal(err)
 				}
+
+				if p.commandFlag == configuration.Delete{
+					logger.Info("Cluster deleted will not continue")
+					os.Exit(0)
+				}
+
 				//Deploy cluster applications
 
 				for _, application := range p.clusterApplications[clusters.FullName] {

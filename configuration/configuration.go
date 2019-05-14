@@ -4,14 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
+	"github.com/google/logger"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
-
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 //GravitywellKind ...
@@ -26,7 +24,7 @@ type Configuration struct {
 }
 
 func LoadConfigurationFromFile(path string, c *Configuration) error {
-	log.Println(fmt.Sprintf("Loading %s", path))
+	logger.Info(fmt.Sprintf("Loading %s", path))
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -35,8 +33,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	appc := GravitywellKind{}
 	err = yaml.Unmarshal(bytes, &appc)
 	if err != nil {
-		color.Red(fmt.Sprintf("%+v", err))
-		os.Exit(1)
+		logger.Fatal(fmt.Sprintf("%+v: %s", err,path))
 		return err
 	}
 	//Load specific kind
@@ -47,7 +44,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 		if err != nil {
 			return err
 		}
-		color.Yellow("Application kind found")
+		logger.Info("Application kind found")
 		c.ApplicationKinds = append(c.ApplicationKinds, appc)
 
 	case "Cluster":
@@ -56,12 +53,12 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 		if err != nil {
 			return err
 		}
-		color.Yellow("Cluster kind found")
+		logger.Info("Cluster kind found")
 		c.ClusterKinds = append(c.ClusterKinds, appc)
 	case "ActionList":
-		color.Yellow("ActionList kind found")
+		logger.Info("ActionList kind found")
 	default:
-		color.Red("Kind not supported")
+		logger.Error("Kind not supported")
 		return errors.New("kind not supported")
 	}
 	return nil
@@ -83,11 +80,11 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 					return err
 				}
 				if info.Size() == 0 {
-					color.Red(fmt.Sprintf("Skipping empty file %s", info.Name()))
+					logger.Error(fmt.Sprintf("Skipping empty file %s", info.Name()))
 					return nil
 				}
 				if err := LoadConfigurationFromFile(path, conf); err != nil {
-					color.Red(fmt.Sprintf(err.Error()))
+					logger.Error(fmt.Sprintf("%s",fmt.Sprintf(err.Error())))
 				}
 				return nil
 			})
@@ -96,7 +93,7 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 		}
 	case mode.IsRegular():
 		if err := LoadConfigurationFromFile(path, conf); err != nil {
-			color.Red(fmt.Sprintf(err.Error()))
+			logger.Error(fmt.Sprintf("%s %s",fmt.Sprintf(err.Error()),path))
 		}
 	}
 	return conf, nil
