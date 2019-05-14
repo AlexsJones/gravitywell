@@ -14,13 +14,11 @@ require (
 	github.com/google/logger v1.0.1
 	github.com/googleapis/gax-go v0.0.0-20181219185031-c8a15bac9b9f // indirect
 	github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d // indirect
+	github.com/goreleaser/goreleaser v0.106.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20170728041850-787624de3eb7 // indirect
-	github.com/imdario/mergo v0.3.5 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
-	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
