@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 )
 
 //ShellCommand ...

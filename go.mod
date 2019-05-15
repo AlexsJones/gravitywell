@@ -23,6 +23,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/satori/go.uuid v0.0.0-20181028125025-b2ce2384e17b
+	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/pflag v1.0.1 // indirect
 	go.opencensus.io v0.18.0 // indirect
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9

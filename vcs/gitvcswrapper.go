@@ -3,7 +3,7 @@ package vcs
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"os"
 	"path"
 	"path/filepath"

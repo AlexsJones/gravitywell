@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 )
 
 type StandardPlanner struct {

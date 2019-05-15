@@ -5,7 +5,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"path"
 )
 

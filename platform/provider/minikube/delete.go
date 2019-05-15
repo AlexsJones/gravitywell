@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"strings"
 )
 

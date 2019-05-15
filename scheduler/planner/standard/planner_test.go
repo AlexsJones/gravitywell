@@ -8,7 +8,7 @@ import (
 
 func TestPlanner(t *testing.T) {
 
-	conf, err := configuration.NewConfigurationFromPath("../../../examples")
+	conf, err := configuration.NewConfigurationFromPath("../../../example-gcp/templates")
 	if err != nil {
 		t.Fatal(err)
 	}

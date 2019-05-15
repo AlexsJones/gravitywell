@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"

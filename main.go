@@ -6,9 +6,8 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/scheduler"
 	"github.com/dimiro1/banner"
-	"github.com/google/logger"
 	"github.com/jessevdk/go-flags"
-	"io/ioutil"
+	logger "github.com/sirupsen/logrus"
 	"os"
 	"strings"
 	"time"
@@ -45,6 +44,17 @@ func Usage() {
 	os.Exit(0)
 }
 
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	logger.SetFormatter(&logger.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	logger.SetOutput(os.Stdout)
+
+	logger.SetLevel(logger.InfoLevel)
+}
+
 func main() {
 	isEnabled := true
 	isColorEnabled := true
@@ -74,29 +84,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//Configure logger ----------------------------------------------------------------
-	if _, err := os.Stat(logDir); os.IsNotExist(err) {
-		if err := os.Mkdir(logDir, os.ModePerm); err != nil {
-			logger.Fatal(err)
-		}
-	}
-	file, err := ioutil.TempFile(logDir, "gravitywell.*.log")
-	if err != nil {
-		logger.Fatal(err)
-	}
-	if err := file.Close(); err != nil {
-		logger.Fatal(err)
-	}
-	lf, err := os.OpenFile(file.Name(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
-	if err != nil {
-		logger.Fatalf("Failed to open log file: %v", err)
-	}
-	defer func() {
-		if err := lf.Close(); err != nil {
-		}
-	}()
-
-	defer logger.Init("Gravitywell", Opts.Verbose, true, lf).Close()
 	//----------------------------------------------------------------------------------
 	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
 	if err != nil {

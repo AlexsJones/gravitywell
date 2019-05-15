@@ -6,7 +6,7 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"github.com/jpillora/backoff"
 	appsv1 "k8s.io/api/apps/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

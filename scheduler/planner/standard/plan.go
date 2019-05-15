@@ -7,7 +7,7 @@ import (
 	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	"github.com/fatih/color"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"os"
 	"strings"
 )

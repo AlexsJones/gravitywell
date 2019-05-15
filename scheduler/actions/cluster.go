@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fatih/color"
-	"github.com/google/logger"
+	logger "github.com/sirupsen/logrus"
 	"os"
 )
 
