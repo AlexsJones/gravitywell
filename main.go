@@ -61,7 +61,7 @@ func main() {
 
 	err := os.Setenv("GW_VERSION",fmt.Sprintf("Build version: %s",version))
 	if err != nil {
-		logger.Warning(err.Error())
+		fmt.Printf(err.Error())
 	}
 	banner.Init(os.Stdout, isEnabled, isColorEnabled, bytes.NewBufferString(b))
 	//Parse Args-----------------------------------------------------------------------
