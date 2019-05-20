@@ -24,7 +24,7 @@ RUN apt-get update -y && \
 RUN export CLOUDSDK_INSTALL_DIR=/opt && \
     curl https://dl.google.com/dl/cloudsdk/release/install_google_cloud_sdk.bash | bash && \
     gcloud components install kubectl && \
-    curl -fsSl -o go.tar.gz https://dl.google.com/go/go1.10.4.linux-amd64.tar.gz && \
+    curl -fsSl -o go.tar.gz https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go.tar.gz && \
     rm -f go.tar.gz
 
@@ -43,7 +43,9 @@ WORKDIR /go/src/github.com/AlexsJones/
 
 COPY . /go/src/github.com/AlexsJones/gravitywell
 
-RUN cd gravitywell && CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.version=$(cat VERSION)' -X 'main.revision=$(git rev-parse --short HEAD)' -X 'main.buildtime=$(date -u +%Y-%m-%d.%H:%M:%S)'" -o /gravitywell && \
+WORKDIR /go/src/github.com/AlexsJones/gravitywell
+
+RUN GO111MODULE=on go build -ldflags="-s -w -X 'main.version=$(cat VERSION)' -X 'main.revision=$(git rev-parse --short HEAD)' -X 'main.buildtime=$(date -u +%Y-%m-%d.%H:%M:%S)'" -o /gravitywell && \
     rm -rf ${GOPATH}
 
 ENTRYPOINT ["dumb-init", "/bin/bash"]
