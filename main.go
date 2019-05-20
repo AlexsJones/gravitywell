@@ -26,6 +26,7 @@ var b = `
 {{ .AnsiColor.Magenta }}      \___  /|__|  (____  /\_/ |__||__|  / ____|  \/\_/  \___  >____/____/
 {{ .AnsiColor.Cyan }}     /_____/            \/               \/                  \/           
 {{ .AnsiColor.Default }}
+{{ .Env "GW_VERSION" }}
 `
 
 var Opts struct {
@@ -58,6 +59,11 @@ func init() {
 func main() {
 	isEnabled := true
 	isColorEnabled := true
+
+	err := os.Setenv("GW_VERSION",fmt.Sprintf("Build version: %s",version))
+	if err != nil {
+		logger.Warning(err.Error())
+	}
 	banner.Init(os.Stdout, isEnabled, isColorEnabled, bytes.NewBufferString(b))
 	//Parse Args-----------------------------------------------------------------------
 	args := os.Args
@@ -79,7 +85,7 @@ func main() {
 	}
 	args = args[2:len(args)]
 
-	_, err := flags.ParseArgs(&Opts, os.Args)
+	_, err = flags.ParseArgs(&Opts, os.Args)
 
 	if err != nil {
 		panic(err)
