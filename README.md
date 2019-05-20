@@ -66,7 +66,8 @@ Aws also requires additional tools for authentication found [here](https://docs.
 
 At this point you are ready to run gravitywell.
 
-For working with templates as per the examples you'll also need [vortex](`go get github.com/AlexsJones/gravitywell`)
+For working with templates as per the examples you'll also need [vortex](https://github.com/AlexsJones/vortex)
+(go get github.com/AlexsJones/vortex)
 _This can be installed either via golang or as a binary also_
 
 
