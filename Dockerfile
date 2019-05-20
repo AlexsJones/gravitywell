@@ -48,4 +48,4 @@ WORKDIR /go/src/github.com/AlexsJones/gravitywell
 RUN GO111MODULE=on go build -ldflags="-s -w -X 'main.version=$(cat VERSION)' -X 'main.revision=$(git rev-parse --short HEAD)' -X 'main.buildtime=$(date -u +%Y-%m-%d.%H:%M:%S)'" -o /gravitywell && \
     rm -rf ${GOPATH}
 
-ENTRYPOINT ["dumb-init", "/bin/bash"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
