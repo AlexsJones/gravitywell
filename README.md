@@ -44,6 +44,7 @@ To get started you'll need golang installed or to fetch the binary from homebrew
     - `go get github.com/AlexsJones/gravitywell`
 - Download with homebrew: `brew tap AlexsJones/homebrew-gravitywell && brew install gravitywell`
 - Download as a cross-platform release: `https://github.com/AlexsJones/gravitywell/releases`
+- `docker run tibbar/gravitywell:latest /gravitywell`
 
 ### Prerequisites
 
