@@ -1,9 +1,8 @@
+--- 
+before_install: 
+  - "echo \"$DOCKER_PASSWORD\" | docker login -u \"$DOCKER_USERNAME\" --password-stdin"
+  - "docker build -t tibbar/gravitywell:latest ."
+  - "docker push tibbar/gravitywell:latest"
 language: bash
-
-services:
+services: 
   - docker
-
-before_install:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker build -t tibbar/gravitywell:latest .
-  - docker push tibbar/gravitywell:latest
