@@ -30,7 +30,7 @@ var b = `
 
 var Opts struct {
 	DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
-	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."`
+	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."required:"yes"`
 	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 	MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
 	Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
@@ -38,9 +38,7 @@ var Opts struct {
 
 func Usage() {
 
-	fmt.Println("...Usage...")
-
-	fmt.Println("create/delete/replace/apply e.g. gravitywell create -f folder/")
+	fmt.Println("the required command `[create|delete|apply|replace]' was not specified")
 	os.Exit(0)
 }
 
@@ -65,29 +63,19 @@ func main() {
 	}
 	banner.Init(os.Stdout, isEnabled, isColorEnabled, bytes.NewBufferString(b))
 	//Parse Args-----------------------------------------------------------------------
-	args := os.Args
-	var command = ""
-	if len(args) == 2 && args[1] == "version" {
-		fmt.Println(version)
-		os.Exit(0)
-	}
-	if len(args) <= 2 {
+	//Pull the command out of the flags
+	if len(os.Args) < 2 {
 		Usage()
 	}
 
-	if args[1] == "" {
+	if os.Args[1] == "" {
 		Usage()
 	}
-	command = strings.ToLower(args[1])
-	if command == "" {
-		Usage()
-	}
-	args = args[2:len(args)]
-
+	command := strings.ToLower(os.Args[1])
 	_, err = flags.ParseArgs(&Opts, os.Args)
 
 	if err != nil {
-		panic(err)
+		os.Exit(0)
 	}
 	//----------------------------------------------------------------------------------
 	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
