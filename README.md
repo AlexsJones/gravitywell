@@ -46,7 +46,7 @@ To get started you'll need golang installed or to fetch the binary from homebrew
 - Download as a cross-platform release: [Latest release](https://github.com/AlexsJones/gravitywell/releases)
 - `docker run tibbar/gravitywell:latest /gravitywell` [Docker hub](https://hub.docker.com/r/tibbar/gravitywell)
 
-### Prerequisites
+## Prerequisites
 
 The current implementation works with Google Cloud Platform & Amazon web services.
 
@@ -62,7 +62,7 @@ _For Amazon Web Services please set the aws profile name and region_
 Aws also requires additional tools for authentication found [here](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
 
 
-### Running
+## Running on GCP
 
 At this point you are ready to run gravitywell.
 
@@ -87,6 +87,16 @@ gravitywell create -f examples-gcp/deployment
 # This will now start to provision any clusters that are required and deploy applications
 
 ```
+
+## Running on Minikube
+
+Adjust the example-minikube/cluster/small.yaml to suit your VMDriver
+
+
+
+`gravitywell create -f example-minikube/`
+
+_Yes that's all!_
 
 ### Example files
 
@@ -200,7 +210,7 @@ Where you can have an action list defined..
 
 *actions lists can call other action lists in a chain - helping to create templated commands*
 
-[See an example here](example-gcp/templates/application/3_small.yaml)
+[See an example here](example-gcp/templates/application/1_small.yaml)
 
 ```
 #./templates/external/gwdeploymentconfig.yaml

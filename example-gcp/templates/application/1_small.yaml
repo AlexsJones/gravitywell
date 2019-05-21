@@ -6,16 +6,16 @@ Strategy:
       ShortName: "{{.clustername}}"
       Applications:
         - Application:
-            Name: "kubernetes-mongodb-cluster"
-            Namespace: "mongodb"
-            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+            Name: "kubernetes-zookeeper-cluster"
+            Namespace: "zk"
+            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
             ActionList:
               Executions:
                 - Execute:
                   Kind: "Shell"
                   Configuration:
-                    Command: ./build_environment.sh dev
+                    Command: kubectl create ns zk
                 - Execute:
                   Kind: "RunActionList"
                   Configuration:
-                    Path: example-gcp/templates/actionlist/actionlist-deployment.yaml
+                    Path: example-gcp/templates/actionlist/actionlist-zookeeper-config.yaml
