@@ -140,6 +140,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 		case state.EDeploymentStateError:
 			color.Red(fmt.Sprintf("%s STATE: %s",
 				resource.GetObjectKind().GroupVersionKind().Kind, state.Translate(s)))
+			os.Exit(1)
 		default:
 			color.Green(fmt.Sprintf("%s STATE: %s",
 				resource.GetObjectKind().GroupVersionKind().Kind, state.Translate(s)))
