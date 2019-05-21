@@ -27,12 +27,12 @@ func NewMinikubeConfig() (*minikube.MiniKubeProvider, error) {
 func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
 	commandFlag configuration.CommandFlag, cluster kinds.ProviderCluster) error {
 
-	create := func() {
+	create := func() error {
 
 		err := provider.Create(minikubeprovider, cluster)
 
 		if err != nil {
-			color.Red(err.Error())
+			return err
 		}
 		// Run post install -----------------------------------------------------
 		for _, executeCommand := range cluster.PostInstallHook {
@@ -40,16 +40,17 @@ func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 
 			}
 		}
+		return nil
 	}
-	delete := func() {
+	delete := func() error {
 		err := provider.Delete(minikubeprovider, cluster)
 		if err != nil {
-			color.Red(err.Error())
+			return err
 		}
 		// Run post delete -----------------------------------------------------
 		for _, executeCommand := range cluster.PostDeleteHook {
@@ -57,23 +58,25 @@ func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 			}
 		}
-
+		return nil
 	}
 	// Run Command ------------------------------------------------------------------
 	switch commandFlag {
 	case configuration.Create:
-		create()
+		return create()
 	case configuration.Apply:
-		create()
+		return create()
 	case configuration.Replace:
-		delete()
-		create()
+		if err := delete(); err != nil {
+			return err
+		}
+		return create()
 	case configuration.Delete:
-		delete()
+		return delete()
 	}
 	return nil
 }
@@ -105,12 +108,12 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	commandFlag configuration.CommandFlag,
 	cluster kinds.ProviderCluster) error {
 
-	create := func() {
+	create := func() error {
 
 		err := provider.Create(awsprovider, cluster)
 
 		if err != nil {
-			color.Red(err.Error())
+			return err
 		}
 		// Run post install -----------------------------------------------------
 		for _, executeCommand := range cluster.PostInstallHook {
@@ -118,13 +121,14 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 
 			}
 		}
+		return nil
 	}
-	delete := func() {
+	delete := func() error {
 		err := provider.Delete(awsprovider, cluster)
 		if err != nil {
 			color.Red(err.Error())
@@ -135,21 +139,25 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 			}
 		}
+		return nil
 	}
+	// Run Command ------------------------------------------------------------------
 	switch commandFlag {
 	case configuration.Create:
-		create()
+		return create()
 	case configuration.Apply:
-		create()
+		return create()
 	case configuration.Replace:
-		delete()
-		create()
+		if err := delete(); err != nil {
+			return err
+		}
+		return create()
 	case configuration.Delete:
-		delete()
+		return delete()
 	}
 	return nil
 }
@@ -174,12 +182,13 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 	commandFlag configuration.CommandFlag,
 	cluster kinds.ProviderCluster) error {
 
-	create := func() {
+	create := func() error {
 
 		err := provider.Create(gcpProvider, cluster)
 
 		if err != nil {
-			color.Red(err.Error())
+			return err
+
 		}
 		// Run post install -----------------------------------------------------
 		for _, executeCommand := range cluster.PostInstallHook {
@@ -187,16 +196,17 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 
 			}
 		}
+		return nil
 	}
-	delete := func() {
+	delete := func() error {
 		err := provider.Delete(gcpProvider, cluster)
 		if err != nil {
-			color.Red(err.Error())
+			return err
 		}
 		// Run post delete -----------------------------------------------------
 		for _, executeCommand := range cluster.PostDeleteHook {
@@ -204,23 +214,25 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 				err := shell.ShellCommand(executeCommand.Execute.Shell,
 					executeCommand.Execute.Path, false)
 				if err != nil {
-					color.Red(err.Error())
+					return err
 				}
 			}
 		}
-
+		return nil
 	}
 	// Run Command ------------------------------------------------------------------
 	switch commandFlag {
 	case configuration.Create:
-		create()
+		return create()
 	case configuration.Apply:
-		create()
+		return create()
 	case configuration.Replace:
-		delete()
-		create()
+		if err := delete(); err != nil {
+			return err
+		}
+		return create()
 	case configuration.Delete:
-		delete()
+		return delete()
 	}
 	return nil
 }

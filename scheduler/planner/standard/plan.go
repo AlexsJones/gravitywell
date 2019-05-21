@@ -119,6 +119,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 				err := actions.GoogleCloudPlatformClusterProcessor(config, p.commandFlag, clusters)
 				if err != nil {
 					logger.Fatal(err)
+					os.Exit(1)
 				}
 
 				if p.commandFlag == configuration.Delete{
