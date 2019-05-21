@@ -34,6 +34,7 @@ var Opts struct {
 	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
 	MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
 	Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
+	Force      bool   `short:"n" long:"force" description:"Force services to apply even if immutable"`
 }
 
 func Usage() {
@@ -43,11 +44,7 @@ func Usage() {
 }
 
 func init() {
-	// Log as JSON instead of the default ASCII formatter.
-	logger.SetFormatter(&logger.JSONFormatter{})
 
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
 	logger.SetOutput(os.Stdout)
 
 	logger.SetLevel(logger.InfoLevel)
@@ -57,7 +54,7 @@ func main() {
 	isEnabled := true
 	isColorEnabled := true
 
-	err := os.Setenv("GW_VERSION",fmt.Sprintf("Build version: %s",version))
+	err := os.Setenv("GW_VERSION", fmt.Sprintf("Build version: %s", version))
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -116,6 +113,7 @@ func main() {
 		SSHKeyPath:         Opts.SSHKeyPath,
 		MaxBackOffDuration: defaultMaxTimeout,
 		DryRun:             Opts.DryRun,
+		Force:              Opts.Force,
 	}
 
 	if _, err := os.Stat(cf.TempVCSPath); os.IsNotExist(err) {

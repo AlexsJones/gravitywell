@@ -44,6 +44,10 @@ func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 	err := filepath.Walk(path.Join(opt.TempVCSPath,
 		repoName, deploymentPath),
 		func(path string, f os.FileInfo, err error) error {
+			if f.IsDir(){
+				logger.Info("Ignoring directory %s",fmt.Sprintf(path))
+				return nil
+			}
 			fileList = append(fileList, path)
 			return nil
 		})

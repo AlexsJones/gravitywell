@@ -19,15 +19,33 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, objdep *v1pol
 	logger.Info("Found PodDisruptionBudget resource")
 	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
 
+	exists := false
+	_, err := pdbclient.Get(objdep.Name, v12.GetOptions{})
+	if err == nil {
+		exists = true
+	}
+
 	if opts.DryRun {
-		_, err := pdbclient.Get(objdep.Name, v12.GetOptions{})
-		if err != nil {
+		if exists == false {
 			logger.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
 			logger.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
+	}
+
+	create := func() (state.State, error){
+		if exists {
+			return state.EDeploymentStateExists,nil
+		}
+		_, err := pdbclient.Create(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info("PodDisruptionBudget deployed")
+		return state.EDeploymentStateOkay, nil
 	}
 	//Replace -------------------------------------------------------------------
 	if commandFlag == configuration.Replace {
@@ -52,16 +70,16 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, objdep *v1pol
 	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := pdbclient.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
+		if exists {
+			return state.EDeploymentStateExists, nil
 		}
-		logger.Info("PodDisruptionBudget deployed")
-		return state.EDeploymentStateOkay, nil
+		return create()
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
+		if !exists {
+			return create()
+		}
 		_, err := pdbclient.Update(objdep)
 		if err != nil {
 			logger.Error("Could not update PodDisruptionBudget")
