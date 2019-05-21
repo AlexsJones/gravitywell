@@ -42,8 +42,9 @@ To get started you'll need golang installed or to fetch the binary from homebrew
 
 - Get with golang: 
     - `go get github.com/AlexsJones/gravitywell`
-- Download with homebrew: `brew tap AlexsJones/homebrew-gravitywell && brew install gravitywell`
-- Download as a cross-platform release: `https://github.com/AlexsJones/gravitywell/releases`
+- Download with homebrew: `brew tap AlexsJones/homebrew-gravitywell && brew install gravitywell`[Tap](https://github.com/AlexsJones/homebrew-gravitywell)
+- Download as a cross-platform release: [Latest release](https://github.com/AlexsJones/gravitywell/releases)
+- `docker run tibbar/gravitywell:latest /gravitywell` [Docker hub](https://hub.docker.com/r/tibbar/gravitywell)
 
 ### Prerequisites
 
@@ -65,7 +66,8 @@ Aws also requires additional tools for authentication found [here](https://docs.
 
 At this point you are ready to run gravitywell.
 
-For working with templates as per the examples you'll also need [vortex](`go get github.com/AlexsJones/gravitywell`)
+For working with templates as per the examples you'll also need [vortex](https://github.com/AlexsJones/vortex)
+(go get github.com/AlexsJones/vortex)
 _This can be installed either via golang or as a binary also_
 
 
