@@ -8,6 +8,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -33,7 +34,12 @@ func loadActionList(path string) kinds.ActionList {
 }
 
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
+	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
+
+	if execute.Kind =="" {
+		logger.Errorf("kind missing: %s (Check file indentation)",fmt.Sprintf("[%s][%s]",deployment.Git,clusterName))
+		os.Exit(1)
+	}
 
 	switch strings.ToLower(execute.Kind) {
 	case "shell":
@@ -52,6 +58,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 
 		executeActionList(al, deployment, opt, clusterName, commandFlag, repoName)
 	}
+
 }
 
 func executeActionList(actionList kinds.ActionList, deployment kinds.Application, opt configuration.Options,
