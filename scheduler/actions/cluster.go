@@ -69,7 +69,8 @@ func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
 	case configuration.Create:
 		return create()
 	case configuration.Apply:
-		return create()
+		logger.Info("Ignoring apply on cluster - no such option")
+		return nil
 	case configuration.Replace:
 		if err := delete(); err != nil {
 			return err
@@ -150,7 +151,8 @@ func AmazonWebServicesClusterProcessor(awsprovider *awsprovider.AWSProvider,
 	case configuration.Create:
 		return create()
 	case configuration.Apply:
-		return create()
+		logger.Info("Ignoring apply on cluster - no such option")
+		return nil
 	case configuration.Replace:
 		if err := delete(); err != nil {
 			return err
@@ -225,7 +227,8 @@ func GoogleCloudPlatformClusterProcessor(gcpProvider *gcp.GCPProvider,
 	case configuration.Create:
 		return create()
 	case configuration.Apply:
-		return create()
+		logger.Info("Ignoring apply on cluster - no such option")
+		return nil
 	case configuration.Replace:
 		if err := delete(); err != nil {
 			return err

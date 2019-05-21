@@ -75,13 +75,11 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 	for _, file := range files {
 		f, err := os.Open(file)
 		if err != nil {
-			logger.Warning(fmt.Sprintf("Could not open from file %s", file))
-			continue
+			logger.Fatalf(fmt.Sprintf("Could not open from file %s", file))
 		}
 		raw, err := ioutil.ReadAll(f)
 		if err != nil {
-			logger.Warning(fmt.Sprintf("Could not read from file %s", file))
-			continue
+			logger.Fatalf(fmt.Sprintf("Could not read from file %s", file))
 		}
 		yamldelimiter := regexp.MustCompile(`(\A|\n)---`)
 		documents := yamldelimiter.Split(string(raw), -1)
@@ -90,8 +88,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
 			if err != nil {
-				logger.Warning(fmt.Sprintf("%s : %s", err.Error(), file))
-				continue
+				logger.Fatalf(fmt.Sprintf("%s : %s", err.Error(), file))
 			}
 			logger.Infof("Decoded Kind: %s", kind.String())
 
@@ -117,8 +114,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			//Remove the namespace from the array and run first
 			_, err := execV1NamespaceResource(k, resource.(*v1.Namespace), namespace, opts, commandFlag)
 			if err != nil {
-				logger.Error(err.Error())
-				continue
+				logger.Fatalf(err.Error())
 			}
 		default:
 			kubernetesResources[out] = resource
@@ -132,8 +128,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 
 		s, err := DeployFromObject(k, resource, namespace, opts, commandFlag, shouldAwaitDeployment)
 		if err != nil {
-			logger.Error(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
-			continue
+			logger.Fatalf(fmt.Sprintf("%s : %s", err.Error(), resource.GetObjectKind().GroupVersionKind().Kind))
 		}
 
 		switch s {

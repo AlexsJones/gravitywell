@@ -84,7 +84,7 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 					return nil
 				}
 				if err := LoadConfigurationFromFile(path, conf); err != nil {
-					logger.Error(fmt.Sprintf("%s",fmt.Sprintf(err.Error())))
+					logger.Warning(fmt.Sprintf("%s",fmt.Sprintf(err.Error())))
 				}
 				return nil
 			})
@@ -93,7 +93,7 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 		}
 	case mode.IsRegular():
 		if err := LoadConfigurationFromFile(path, conf); err != nil {
-			logger.Error(fmt.Sprintf("%s %s",fmt.Sprintf(err.Error()),path))
+			logger.Warning(fmt.Sprintf("%s %s",fmt.Sprintf(err.Error()),path))
 		}
 	}
 	return conf, nil

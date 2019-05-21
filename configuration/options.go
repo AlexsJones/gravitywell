@@ -10,4 +10,5 @@ type Options struct {
 	SSHKeyPath         string
 	DryRun             bool
 	MaxBackOffDuration time.Duration
+	Force              bool
 }
