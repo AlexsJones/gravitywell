@@ -2,8 +2,8 @@ package subprocessor
 
 import (
 	"fmt"
+	"github.com/google/logger"
 	"github.com/satori/go.uuid"
-	"log"
 )
 
 type Routine struct {

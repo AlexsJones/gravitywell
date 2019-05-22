@@ -11,4 +11,5 @@ type Options struct {
 	DryRun             bool
 	MaxBackOffDuration time.Duration
 	Force              bool
+	IgnoreFilter       []string
 }

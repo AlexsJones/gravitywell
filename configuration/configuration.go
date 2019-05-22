@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -33,7 +34,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	appc := GravitywellKind{}
 	err = yaml.Unmarshal(bytes, &appc)
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("%+v: %s", err,path))
+		logger.Fatal(fmt.Sprintf("%+v: %s", err, path))
 		return err
 	}
 	//Load specific kind
@@ -64,7 +65,7 @@ func LoadConfigurationFromFile(path string, c *Configuration) error {
 	return nil
 }
 
-func NewConfigurationFromPath(path string) (*Configuration, error) {
+func NewConfigurationFromPath(path string, ignoreFilters []string) (*Configuration, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return nil, err
@@ -79,12 +80,18 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 				if err != nil {
 					return err
 				}
+				for _, filter := range ignoreFilters {
+					if strings.Contains(path, filter) {
+						logger.Infof("Ignore filter %s is ignoring %s", ignoreFilters, path)
+						return nil
+					}
+				}
 				if info.Size() == 0 {
 					logger.Error(fmt.Sprintf("Skipping empty file %s", info.Name()))
 					return nil
 				}
 				if err := LoadConfigurationFromFile(path, conf); err != nil {
-					logger.Warning(fmt.Sprintf("%s",fmt.Sprintf(err.Error())))
+					logger.Warning(fmt.Sprintf("%s", fmt.Sprintf(err.Error())))
 				}
 				return nil
 			})
@@ -92,9 +99,16 @@ func NewConfigurationFromPath(path string) (*Configuration, error) {
 			return nil, err
 		}
 	case mode.IsRegular():
-		if err := LoadConfigurationFromFile(path, conf); err != nil {
-			logger.Warning(fmt.Sprintf("%s %s",fmt.Sprintf(err.Error()),path))
+		for _, filter := range ignoreFilters {
+			if strings.Contains(path, filter) {
+				logger.Infof("Ignore filter %s is ignoring %s", ignoreFilters, path)
+				return nil, nil
+			}
 		}
+		if err := LoadConfigurationFromFile(path, conf); err != nil {
+			logger.Warning(fmt.Sprintf("%s %s", fmt.Sprintf(err.Error()), path))
+		}
+
 	}
 	return conf, nil
 }

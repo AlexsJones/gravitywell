@@ -29,12 +29,13 @@ var b = `
 `
 
 var Opts struct {
-	DryRun     bool   `short:"d" long:"dryrun" description:"Performs a dryrun."`
-	FileName   string `short:"f" long:"filename" description:"filename to execute, also accepts a path."required:"yes"`
-	SSHKeyPath string `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
-	MaxTimeout string `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
-	Verbose    bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
-	Force      bool   `short:"n" long:"force" description:"Force services to apply even if immutable"`
+	DryRun       bool     `short:"d" long:"dryrun" description:"Performs a dryrun."`
+	FileName     string   `short:"f" long:"filename" description:"filename to execute, also accepts a path."required:"yes"`
+	SSHKeyPath   string   `short:"s" long:"sshkeypath" description:"Custom ssh key path."`
+	MaxTimeout   string   `short:"m" long:"maxtimeout" description:"Max rollout time e.g. 60s or 1m"`
+	Verbose      bool     `short:"v" long:"verbose" description:"Enable verbose logging"`
+	Force        bool     `short:"n" long:"force" description:"Force services to apply even if immutable"`
+	IgnoreFilter []string `short:"i" long:"ignore" description:"Ignore excepts any partial string to test and ignore paths/directories with e.g. --ignore=cluster --ignore=actionlist"`
 }
 
 func Usage() {
@@ -75,7 +76,7 @@ func main() {
 		os.Exit(0)
 	}
 	//----------------------------------------------------------------------------------
-	conf, err := configuration.NewConfigurationFromPath(Opts.FileName)
+	conf, err := configuration.NewConfigurationFromPath(Opts.FileName, Opts.IgnoreFilter)
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
@@ -114,6 +115,7 @@ func main() {
 		MaxBackOffDuration: defaultMaxTimeout,
 		DryRun:             Opts.DryRun,
 		Force:              Opts.Force,
+		IgnoreFilter:       Opts.IgnoreFilter,
 	}
 
 	if _, err := os.Stat(cf.TempVCSPath); os.IsNotExist(err) {
