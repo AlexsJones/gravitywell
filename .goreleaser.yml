@@ -31,7 +31,5 @@ brew:
     owner: AlexsJones
     name: homebrew-gravitywell
 
-  skip_upload: true
-
   install: |
     bin.install "gravitywell"
