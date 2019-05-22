@@ -84,6 +84,9 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 		yamldelimiter := regexp.MustCompile(`(\A|\n)---`)
 		documents := yamldelimiter.Split(string(raw), -1)
 		for _, doc := range documents {
+			if doc == "" {
+				continue
+			}
 			//Decode into kubernetes object
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)

@@ -68,7 +68,6 @@ func (g *GCPProvider) Create(clusterp kinds.ProviderCluster) error {
 			clusterp.Region),
 		Cluster: cluster,
 	}
-
 	clusterResponse, err := g.ClusterManagerClient.CreateCluster(g.Context, clusterReq)
 	if err != nil {
 		color.Red(err.Error())

@@ -40,7 +40,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 	}
 
 	if execute.Configuration == nil {
-		logger.Fatal("Configuration is missing within Execute bloc")
+		logger.Fatal("Configuration is missing within Execute block")
 	}
 
 	switch strings.ToLower(execute.Kind) {
