@@ -23,6 +23,7 @@ import (
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
 	storagev1b1 "k8s.io/api/storage/v1beta1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -157,10 +158,14 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	switch obj.(type) {
 	case *v1.Pod:
 		response, e = execV1PodResource(k, obj.(*v1.Pod), namespace, opts, commandFlag)
+	case *v1.PersistentVolume:
+		response, e = execV1PersistentVolumeResource(k,obj.(*v1.PersistentVolume),namespace,opts,commandFlag)
 	case *batchbeta1.CronJob:
 		response, e = execV1Beta1CronJob(k, obj.(*batchbeta1.CronJob), namespace, opts, commandFlag)
 	case *batchv1.Job:
 		response, e = execV1Job(k, obj.(*batchv1.Job), namespace, opts, commandFlag)
+	case *storagev1.StorageClass:
+		response, e = execV1StorageResource(k, obj.(*storagev1.StorageClass), namespace, opts, commandFlag)
 	case *v1betav1.Deployment:
 		response, e = execV1BetaDeploymentResource(k, obj.(*v1betav1.Deployment),
 			namespace, opts, commandFlag, shouldAwaitDeployment)
