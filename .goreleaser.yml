@@ -7,7 +7,7 @@ before:
 builds:
   - main: main.go
     ldflags:
-      - -s -w -X "main.version=v.0.3.8"
+      - -s -w -X "main.version={{.Env.VERSION}}"
     env:
       - CGO_ENABLED=0
       - GO111MODULE=on
