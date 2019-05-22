@@ -68,6 +68,15 @@ func getConfig(context string) clientcmd.ClientConfig {
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
 
+func delete_empty (s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
 //GenerateDeploymentPlan
 func GenerateDeploymentPlan(k kubernetes.Interface,
 	files []string, namespace string, opts configuration.Options,
@@ -84,7 +93,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			logger.Fatalf(fmt.Sprintf("Could not read from file %s", file))
 		}
 		yamldelimiter := regexp.MustCompile(`(\A|\n)---`)
-		documents := yamldelimiter.Split(string(raw), -1)
+		documents := delete_empty(yamldelimiter.Split(string(raw), -1))
 		for _, doc := range documents {
 			if doc == "" {
 				continue
@@ -93,7 +102,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
 			if err != nil {
-				logger.Fatalf(fmt.Sprintf("%s : %s", err.Error(), file))
+				logger.Fatalf(fmt.Sprintf("%s : Could not be decoded : %s",file, err.Error()))
 			}
 			logger.Infof("Decoded Kind: %s", kind.String())
 

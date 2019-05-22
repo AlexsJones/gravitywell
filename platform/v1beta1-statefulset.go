@@ -51,12 +51,12 @@ func execV1Beta1StatefulSetResouce(k kubernetes.Interface, objdep *v1beta1.State
 			if err != nil {
 				return errors.New("failed to get deployment")
 			}
-			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.Replicas {
+			if stsResponse.Status.ReadyReplicas >= stsResponse.Status.CurrentReplicas {
 				return nil
 			}
 			logger.Info(fmt.Sprintf("Awaiting deployment replica roll out %d/%d",
 				stsResponse.Status.ReadyReplicas,
-				stsResponse.Status.Replicas))
+				stsResponse.Status.CurrentReplicas))
 
 			time.Sleep(b.Duration())
 			if b.Attempt() >= 3 {
