@@ -128,16 +128,8 @@ func execV1BetaDeploymentResource(k kubernetes.Interface, objdep *v1betav1.Deplo
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 
-		if opts.Force {
-			if !exists {
-				return create()
-			} else {
-				if _, err := del(); err != nil {
-					return state.EDeploymentStateError, err
-				}
-
-				return create()
-			}
+		if !exists {
+			return create()
 		} else {
 			return update()
 		}

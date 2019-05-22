@@ -90,15 +90,8 @@ func execV1PodResource(k kubernetes.Interface,  objdep *v1.Pod, namespace string
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 
-		if opts.Force {
-			if !exists {
-				return create()
-			}else {
-				if _,err := del(); err != nil {
-					return state.EDeploymentStateError,err
-				}
-				return create()
-			}
+		if !exists {
+			return create()
 		} else {
 			return update()
 		}

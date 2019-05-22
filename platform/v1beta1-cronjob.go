@@ -91,15 +91,8 @@ func execV1Beta1CronJob(k kubernetes.Interface, objdep *v1beta1.CronJob, namespa
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 
-		if opts.Force {
-			if !exists {
-				return create()
-			}else {
-				if _,err := del(); err != nil {
-					return state.EDeploymentStateError,err
-				}
-				return create()
-			}
+		if !exists {
+			return create()
 		} else {
 			return update()
 		}

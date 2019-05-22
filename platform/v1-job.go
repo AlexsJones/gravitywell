@@ -91,15 +91,8 @@ func execV1Job(k kubernetes.Interface, objdep *batchv1.Job, namespace string, op
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
 
-		if opts.Force {
-			if !exists {
-				return create()
-			}else {
-				if _,err := del(); err != nil {
-					return state.EDeploymentStateError,err
-				}
-				return create()
-			}
+		if !exists {
+			return create()
 		} else {
 			return update()
 		}
