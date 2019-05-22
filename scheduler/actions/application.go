@@ -8,7 +8,6 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
 	"strings"
 )
 
@@ -37,8 +36,11 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
 
 	if execute.Kind =="" {
-		logger.Errorf("kind missing: %s (Check file indentation)",fmt.Sprintf("[%s][%s]",deployment.Git,clusterName))
-		os.Exit(1)
+		logger.Fatalf("kind missing: %s (Check file indentation)",fmt.Sprintf("[%s][%s]",deployment.Git,clusterName))
+	}
+
+	if execute.Configuration == nil {
+		logger.Fatal("Configuration is missing within Execute bloc")
 	}
 
 	switch strings.ToLower(execute.Kind) {

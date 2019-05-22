@@ -44,6 +44,9 @@ func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 	err := filepath.Walk(path.Join(opt.TempVCSPath,
 		repoName, deploymentPath),
 		func(path string, f os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
 			if f.IsDir(){
 				logger.Info("Ignoring directory %s",fmt.Sprintf(path))
 				return nil
@@ -52,7 +55,7 @@ func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 			return nil
 		})
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Fatal(err.Error())
 	}
 	_, k8siface := clientForCluster(clusterName)
 	err = platform.GenerateDeploymentPlan(
