@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
@@ -31,12 +32,17 @@ func loadActionList(path string) kinds.ActionList {
 	}
 	return appc
 }
-
+func prettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
+}
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
 
 	if execute.Kind =="" {
-		logger.Fatalf("kind missing: %s (Check file indentation)",fmt.Sprintf("[%s][%s]",deployment.Git,clusterName))
+		fmt.Printf(prettyPrint(deployment))
+		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
+			deployment.Git,clusterName))
 	}
 
 	if execute.Configuration == nil {

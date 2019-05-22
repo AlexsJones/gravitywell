@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.34.0
 	github.com/aws/aws-sdk-go v1.19.7
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dimiro1/banner v0.0.0-20161108151223-c2f858997d49
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/color v1.7.0
@@ -19,6 +20,7 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
+	github.com/kr/pretty v0.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
