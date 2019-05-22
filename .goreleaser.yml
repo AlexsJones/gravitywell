@@ -24,7 +24,7 @@ changelog:
 brew:
   # Name template of the recipe
   # Default to project name
-  name: homebrew-gravitywell
+  name: gravitywell
 
   # Repository to push the tap to.
   github:
