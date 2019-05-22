@@ -7,7 +7,7 @@ before:
 builds:
   - main: main.go
     ldflags:
-      - -s -w -X "main.version={{.Env.VERSION}}"
+      - -s -w -X "main.version=v.0.3.8"
     env:
       - CGO_ENABLED=0
       - GO111MODULE=on
@@ -21,3 +21,17 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+brew:
+  # Name template of the recipe
+  # Default to project name
+  name: homebrew-gravitywell
+
+  # Repository to push the tap to.
+  github:
+    owner: AlexsJones
+    name: homebrew-gravitywell
+
+  skip_upload: true
+
+  install: |
+    bin.install "gravitywell"
