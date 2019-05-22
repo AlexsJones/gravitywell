@@ -24,6 +24,7 @@ import (
 	v1rbac "k8s.io/api/rbac/v1"
 	storagev1b1 "k8s.io/api/storage/v1beta1"
 	storagev1 "k8s.io/api/storage/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -205,6 +206,8 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 		response, e = execV1Beta1IngressResouce(k, obj.(*v1betav1.Ingress), namespace, opts, commandFlag)
 	case *storagev1b1.StorageClass:
 		response, e = execV1Beta1StorageResouce(k, obj.(*storagev1b1.StorageClass), namespace, opts, commandFlag)
+	case *autoscalingv1.HorizontalPodAutoscaler:
+		response, e = execV1HorizontalPodAutoscaler(k, obj.(*autoscalingv1.HorizontalPodAutoscaler), namespace, opts, commandFlag)
 	default:
 		logger.Error("Unable to convert API resource:", obj.GetObjectKind().GroupVersionKind())
 	}
