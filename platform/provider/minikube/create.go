@@ -48,7 +48,7 @@ func (m *MiniKubeProvider) Create(cluster kinds.ProviderCluster) error {
 	logger.Info(fmt.Sprintf("Running shell command %s\n", command))
 
 	if err := shell.ShellCommand(command, ".", true); err != nil {
-		logger.Error(err.Error())
+		logger.Info(err.Error())
 	}
 
 	return nil

@@ -19,11 +19,3 @@ Strategy:
               CPU: 4
               ExtraConfiguration:
                 apiserver.enable-admission-plugins: ["LimitRanger","NamespaceExists","NamespaceLifecycle","ResourceQuota","ServiceAccount","DefaultStorageClass","MutatingAdmissionWebhook"]
-            PostInstallHook:
-              - Execute:
-                  Path: "."
-                  Shell: "minikube status"
-            PostDeleteHook:
-              - Execute:
-                  Path: "."
-                  Shell: "minikube status"

@@ -14,7 +14,7 @@ Strategy:
                 - Execute:
                   Kind: "Shell"
                   Configuration:
-                    Command: kubectl create ns zk
+                    Command: kubectl create ns zk || true
                 - Execute:
                   Kind: "RunActionList"
                   Configuration:
