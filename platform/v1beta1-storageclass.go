@@ -16,25 +16,60 @@ import (
 )
 
 func execV1Beta1StorageResouce(k kubernetes.Interface, objdep *storagev1b1.StorageClass, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	logger.Info("Found StorageClass resource")
+	name := "StorageClass"
+
 	client := k.StorageV1beta1().StorageClasses()
 
+	exists := false
+	_, err := client.Get(objdep.Name, v12.GetOptions{})
+	if err == nil {
+		exists = true
+	}
+
 	if opts.DryRun {
-		_, err := client.Get(objdep.Name, v12.GetOptions{})
-		if err != nil {
-			logger.Error(fmt.Sprintf("DRY-RUN: StorageClass resource %s does not exist\n", objdep.Name))
+		if exists == false {
+			logger.Error(fmt.Sprintf("DRY-RUN: %s resource %s does not exist\n",name, objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			logger.Info(fmt.Sprintf("DRY-RUN: StorageClass resource %s exists\n", objdep.Name))
-
+			logger.Info(fmt.Sprintf("DRY-RUN: %s resource %s exists\n", name,objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	//Replace -------------------------------------------------------------------
-	if commandFlag == configuration.Replace {
+	// ----------------------------------------------------------------------------------------------------------------
+	create := func() (state.State, error){
+		if exists {
+			return state.EDeploymentStateExists,nil
+		}
+		_, err := client.Create(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s", name,objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
+	}
+	update := func() (state.State,error) {
+		if !exists {
+			return create()
+		}
+		_, err := client.Update(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not update %s",name))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		logger.Info(fmt.Sprintf("%s updated",name))
+		return state.EDeploymentStateUpdated, nil
+	}
+	del := func() (state.State,error) {
+		if !exists {
+			return state.EDeploymentStateDone,nil
+		}
 		logger.Info("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		_ = client.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		if err != nil {
+			return state.EDeploymentStateNotExists, err
+		}
 		for {
 			_, err := client.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
@@ -43,33 +78,45 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, objdep *storagev1b1.Stora
 			time.Sleep(time.Second * 1)
 			logger.Info(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
-		_, err := client.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy StorageClass resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
-		}
-		logger.Info("Deployment deployed")
-		return state.EDeploymentStateOkay, nil
+		return state.EDeploymentStateDone,nil
 	}
+	// ----------------------------------------------------------------------------------------------------------------
+
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		_, err := client.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy StorageClass resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
-		}
-		logger.Info("StorageClass deployed")
-		return state.EDeploymentStateOkay, nil
+
+		return create()
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		_, err := client.Update(objdep)
-		if err != nil {
-			logger.Error("Could not update StorageClass")
-			return state.EDeploymentStateCantUpdate, err
+
+		if opts.Force {
+			if !exists {
+				return create()
+			}else {
+				if _,err := del(); err != nil {
+					return state.EDeploymentStateError,err
+				}
+				return create()
+			}
+		} else {
+			return update()
 		}
-		logger.Info("StorageClass updated")
-		return state.EDeploymentStateUpdated, nil
+	}
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		if exists {
+			if _,err := del(); err != nil {
+				return state.EDeploymentStateError,err
+			}
+		}
+		_, err = client.Create(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s",name, objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
 	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
@@ -81,5 +128,5 @@ func execV1Beta1StorageResouce(k kubernetes.Interface, objdep *storagev1b1.Stora
 		logger.Info(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
-	return state.EDeploymentStateNil, errors.New("No kubectl command")
+	return state.EDeploymentStateNil, errors.New(fmt.Sprintf("no kubectl command given to %s",name))
 }

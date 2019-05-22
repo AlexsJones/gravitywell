@@ -25,6 +25,6 @@ func ExecuteShellAction(action kinds.Execute, opt configuration.Options, repoNam
 
 	logger.Warning(fmt.Sprintf("Running shell command %s\n", command))
 	if err := shell.ShellCommand(command, p, true); err != nil {
-		logger.Error(err.Error())
+		logger.Fatal(err.Error())
 	}
 }

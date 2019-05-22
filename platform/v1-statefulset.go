@@ -6,22 +6,38 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
-	logger "github.com/sirupsen/logrus"
 	"github.com/jpillora/backoff"
+	logger "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"time"
 )
 
-func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet, namespace string,
+
+func execV1StatefulSetResource(k kubernetes.Interface, objdep *appsv1.StatefulSet, namespace string,
 	opts configuration.Options, commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {
-	logger.Info("Found statefulset resource")
+	name := "StatefulSet"
 
-	stsclient := k.AppsV1().StatefulSets(namespace)
+	client := k.AppsV1().StatefulSets(namespace)
 
+	exists := false
+	_, err := client.Get(objdep.Name, meta_v1.GetOptions{})
+	if err == nil {
+		exists = true
+	}
+
+	if opts.DryRun {
+		if exists == false {
+			logger.Error(fmt.Sprintf("DRY-RUN: %s resource %s does not exist\n",name, objdep.Name))
+			return state.EDeploymentStateNotExists, err
+		} else {
+			logger.Info(fmt.Sprintf("DRY-RUN: %s resource %s exists\n", name,objdep.Name))
+			return state.EDeploymentStateExists, nil
+		}
+	}
+	// ----------------------------------------------------------------------------------------------------------------
 	awaitReady := func() error {
 
 		color.Yellow("Awaiting readiness...")
@@ -31,7 +47,7 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			Jitter: true,
 		}
 		for {
-			stsResponse, err := stsclient.Get(objdep.Name, meta_v1.GetOptions{})
+			stsResponse, err := client.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
 				return errors.New("failed to get deployment")
 			}
@@ -48,32 +64,13 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 			}
 		}
 	}
-	if opts.DryRun {
-		_, err := stsclient.Get(objdep.Name, v12.GetOptions{})
-		if err != nil {
-			logger.Error(fmt.Sprintf("DRY-RUN: StatefulSet resource %s does not exist\n", objdep.Name))
-			return state.EDeploymentStateNotExists, err
-		} else {
-			logger.Info(fmt.Sprintf("DRY-RUN: StatefulSet resource %s exists\n", objdep.Name))
-			return state.EDeploymentStateExists, nil
+	create := func() (state.State, error){
+		if exists {
+			return state.EDeploymentStateExists,nil
 		}
-	}
-	//Replace -------------------------------------------------------------------
-	if commandFlag == configuration.Replace {
-		logger.Info("Removing resource in preparation for redeploy")
-		graceperiod := int64(0)
-		_ = stsclient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
-		for {
-			_, err := stsclient.Get(objdep.Name, meta_v1.GetOptions{})
-			if err != nil {
-				break
-			}
-			time.Sleep(time.Second * 1)
-			logger.Info(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
-		}
-		_, err := stsclient.Create(objdep)
+		_, err := client.Create(objdep)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy objdep resource %s due to %s", objdep.Name, err.Error()))
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s", name,objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
 		if shouldAwaitDeployment {
@@ -81,29 +78,16 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 				return state.EDeploymentStateError, nil
 			}
 		}
-		logger.Info("Statefulset deployed")
+		logger.Info(fmt.Sprintf("%s deployed",name))
 		return state.EDeploymentStateOkay, nil
 	}
-	//Create ---------------------------------------------------------------------
-	if commandFlag == configuration.Create {
-		_, err := stsclient.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy objdep resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
+	update := func() (state.State,error) {
+		if !exists {
+			return create()
 		}
-		logger.Info("Statefulset deployed")
-		if shouldAwaitDeployment {
-			if err := awaitReady(); err != nil {
-				return state.EDeploymentStateError, nil
-			}
-		}
-		return state.EDeploymentStateOkay, nil
-	}
-	//Apply --------------------------------------------------------------------
-	if commandFlag == configuration.Apply {
-		_, err := stsclient.Update(objdep)
+		_, err := client.Update(objdep)
 		if err != nil {
-			logger.Error("Could not update Statefulset")
+			logger.Error(fmt.Sprintf("Could not update %s",name))
 			return state.EDeploymentStateCantUpdate, err
 		}
 		if shouldAwaitDeployment {
@@ -111,12 +95,71 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 				return state.EDeploymentStateError, nil
 			}
 		}
-		logger.Info("Statefulset updated")
+		logger.Info(fmt.Sprintf("%s updated",name))
 		return state.EDeploymentStateUpdated, nil
+	}
+	del := func() (state.State,error) {
+		if !exists {
+			return state.EDeploymentStateDone,nil
+		}
+		logger.Info("Removing resource in preparation for redeploy")
+		graceperiod := int64(0)
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		if err != nil {
+			return state.EDeploymentStateNotExists, err
+		}
+		for {
+			_, err := client.Get(objdep.Name, meta_v1.GetOptions{})
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+			logger.Info(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
+		}
+		return state.EDeploymentStateDone,nil
+	}
+	// ----------------------------------------------------------------------------------------------------------------
+
+	//Create ---------------------------------------------------------------------
+	if commandFlag == configuration.Create {
+
+		return create()
+	}
+	//Apply --------------------------------------------------------------------
+	if commandFlag == configuration.Apply {
+
+		if opts.Force {
+			if !exists {
+				return create()
+			}else {
+				if _,err := del(); err != nil {
+					return state.EDeploymentStateError,err
+				}
+
+				return create()
+			}
+		} else {
+			return update()
+		}
+	}
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		if exists {
+			if _,err := del(); err != nil {
+				return state.EDeploymentStateError,err
+			}
+		}
+		_, err = client.Create(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s",name, objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
 	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
-		err := stsclient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
 			logger.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
@@ -124,5 +167,5 @@ func execV1StatefulSetResouce(k kubernetes.Interface, objdep *appsv1.StatefulSet
 		logger.Info(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
-	return state.EDeploymentStateNil, errors.New("No kubectl command")
+	return state.EDeploymentStateNil, errors.New(fmt.Sprintf("no kubectl command given to %s",name))
 }

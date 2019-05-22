@@ -13,32 +13,50 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"time"
 )
+
 func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	logger.Info("Found service resource")
-	ssclient := k.CoreV1().Services(namespace)
+	name := "Service"
+
+	client := k.CoreV1().Services(namespace)
 
 	exists := false
-	_, err := ssclient.Get(objdep.Name, v12.GetOptions{})
+	_, err := client.Get(objdep.Name, v12.GetOptions{})
 	if err == nil {
 		exists = true
 	}
 
 	if opts.DryRun {
 		if exists == false {
-			logger.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", objdep.Name))
+			logger.Error(fmt.Sprintf("DRY-RUN: %s resource %s does not exist\n",name, objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			logger.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", objdep.Name))
+			logger.Info(fmt.Sprintf("DRY-RUN: %s resource %s exists\n", name,objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-	update := func() (state.State,error) {
-		_, err := ssclient.Update(objdep)
+	// ----------------------------------------------------------------------------------------------------------------
+	create := func() (state.State, error){
+		if exists {
+			return state.EDeploymentStateExists,nil
+		}
+		_, err := client.Create(objdep)
 		if err != nil {
-			logger.Error("Could not update Service")
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s", name,objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
+	}
+	update := func() (state.State,error) {
+		if !exists {
+			return create()
+		}
+		_, err := client.Update(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not update %s",name))
 			return state.EDeploymentStateCantUpdate, err
 		}
-		logger.Info("Service updated")
+		logger.Info(fmt.Sprintf("%s updated",name))
 		return state.EDeploymentStateUpdated, nil
 	}
 	del := func() (state.State,error) {
@@ -47,12 +65,12 @@ func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace 
 		}
 		logger.Info("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		err := ssclient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
 		if err != nil {
 			return state.EDeploymentStateNotExists, err
 		}
 		for {
-			_, err := ssclient.Get(objdep.Name, meta_v1.GetOptions{})
+			_, err := client.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
 				break
 			}
@@ -61,35 +79,8 @@ func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace 
 		}
 		return state.EDeploymentStateDone,nil
 	}
+	// ----------------------------------------------------------------------------------------------------------------
 
-	create := func() (state.State, error){
-		if exists {
-			return state.EDeploymentStateExists,nil
-		}
-		_, err := ssclient.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
-		}
-		logger.Info("Service deployed")
-		return state.EDeploymentStateOkay, nil
-	}
-
-	//Replace -------------------------------------------------------------------
-	if commandFlag == configuration.Replace {
-		if exists {
-			if _,err := del(); err != nil {
-				return state.EDeploymentStateError,err
-			}
-		}
-		_, err = ssclient.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy Service resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
-		}
-		logger.Info("Service deployed")
-		return state.EDeploymentStateOkay, nil
-	}
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
 
@@ -105,15 +96,30 @@ func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace 
 			if _,err := del(); err != nil {
 				return state.EDeploymentStateError,err
 			}
-			return update()
+			return create()
 			}
 		} else {
 			return update()
 		}
 	}
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		if exists {
+			if _,err := del(); err != nil {
+				return state.EDeploymentStateError,err
+			}
+		}
+		_, err = client.Create(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s",name, objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
+		}
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
+	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
-		err := ssclient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
 			logger.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
@@ -121,5 +127,5 @@ func execV1ServiceResouce(k kubernetes.Interface, objdep *v1.Service, namespace 
 		logger.Info(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
-	return state.EDeploymentStateNil, errors.New("No kubectl command")
+	return state.EDeploymentStateNil, errors.New(fmt.Sprintf("no kubectl command given to %s",name))
 }
