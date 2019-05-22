@@ -16,81 +16,111 @@ import (
 )
 
 func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, objdep *v1polbeta.PodDisruptionBudget, namespace string, opts configuration.Options, commandFlag configuration.CommandFlag) (state.State, error) {
-	logger.Info("Found PodDisruptionBudget resource")
-	pdbclient := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
+	name := "PodDisruptionBudget"
+
+	client := k.PolicyV1beta1().PodDisruptionBudgets(namespace)
 
 	exists := false
-	_, err := pdbclient.Get(objdep.Name, v12.GetOptions{})
+	_, err := client.Get(objdep.Name, v12.GetOptions{})
 	if err == nil {
 		exists = true
 	}
 
 	if opts.DryRun {
 		if exists == false {
-			logger.Error(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s does not exist\n", objdep.Name))
+			logger.Error(fmt.Sprintf("DRY-RUN: %s resource %s does not exist\n",name, objdep.Name))
 			return state.EDeploymentStateNotExists, err
 		} else {
-			logger.Info(fmt.Sprintf("DRY-RUN: PodDisruptionBudget resource %s exists\n", objdep.Name))
+			logger.Info(fmt.Sprintf("DRY-RUN: %s resource %s exists\n", name,objdep.Name))
 			return state.EDeploymentStateExists, nil
 		}
 	}
-
+	// ----------------------------------------------------------------------------------------------------------------
 	create := func() (state.State, error){
 		if exists {
 			return state.EDeploymentStateExists,nil
 		}
-		_, err := pdbclient.Create(objdep)
+		_, err := client.Create(objdep)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", objdep.Name, err.Error()))
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s", name,objdep.Name, err.Error()))
 			return state.EDeploymentStateError, err
 		}
-		logger.Info("PodDisruptionBudget deployed")
+		logger.Info(fmt.Sprintf("%s deployed",name))
 		return state.EDeploymentStateOkay, nil
 	}
-	//Replace -------------------------------------------------------------------
-	if commandFlag == configuration.Replace {
+	update := func() (state.State,error) {
+		if !exists {
+			return create()
+		}
+		_, err := client.Update(objdep)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Could not update %s",name))
+			return state.EDeploymentStateCantUpdate, err
+		}
+		logger.Info(fmt.Sprintf("%s updated",name))
+		return state.EDeploymentStateUpdated, nil
+	}
+	del := func() (state.State,error) {
+		if !exists {
+			return state.EDeploymentStateDone,nil
+		}
 		logger.Info("Removing resource in preparation for redeploy")
 		graceperiod := int64(0)
-		_ = pdbclient.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{GracePeriodSeconds: &graceperiod})
+		if err != nil {
+			return state.EDeploymentStateNotExists, err
+		}
 		for {
-			_, err := pdbclient.Get(objdep.Name, meta_v1.GetOptions{})
+			_, err := client.Get(objdep.Name, meta_v1.GetOptions{})
 			if err != nil {
 				break
 			}
 			time.Sleep(time.Second * 1)
 			logger.Info(fmt.Sprintf("Awaiting deletion of %s", objdep.Name))
 		}
-		_, err := pdbclient.Create(objdep)
-		if err != nil {
-			logger.Error(fmt.Sprintf("Could not deploy PodDisruptionBudget resource %s due to %s", objdep.Name, err.Error()))
-			return state.EDeploymentStateError, err
-		}
-		logger.Info("PodDisruptionBudget deployed")
-		return state.EDeploymentStateOkay, nil
+		return state.EDeploymentStateDone,nil
 	}
+	// ----------------------------------------------------------------------------------------------------------------
+
 	//Create ---------------------------------------------------------------------
 	if commandFlag == configuration.Create {
-		if exists {
-			return state.EDeploymentStateExists, nil
-		}
+
 		return create()
 	}
 	//Apply --------------------------------------------------------------------
 	if commandFlag == configuration.Apply {
-		if !exists {
-			return create()
+
+		if opts.Force {
+			if !exists {
+				return create()
+			}else {
+				if _,err := del(); err != nil {
+					return state.EDeploymentStateError,err
+				}
+				return create()
+			}
+		} else {
+			return update()
 		}
-		_, err := pdbclient.Update(objdep)
+	}
+	//Replace -------------------------------------------------------------------
+	if commandFlag == configuration.Replace {
+		if exists {
+			if _,err := del(); err != nil {
+				return state.EDeploymentStateError,err
+			}
+		}
+		_, err = client.Create(objdep)
 		if err != nil {
-			logger.Error("Could not update PodDisruptionBudget")
-			return state.EDeploymentStateCantUpdate, err
+			logger.Error(fmt.Sprintf("Could not deploy %s resource %s due to %s",name, objdep.Name, err.Error()))
+			return state.EDeploymentStateError, err
 		}
-		logger.Info("PodDisruptionBudget updated")
-		return state.EDeploymentStateUpdated, nil
+		logger.Info(fmt.Sprintf("%s deployed",name))
+		return state.EDeploymentStateOkay, nil
 	}
 	//Delete -------------------------------------------------------------------
 	if commandFlag == configuration.Delete {
-		err := pdbclient.Delete(objdep.Name, &meta_v1.DeleteOptions{})
+		err := client.Delete(objdep.Name, &meta_v1.DeleteOptions{})
 		if err != nil {
 			logger.Error(fmt.Sprintf("Could not delete %s", objdep.Kind))
 			return state.EDeploymentStateCantUpdate, err
@@ -98,5 +128,5 @@ func execV1Beta1PodDisruptionBudgetResouce(k kubernetes.Interface, objdep *v1pol
 		logger.Info(fmt.Sprintf("%s deleted", objdep.Kind))
 		return state.EDeploymentStateOkay, nil
 	}
-	return state.EDeploymentStateNil, errors.New("No kubectl command")
+	return state.EDeploymentStateNil, errors.New(fmt.Sprintf("no kubectl command given to %s",name))
 }
