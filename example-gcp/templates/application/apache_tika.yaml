@@ -13,7 +13,7 @@ Strategy:
             # refs/heads/{branchname}
             # refs/tags/{tagname}
             # refs/remotes/
-            GitReference: ref/heads/master #Optional and this example just pulls master
+            GitReference: refs/heads/master #Optional and this example just pulls master
             ActionList:
               Executions:
                 - Execute:
