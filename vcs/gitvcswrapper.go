@@ -17,7 +17,7 @@ func nameForRepository(repoUrl string) string {
 	return splitStrings[len(splitStrings)-1]
 }
 
-func FetchRepo(remote string, opt configuration.Options) (string, error) {
+func FetchRepo(remote string, reference string, opt configuration.Options) (string, error) {
 	remoteVCSRepoName := nameForRepository(remote)
 	if _, err := os.Stat(path.Join(opt.TempVCSPath, remoteVCSRepoName)); !os.IsNotExist(err) {
 		logger.Info(fmt.Sprintf("Using existing repository %s", path.Join(opt.TempVCSPath, remoteVCSRepoName)))
@@ -25,6 +25,7 @@ func FetchRepo(remote string, opt configuration.Options) (string, error) {
 	}
 	logger.Info(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 	gvcs := new(GitVCS)
-	_, err := gvcs.Fetch(path.Join(opt.TempVCSPath, remoteVCSRepoName), remote, opt.SSHKeyPath)
+	_, err := gvcs.Fetch(path.Join(opt.TempVCSPath, remoteVCSRepoName), remote,reference, opt.SSHKeyPath)
+
 	return remoteVCSRepoName, err
 }

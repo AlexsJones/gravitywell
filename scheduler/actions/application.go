@@ -81,7 +81,7 @@ func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
 	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
-	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, opt)
+	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, deployment.GitReference, opt)
 	if err != nil {
 		logger.Error(err.Error())
 

@@ -1,13 +1,15 @@
 package vcs
 
 import (
+	logger "github.com/sirupsen/logrus"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
 
 	"golang.org/x/crypto/ssh"
-	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4"
 	gitssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
@@ -16,7 +18,7 @@ type GitVCS struct {
 }
 
 //Fetch ...
-func (g *GitVCS) Fetch(localpath string, remote string, keypath string) (string, error) {
+func (g *GitVCS) Fetch(localpath string, remote string, reference string, keypath string) (string, error) {
 
 	var p string
 
@@ -44,11 +46,30 @@ func (g *GitVCS) Fetch(localpath string, remote string, keypath string) (string,
 		},
 	}
 
-	_, err = git.PlainClone(localpath, false, &git.CloneOptions{
+	repo, err := git.PlainClone(localpath, false, &git.CloneOptions{
 		URL:      remote,
 		Progress: os.Stdout,
 		Auth:     auth,
 	})
+
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if reference != "" {
+		logger.Infof("Checking out %s:%s",remote,reference)
+		tree, err := repo.Worktree()
+		if err != nil {
+			logger.Fatal(err)
+		}
+		err = tree.Checkout(&git.CheckoutOptions{
+			Branch: plumbing.ReferenceName(reference),
+		})
+		if err != nil {
+			logger.Fatal(err)
+		}
+	}
+
 	return "", err
 }
 
