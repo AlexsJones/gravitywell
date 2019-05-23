@@ -1,7 +1,6 @@
 --- 
 before_install: 
   - "echo \"$DOCKER_PASSWORD\" | docker login -u \"$DOCKER_USERNAME\" --password-stdin"
-  - "cat docker build -t tibbar/gravitywell:latest ."
   - "cat VERSION | xargs -I{} docker build -t tibbar/gravitywell:{} ."
   - "cat VERSION | xargs -I{} docker push tibbar/gravitywell:{}"
   - "docker build -t tibbar/gravitywell:latest ."

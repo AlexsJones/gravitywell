@@ -1,0 +1,30 @@
+APIVersion: "v1"
+Kind: "Application"
+Strategy:
+  - Cluster:
+      FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+      ShortName: "{{.clustername}}"
+      Applications:
+        - Application:
+            Name: "kubernetes-mongodb-cluster"
+            Namespace: "mongodb"
+            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+            ActionList:
+              Executions:
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: kubectl create ns mongodb | true
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: ./build_environment.sh dev
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: ./generate_pem.sh testExampleKey122
+                - Execute:
+                  Kind: "Kubernetes"
+                  Configuration:
+                    Path: deployment/mongo #Optional value
+                    AwaitDeployment: true #Optional defaults to false

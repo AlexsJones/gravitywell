@@ -210,7 +210,7 @@ Where you can have an action list defined..
 
 *actions lists can call other action lists in a chain - helping to create templated commands*
 
-[See an example here](example-gcp/templates/application/1_small.yaml)
+[See an example here](example-gcp/templates/application/zookeeper.yaml)
 
 ```
 #./templates/external/gwdeploymentconfig.yaml
