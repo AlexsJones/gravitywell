@@ -2,21 +2,21 @@ APIVersion: "v1"
 Kind: "Application"
 Strategy:
   - Cluster:
-      FullName: "minikube-test"
-      ShortName: "minikube-test"
+      Name: "{{.clustername}}"
       Applications:
         - Application:
             Name: "kubernetes-zookeeper-cluster"
             Namespace: "zk"
             VCS:
+              FileSystem: # Optional
               Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
             ActionList:
               Executions:
                 - Execute:
                   Kind: "Shell"
                   Configuration:
-                    Command: kubectl create ns zk || true
+                    Command: kubectl create ns zk
                 - Execute:
                   Kind: "RunActionList"
                   Configuration:
-                    Path: example-gcp/templates/actionlist/actionlist-zookeeper-config.yaml
+                    Path: examples/common/templates/actionlist/actionlist-zookeeper-config.yaml

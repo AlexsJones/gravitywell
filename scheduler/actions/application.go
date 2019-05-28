@@ -14,9 +14,14 @@ import (
 )
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
-	opt configuration.Options, clusterName string, application kinds.Application) {
+	opt configuration.Options, clusterInformation struct {
+	ClusterName string
+	ClusterRegion string
+	ClusterProjectName string
+	ClusterProviderName string
+}, application kinds.Application) {
 
-	executeDeployment(application, opt, clusterName, commandFlag)
+	executeDeployment(application, opt, clusterInformation, commandFlag)
 }
 
 func loadActionList(path string) kinds.ActionList {
@@ -38,12 +43,17 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
+	clusterInformation struct {
+	ClusterName string
+	ClusterRegion string
+	ClusterProjectName string
+	ClusterProviderName string
+}, commandFlag configuration.CommandFlag, repoName string)  {
 
 	if execute.Kind =="" {
 		fmt.Printf(prettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
-			deployment.VCS.Git,clusterName))
+			deployment.VCS.Git,clusterInformation.ClusterName))
 	}
 
 	if execute.Configuration == nil {
@@ -55,7 +65,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 		ExecuteShellAction(execute, opt, repoName)
 
 	case "kubernetes":
-		ExecuteKubernetesAction(execute, clusterName, deployment, commandFlag, opt, repoName)
+		ExecuteKubernetesAction(execute, clusterInformation, deployment, commandFlag, opt, repoName)
 
 	case "runactionlist":
 		tp, ok := execute.Configuration["Path"]
@@ -65,16 +75,21 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 		}
 		al := loadActionList(tp)
 
-		executeActionList(al, deployment, opt, clusterName, commandFlag, repoName)
+		executeActionList(al, deployment, opt, clusterInformation, commandFlag, repoName)
 	}
 
 }
 
 func executeActionList(actionList kinds.ActionList, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, remoteVCSRepoName string) {
+	clusterInformation struct {
+	ClusterName string
+	ClusterRegion string
+	ClusterProjectName string
+	ClusterProviderName string
+}, commandFlag configuration.CommandFlag, remoteVCSRepoName string) {
 	for _, a := range actionList.Executions {
 
-		selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
+		selectAndExecute(a, deployment, opt, clusterInformation, commandFlag, remoteVCSRepoName)
 	}
 }
 

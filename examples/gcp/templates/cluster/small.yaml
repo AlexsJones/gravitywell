@@ -5,8 +5,9 @@ Strategy:
       Name: "Google Cloud Platform"
       Clusters:
         - Cluster:
-            FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
-            ShortName: "{{.clustername}}"
+            Name: "{{.clustername}}"
+#            FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
+#            ShortName: "{{.clustername}}"
             Project: "{{.projectname}}"
             Region: "us-east4"
             Zones: ["us-east4-a"]

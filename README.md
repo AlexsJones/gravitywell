@@ -77,12 +77,12 @@ _Lets take it for a spin using the gcp example_
 #If you've looked at the templates you'll see a helmesque style of interpolation
 # "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
 
-vortex --output example-gcp/deployment --template example-gcp/templates \
---set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=testcluster"
+# Build the cluster template
+vortex --output deployment/applications --template examples/common/templates/application --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=gke_alex-example_us-east4_testcluster"
+# Build the example application templates
+vortex --output deployment/applications --template examples/common/templates/application --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=gke_alex-example_us-east4_testcluster"
 
-# Now an examples/templates folder exists you simple run...
-
-gravitywell create -f examples-gcp/deployment
+gravitywell create -f deployment/
 
 # This will now start to provision any clusters that are required and deploy applications
 
@@ -210,7 +210,7 @@ Where you can have an action list defined..
 
 *actions lists can call other action lists in a chain - helping to create templated commands*
 
-[See an example here](example-gcp/templates/application/zookeeper.yaml)
+[See an example here](examples/example-gcp/templates/application/zookeeper.yaml)
 
 ```
 #./templates/external/gwdeploymentconfig.yaml

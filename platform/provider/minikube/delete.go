@@ -1,7 +1,6 @@
 package minikube
 
 import (
-	"errors"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions/shell"
@@ -13,13 +12,8 @@ func (g *MiniKubeProvider) Delete(cluster kinds.ProviderCluster) error {
 
 	minikubeConnection := []string{"minikube delete"}
 
-	if strings.ToLower(cluster.FullName) != strings.ToLower(cluster.ShortName) {
-		logger.Error("Minikube requires FullName & ShortName to match")
-		return errors.New("minikube Cluster name invalid")
-	}
-
-	if strings.ToLower(cluster.FullName) != "minikube" || strings.ToLower(cluster.ShortName) != "minikube" {
-		minikubeConnection = append(minikubeConnection,fmt.Sprintf("-p=%s",cluster.FullName))
+	if strings.ToLower(cluster.Name) != "minikube"  {
+		minikubeConnection = append(minikubeConnection,fmt.Sprintf("-p=%s",cluster.Name))
 	}
 
 	command := strings.Join(minikubeConnection," ")

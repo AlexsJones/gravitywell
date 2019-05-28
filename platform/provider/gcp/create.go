@@ -45,7 +45,7 @@ func (g *GCPProvider) Create(clusterp kinds.ProviderCluster) error {
 	if len(clusterp.NodePools) == 0 {
 
 		cluster = &containerpb.Cluster{
-			Name:             clusterp.ShortName,
+			Name:             clusterp.Name,
 			Locations:        clusterp.Zones,
 			InitialNodeCount: int32(clusterp.InitialNodeCount),
 			NodeConfig: &containerpb.NodeConfig{
@@ -57,7 +57,7 @@ func (g *GCPProvider) Create(clusterp kinds.ProviderCluster) error {
 
 	} else {
 		cluster = &containerpb.Cluster{
-			Name:           clusterp.ShortName,
+			Name:           clusterp.Name,
 			Locations:      clusterp.Zones,
 			NodePools:      convertedNodePool,
 			ResourceLabels: clusterp.Labels,
@@ -78,7 +78,7 @@ func (g *GCPProvider) Create(clusterp kinds.ProviderCluster) error {
 	for {
 		clust, err :=
 			g.ClusterManagerClient.GetCluster(g.Context, &containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
-				clusterp.Region, clusterp.ShortName)})
+				clusterp.Region, clusterp.Name)})
 		if err != nil {
 			return err
 		}
