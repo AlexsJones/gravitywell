@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
@@ -9,19 +8,13 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"path/filepath"
 	"strings"
 )
 
 func ApplicationProcessor(commandFlag configuration.CommandFlag,
-	opt configuration.Options, clusterInformation struct {
-	ClusterName string
-	ClusterRegion string
-	ClusterProjectName string
-	ClusterProviderName string
-}, application kinds.Application) {
+	opt configuration.Options, clusterName string, application kinds.Application) {
 
-	executeDeployment(application, opt, clusterInformation, commandFlag)
+	executeDeployment(application, opt, clusterName, commandFlag)
 }
 
 func loadActionList(path string) kinds.ActionList {
@@ -38,22 +31,13 @@ func loadActionList(path string) kinds.ActionList {
 	}
 	return appc
 }
-func prettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
-}
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterInformation struct {
-	ClusterName string
-	ClusterRegion string
-	ClusterProjectName string
-	ClusterProviderName string
-}, commandFlag configuration.CommandFlag, repoName string)  {
+	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
 
 	if execute.Kind =="" {
-		fmt.Printf(prettyPrint(deployment))
+		fmt.Printf(PrettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
-			deployment.VCS.Git,clusterInformation.ClusterName))
+			deployment.VCS.Git,clusterName))
 	}
 
 	if execute.Configuration == nil {
@@ -65,7 +49,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 		ExecuteShellAction(execute, opt, repoName)
 
 	case "kubernetes":
-		ExecuteKubernetesAction(execute, clusterInformation, deployment, commandFlag, opt, repoName)
+		ExecuteKubernetesAction(execute, clusterName, deployment, commandFlag, opt, repoName)
 
 	case "runactionlist":
 		tp, ok := execute.Configuration["Path"]
@@ -75,21 +59,16 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 		}
 		al := loadActionList(tp)
 
-		executeActionList(al, deployment, opt, clusterInformation, commandFlag, repoName)
+		executeActionList(al, deployment, opt, clusterName, commandFlag, repoName)
 	}
 
 }
 
 func executeActionList(actionList kinds.ActionList, deployment kinds.Application, opt configuration.Options,
-	clusterInformation struct {
-	ClusterName string
-	ClusterRegion string
-	ClusterProjectName string
-	ClusterProviderName string
-}, commandFlag configuration.CommandFlag, remoteVCSRepoName string) {
+	clusterName string, commandFlag configuration.CommandFlag, remoteVCSRepoName string) {
 	for _, a := range actionList.Executions {
 
-		selectAndExecute(a, deployment, opt, clusterInformation, commandFlag, remoteVCSRepoName)
+		selectAndExecute(a, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)
 	}
 }
 
@@ -97,18 +76,11 @@ func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
 	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
-	var remoteVCSRepoName string
-	var err error
+	remoteVCSRepoName, err := vcs.FetchRepo(deployment.VCS.Git, deployment.VCS.GitReference, opt)
+	if err != nil {
+		logger.Error(err.Error())
 
-	if deployment.VCS.FileSystem != "" {
-		remoteVCSRepoName = filepath.Base(deployment.VCS.FileSystem)
-	}else {
-		remoteVCSRepoName, err = vcs.FetchRepo(deployment.VCS.Git, deployment.VCS.GitReference, opt)
-		if err != nil {
-			logger.Error(err.Error())
-
-			return
-		}
+		return
 	}
 
 	executeActionList(deployment.ActionList, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)

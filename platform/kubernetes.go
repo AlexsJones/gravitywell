@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
@@ -55,15 +56,42 @@ func configForContext(context string) (*rest.Config, error) {
 	return config, nil
 }
 
+func findKubeConfig() (string, error) {
+	env := os.Getenv("KUBECONFIG")
+	if env != "" {
+		return env, nil
+	}
+	path, err := homedir.Expand("~/.kube/config")
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 // getConfig returns a Kubernetes client config for a given context.
-func getConfig(context string) clientcmd.ClientConfig {
+func getConfig(c string) clientcmd.ClientConfig {
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 	rules.DefaultClientConfig = &clientcmd.DefaultClientConfig
 
 	overrides := &clientcmd.ConfigOverrides{ClusterDefaults: clientcmd.ClusterDefaults}
 
-	if context != "" {
-		overrides.CurrentContext = context
+	kubeConfigPath, err := findKubeConfig()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	kubeConfig, err := clientcmd.LoadFromFile(kubeConfigPath)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if c != "" {
+		for mapContext, _ := range kubeConfig.Contexts {
+			if strings.Contains(mapContext,c) {
+				overrides.CurrentContext = mapContext
+				continue
+			}
+		}
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
@@ -115,8 +143,6 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 	if len(kubernetesResources) == 0 {
 		return errors.New("no resources within file list")
 	}
-
-	//TODO: Run X resource first
 
 	//Run namespace first
 	out := 0

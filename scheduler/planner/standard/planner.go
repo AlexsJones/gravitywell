@@ -1,8 +1,8 @@
 package standard
 
 import (
-	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
+	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
 	logger "github.com/sirupsen/logrus"
 )
@@ -34,8 +34,7 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 
 		}
 	}
-	logger.Infof(fmt.Sprintf("%#v", s.plan.clusterDeployments))
-
+	logger.Infof(actions.PrettyPrint(s.plan.clusterDeployments))
 	//At this point if there are no clusters, we set a flag to tell the plan to only run applications
 	if len(s.plan.clusterDeployments) == 0 {
 		logger.Info("No clusters found to deploy - skipping")
@@ -50,17 +49,15 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 	// Application -------------------------------------------------------------------------------
 	for _, applicationKinds := range configuration.ApplicationKinds {
 		for _, applicationLists := range applicationKinds.Strategy {
-			//Name of cluster (short name)
 
 			for _, app := range applicationLists.Cluster.Applications {
-
-				s.plan.clusterApplications[applicationLists.Cluster.FullName] =
-					append(s.plan.clusterApplications[applicationLists.Cluster.FullName], app.Application)
+				s.plan.clusterApplications[applicationLists.Cluster.Name] =
+					append(s.plan.clusterApplications[applicationLists.Cluster.Name], app.Application)
 			}
 		}
 	}
 	// -------------------------------------------------------------------------------------------
-	logger.Infof(fmt.Sprintf("%#v", s.plan.clusterApplications))
+	logger.Infof(actions.PrettyPrint(s.plan.clusterApplications))
 	// -------------------------------------------------------------------------------------------
 	return s.plan, nil
 }

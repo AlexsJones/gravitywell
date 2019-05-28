@@ -12,7 +12,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
@@ -25,12 +24,7 @@ func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
 	return restclient, k8siface
 }
 
-func ExecuteKubernetesAction(action kinds.Execute, clusterInformation struct {
-	ClusterName string
-	ClusterRegion string
-	ClusterProjectName string
-	ClusterProviderName string
-},
+func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 	deployment kinds.Application,
 	commandFlag configuration.CommandFlag, opt configuration.Options, repoName string) {
 	var deploymentPath = "."
@@ -62,16 +56,6 @@ func ExecuteKubernetesAction(action kinds.Execute, clusterInformation struct {
 		})
 	if err != nil {
 		logger.Fatal(err.Error())
-	}
-	var clusterName = clusterInformation.ClusterName
-	//WARNING: Cloud provider sensitive behaviour is required here to determine the correct context name.
-
-	switch strings.ToLower(clusterInformation.ClusterProviderName) {
-	case "google cloud platform":
-		clusterName = fmt.Sprintf("gke_%s_%s_%s",clusterInformation.ClusterProjectName,
-			clusterInformation.ClusterRegion, clusterInformation.ClusterName)
-	case "amazon web services":
-
 	}
 
 	_, k8siface := clientForCluster(clusterName)

@@ -76,19 +76,9 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.Name] {
-					clusterInformation := struct {
-						ClusterName string
-						ClusterRegion string
-						ClusterProjectName string
-						ClusterProviderName string
-					} {
-						clusters.Name, clusters.Region,
-						clusters.Project,
-						strings.ToLower(p.providerClusterReference[k].ProviderName),
-					}
 
 					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusterInformation, application)
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -109,21 +99,12 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-				clusterInformation := struct {
-					ClusterName string
-					ClusterRegion string
-					ClusterProjectName string
-					ClusterProviderName string
-				} {
-					clusters.Name, clusters.Region,
-					clusters.Project,
-					strings.ToLower(p.providerClusterReference[k].ProviderName),
-				}
+
 				//Deploy cluster applications
 				for _, application := range p.clusterApplications[clusters.Name] {
 
 					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusterInformation, application)
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -145,22 +126,13 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-				clusterInformation := struct {
-					ClusterName string
-					ClusterRegion string
-					ClusterProjectName string
-					ClusterProviderName string
-				} {
-					clusters.Name, clusters.Region,
-					clusters.Project,
-					strings.ToLower(p.providerClusterReference[k].ProviderName),
-				}
+
 				//Deploy cluster applications
 
 				for _, application := range p.clusterApplications[clusters.Name] {
 
 					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusterInformation, application)
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -173,14 +145,11 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 }
 func (p *Plan) applicationFirstDeploymentPlan() {
 
-	for clusterName, _ := range p.clusterApplications {
+	for clusterFullName, _ := range p.clusterApplications {
 
-		for _, application := range p.clusterApplications[clusterName] {
-
-			color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterName))
-			//This won't work as missing alot of cluster detail here...
-			// Need to rework structure
-			actions.ApplicationProcessor(p.commandFlag, p.opt, clusterName, application)
+		for _, application := range p.clusterApplications[clusterFullName] {
+			color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterFullName))
+			actions.ApplicationProcessor(p.commandFlag, p.opt, clusterFullName, application)
 
 		}
 	}
