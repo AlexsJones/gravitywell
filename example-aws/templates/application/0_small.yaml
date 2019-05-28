@@ -9,7 +9,8 @@ Strategy:
         - Application:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
-            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            VCS:
+              Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
             ActionList:
               Executions:
                 - Execute:

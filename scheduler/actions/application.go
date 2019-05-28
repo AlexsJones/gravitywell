@@ -9,6 +9,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 )
 
@@ -42,7 +43,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 	if execute.Kind =="" {
 		fmt.Printf(prettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
-			deployment.Git,clusterName))
+			deployment.VCS.Git,clusterName))
 	}
 
 	if execute.Configuration == nil {
@@ -81,11 +82,18 @@ func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
 	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
-	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, deployment.GitReference, opt)
-	if err != nil {
-		logger.Error(err.Error())
+	var remoteVCSRepoName string
+	var err error
 
-		return
+	if deployment.VCS.FileSystem != "" {
+		remoteVCSRepoName = filepath.Base(deployment.VCS.FileSystem)
+	}else {
+		remoteVCSRepoName, err = vcs.FetchRepo(deployment.VCS.Git, deployment.VCS.GitReference, opt)
+		if err != nil {
+			logger.Error(err.Error())
+
+			return
+		}
 	}
 
 	executeActionList(deployment.ActionList, deployment, opt, clusterName, commandFlag, remoteVCSRepoName)

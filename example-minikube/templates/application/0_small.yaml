@@ -8,7 +8,8 @@ Strategy:
         - Application:
             Name: "kubernetes-zookeeper-cluster"
             Namespace: "zk"
-            Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
+            VCS:
+              Git: "git@github.com:AlexsJones/kubernetes-zookeeper-cluster.git"
             ActionList:
               Executions:
                 - Execute:
