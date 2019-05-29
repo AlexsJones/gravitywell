@@ -6,7 +6,7 @@
 ![buildstatus](https://travis-ci.org/AlexsJones/gravitywell.svg?branch=master)
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a6cd570642c5aeeedaf9/maintainability)](https://codeclimate.com/github/AlexsJones/gravitywell/maintainability)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Join the chat at https://gitter.im/gravitywellHQ/community](https://badges.gitter.im/gravitywellHQ/community.svg)](https://gitter.im/gravitywellHQ/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
 
 **Update** AWS API now in Alpha for AWS EKS - Still building a CFN for auto node pool creation. For decent results use a more mature tool for AWS such as [eksctl](https://github.com/weaveworks/eksctl)
