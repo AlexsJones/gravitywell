@@ -1,6 +1,9 @@
 # Gravitywell
 
+
 <img src="https://github.com/ashleymcnamara/gophers/blob/master/SPACEGIRL_GOPHER.png?raw=true" alt="drawing" width="200"/>
+
+[![Gitter](https://badges.gitter.im/gravitywellHQ/community.svg)](https://gitter.im/gravitywellHQ/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ![ProjectStatus](https://img.shields.io/badge/project%20status-Alpha-yellow.svg)
 ![buildstatus](https://travis-ci.org/AlexsJones/gravitywell.svg?branch=master)
