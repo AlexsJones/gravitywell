@@ -12,11 +12,11 @@ func (g *MiniKubeProvider) Delete(cluster kinds.ProviderCluster) error {
 
 	minikubeConnection := []string{"minikube delete"}
 
-	if strings.ToLower(cluster.Name) != "minikube"  {
-		minikubeConnection = append(minikubeConnection,fmt.Sprintf("-p=%s",cluster.Name))
+	if strings.ToLower(cluster.Name) != "minikube" {
+		minikubeConnection = append(minikubeConnection, fmt.Sprintf("-p=%s", cluster.Name))
 	}
 
-	command := strings.Join(minikubeConnection," ")
+	command := strings.Join(minikubeConnection, " ")
 
 	logger.Info(fmt.Sprintf("Running shell command %s\n", command))
 

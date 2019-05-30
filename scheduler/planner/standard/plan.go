@@ -69,7 +69,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Fatal(err)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
@@ -95,7 +95,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Fatal(err)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
@@ -122,7 +122,7 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					os.Exit(1)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}

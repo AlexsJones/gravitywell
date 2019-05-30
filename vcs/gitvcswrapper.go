@@ -25,7 +25,7 @@ func FetchRepo(remote string, reference string, opt configuration.Options) (stri
 	}
 	logger.Info(fmt.Sprintf("Fetching deployment %s into %s\n", remoteVCSRepoName, path.Join(opt.TempVCSPath, remoteVCSRepoName)))
 	gvcs := new(GitVCS)
-	_, err := gvcs.Fetch(path.Join(opt.TempVCSPath, remoteVCSRepoName), remote,reference, opt.SSHKeyPath)
+	_, err := gvcs.Fetch(path.Join(opt.TempVCSPath, remoteVCSRepoName), remote, reference, opt.SSHKeyPath)
 
 	return remoteVCSRepoName, err
 }

@@ -57,7 +57,7 @@ func (g *GitVCS) Fetch(localpath string, remote string, reference string, keypat
 	}
 
 	if reference != "" {
-		logger.Infof("Checking out %s:%s",remote,reference)
+		logger.Infof("Checking out %s:%s", remote, reference)
 		tree, err := repo.Worktree()
 		if err != nil {
 			logger.Fatal(err)

@@ -15,7 +15,7 @@ import (
 )
 
 func clientForCluster(clusterName string) (*rest.Config, kubernetes.Interface) {
-	logger.Info(fmt.Sprintf("Switching to cluster: %s\n", clusterName))
+	logger.Info(fmt.Sprintf("\n\nSwitching to cluster: %s\n\n", clusterName))
 	restclient, k8siface, err := platform.GetKubeClient(clusterName)
 	if err != nil {
 		logger.Error(err.Error())
@@ -47,8 +47,8 @@ func ExecuteKubernetesAction(action kinds.Execute, clusterName string,
 			if err != nil {
 				return err
 			}
-			if f.IsDir(){
-				logger.Info("Ignoring directory %s",fmt.Sprintf(path))
+			if f.IsDir() {
+				logger.Info("Ignoring directory %s", fmt.Sprintf(path))
 				return nil
 			}
 			fileList = append(fileList, path)
