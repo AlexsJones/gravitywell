@@ -69,16 +69,16 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Fatal(err)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
 
 				//Deploy cluster applications
-				for _, application := range p.clusterApplications[clusters.FullName] {
+				for _, application := range p.clusterApplications[clusters.Name] {
 
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -95,16 +95,16 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Fatal(err)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
 
 				//Deploy cluster applications
-				for _, application := range p.clusterApplications[clusters.FullName] {
+				for _, application := range p.clusterApplications[clusters.Name] {
 
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -122,17 +122,17 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					os.Exit(1)
 				}
 
-				if p.commandFlag == configuration.Delete{
+				if p.commandFlag == configuration.Delete {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
 
 				//Deploy cluster applications
 
-				for _, application := range p.clusterApplications[clusters.FullName] {
+				for _, application := range p.clusterApplications[clusters.Name] {
 
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.FullName))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.FullName, application)
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
 
 				}
 			}
@@ -148,7 +148,6 @@ func (p *Plan) applicationFirstDeploymentPlan() {
 	for clusterFullName, _ := range p.clusterApplications {
 
 		for _, application := range p.clusterApplications[clusterFullName] {
-
 			color.Yellow(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterFullName))
 			actions.ApplicationProcessor(p.commandFlag, p.opt, clusterFullName, application)
 

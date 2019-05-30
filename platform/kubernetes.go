@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
@@ -16,15 +17,15 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/apps/v1beta2"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	batchbeta1 "k8s.io/api/batch/v1beta1"
 	"k8s.io/api/core/v1"
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	v1polbeta "k8s.io/api/policy/v1beta1"
 	v1rbac "k8s.io/api/rbac/v1"
-	storagev1b1 "k8s.io/api/storage/v1beta1"
 	storagev1 "k8s.io/api/storage/v1"
-	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	storagev1b1 "k8s.io/api/storage/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -55,20 +56,47 @@ func configForContext(context string) (*rest.Config, error) {
 	return config, nil
 }
 
+func findKubeConfig() (string, error) {
+	env := os.Getenv("KUBECONFIG")
+	if env != "" {
+		return env, nil
+	}
+	path, err := homedir.Expand("~/.kube/config")
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 // getConfig returns a Kubernetes client config for a given context.
-func getConfig(context string) clientcmd.ClientConfig {
+func getConfig(c string) clientcmd.ClientConfig {
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 	rules.DefaultClientConfig = &clientcmd.DefaultClientConfig
 
 	overrides := &clientcmd.ConfigOverrides{ClusterDefaults: clientcmd.ClusterDefaults}
 
-	if context != "" {
-		overrides.CurrentContext = context
+	kubeConfigPath, err := findKubeConfig()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	kubeConfig, err := clientcmd.LoadFromFile(kubeConfigPath)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if c != "" {
+		for mapContext, _ := range kubeConfig.Contexts {
+			if strings.Contains(mapContext, c) {
+				overrides.CurrentContext = mapContext
+				continue
+			}
+		}
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
 }
 
-func delete_empty (s []string) []string {
+func delete_empty(s []string) []string {
 	var r []string
 	for _, str := range s {
 		if str != "" {
@@ -77,6 +105,7 @@ func delete_empty (s []string) []string {
 	}
 	return r
 }
+
 //GenerateDeploymentPlan
 func GenerateDeploymentPlan(k kubernetes.Interface,
 	files []string, namespace string, opts configuration.Options,
@@ -102,7 +131,7 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 			decode := scheme.Codecs.UniversalDeserializer().Decode
 			obj, kind, err := decode([]byte(doc), nil, nil)
 			if err != nil {
-				logger.Fatalf(fmt.Sprintf("%s : Could not be decoded : %s",file, err.Error()))
+				logger.Fatalf(fmt.Sprintf("%s : Could not be decoded : %s", file, err.Error()))
 			}
 			logger.Infof("Decoded Kind: %s", kind.String())
 
@@ -115,8 +144,6 @@ func GenerateDeploymentPlan(k kubernetes.Interface,
 	if len(kubernetesResources) == 0 {
 		return errors.New("no resources within file list")
 	}
-
-	//TODO: Run X resource first
 
 	//Run namespace first
 	out := 0
@@ -169,7 +196,7 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	case *v1.Pod:
 		response, e = execV1PodResource(k, obj.(*v1.Pod), namespace, opts, commandFlag)
 	case *v1.PersistentVolume:
-		response, e = execV1PersistentVolumeResource(k,obj.(*v1.PersistentVolume),namespace,opts,commandFlag)
+		response, e = execV1PersistentVolumeResource(k, obj.(*v1.PersistentVolume), namespace, opts, commandFlag)
 	case *batchbeta1.CronJob:
 		response, e = execV1Beta1CronJob(k, obj.(*batchbeta1.CronJob), namespace, opts, commandFlag)
 	case *batchv1.Job:
@@ -195,7 +222,7 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	case *v1.Service:
 		response, e = execV1ServiceResouce(k, obj.(*v1.Service), namespace, opts, commandFlag)
 	case *v1.ConfigMap:
-		response, e = execV1ConfigMapResouce(k, obj.(*v1.ConfigMap), namespace, opts, commandFlag)
+		response, e = execV1ConfigMapResource(k, obj.(*v1.ConfigMap), namespace, opts, commandFlag)
 	case *v1polbeta.PodDisruptionBudget:
 		response, e = execV1Beta1PodDisruptionBudgetResouce(k, obj.(*v1polbeta.PodDisruptionBudget), namespace, opts, commandFlag)
 	case *v1.ServiceAccount:
@@ -210,7 +237,7 @@ func DeployFromObject(k kubernetes.Interface, obj runtime.Object,
 	case *v1rbac.ClusterRole:
 		response, e = execV1AuthClusterRoleResouce(k, obj.(*v1rbac.ClusterRole), namespace, opts, commandFlag)
 	case *v1betav1.DaemonSet:
-		response, e = execV1DaemonSetResource(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag,shouldAwaitDeployment)
+		response, e = execV1DaemonSetResource(k, obj.(*v1betav1.DaemonSet), namespace, opts, commandFlag, shouldAwaitDeployment)
 	case *v1betav1.Ingress:
 		response, e = execV1Beta1IngressResouce(k, obj.(*v1betav1.Ingress), namespace, opts, commandFlag)
 	case *storagev1b1.StorageClass:

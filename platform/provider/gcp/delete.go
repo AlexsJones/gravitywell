@@ -13,7 +13,7 @@ func (g *GCPProvider) Delete(clusterp kinds.ProviderCluster) error {
 	clusterReq := &containerpb.DeleteClusterRequest{
 
 		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
-			clusterp.Region, clusterp.ShortName),
+			clusterp.Region, clusterp.Name),
 	}
 
 	clusterResponse, err := g.ClusterManagerClient.DeleteCluster(g.Context, clusterReq)
@@ -27,7 +27,7 @@ func (g *GCPProvider) Delete(clusterp kinds.ProviderCluster) error {
 		_, err :=
 			g.ClusterManagerClient.GetCluster(g.Context,
 				&containerpb.GetClusterRequest{Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", clusterp.Project,
-					clusterp.Region, clusterp.ShortName)})
+					clusterp.Region, clusterp.Name)})
 
 		if err != nil {
 			//I know this looks awful but you need to test if the cluster is alive

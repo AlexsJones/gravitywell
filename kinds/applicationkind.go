@@ -1,16 +1,18 @@
 package kinds
 
 type Application struct {
-	Name         string     `yaml:"Name"`
-	Namespace    string     `yaml:"Namespace"`
-	Git          string     `yaml:"Git"`
-	GitReference string     `yaml:"GitReference"`
-	ActionList   ActionList `yaml:"ActionList"`
+	Name      string `yaml:"Name"`
+	Namespace string `yaml:"Namespace"`
+	VCS       struct {
+		FileSystem   string `yaml:"FileSystem"`
+		Git          string `yaml:"Git"`
+		GitReference string `yaml:"GitReference"`
+	} `yaml:"VCS"`
+	ActionList ActionList `yaml:"ActionList"`
 }
 
 type ApplicationCluster struct {
-	ShortName    string `yaml:"ShortName"`
-	FullName     string `yaml:"FullName"`
+	Name         string `yaml:"Name"`
 	Applications []struct {
 		Application Application `yaml:"Application"`
 	} `yaml:"Applications"`

@@ -8,4 +8,4 @@ Executions:
   - Execute:
     Kind: "RunActionList"
     Configuration:
-      Path: example-gcp/templates/actionlist/actionlist-deployment.yaml
+      Path: examples/common/templates/actionlist/actionlist-deployment.yaml

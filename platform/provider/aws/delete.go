@@ -17,7 +17,7 @@ func (awsp *AWSProvider) Delete(clusterp kinds.ProviderCluster) error {
 	ec := eks.New(awsp.AWSClient)
 
 	_, err := ec.DeleteCluster(&eks.DeleteClusterInput{
-		Name: aws.String(clusterp.ShortName),
+		Name: aws.String(clusterp.Name),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -55,7 +55,7 @@ func (awsp *AWSProvider) Delete(clusterp kinds.ProviderCluster) error {
 	for {
 		color.Blue(fmt.Sprintf("Started cluster deletion"))
 
-		do, err := ec.DescribeCluster(&eks.DescribeClusterInput{Name: aws.String(clusterp.ShortName)})
+		do, err := ec.DescribeCluster(&eks.DescribeClusterInput{Name: aws.String(clusterp.Name)})
 		if err != nil {
 			return nil
 		}

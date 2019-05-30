@@ -6,15 +6,14 @@ import (
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/state"
 	"github.com/fatih/color"
-	logger "github.com/sirupsen/logrus"
 	"github.com/jpillora/backoff"
+	logger "github.com/sirupsen/logrus"
 	v1betav1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"time"
 )
-
 
 func execV1BetaDeploymentResource(k kubernetes.Interface, objdep *v1betav1.Deployment, namespace string,
 	opts configuration.Options, commandFlag configuration.CommandFlag, shouldAwaitDeployment bool) (state.State, error) {

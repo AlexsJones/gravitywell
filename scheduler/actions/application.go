@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
@@ -32,17 +31,13 @@ func loadActionList(path string) kinds.ActionList {
 	}
 	return appc
 }
-func prettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
-}
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
+	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
 
-	if execute.Kind =="" {
-		fmt.Printf(prettyPrint(deployment))
+	if execute.Kind == "" {
+		fmt.Printf(PrettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
-			deployment.Git,clusterName))
+			deployment.VCS.Git, clusterName))
 	}
 
 	if execute.Configuration == nil {
@@ -81,7 +76,7 @@ func executeDeployment(deployment kinds.Application, opt configuration.Options,
 	clusterName string, commandFlag configuration.CommandFlag) {
 	logger.Info(fmt.Sprintf("Loading deployment %s\n", deployment.Name))
 
-	remoteVCSRepoName, err := vcs.FetchRepo(deployment.Git, deployment.GitReference, opt)
+	remoteVCSRepoName, err := vcs.FetchRepo(deployment.VCS.Git, deployment.VCS.GitReference, opt)
 	if err != nil {
 		logger.Error(err.Error())
 

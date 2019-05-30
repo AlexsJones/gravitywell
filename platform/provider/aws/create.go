@@ -34,7 +34,7 @@ func (awsp *AWSProvider) Create(clusterp kinds.ProviderCluster) error {
 
 	input := &eks.CreateClusterInput{
 		ClientRequestToken: aws.String(u.String()),
-		Name:               aws.String(clusterp.ShortName),
+		Name:               aws.String(clusterp.Name),
 		ResourcesVpcConfig: &eks.VpcConfigRequest{
 			SecurityGroupIds: securityGroupId,
 			SubnetIds:        subnetId,
@@ -80,7 +80,7 @@ func (awsp *AWSProvider) Create(clusterp kinds.ProviderCluster) error {
 	for {
 		color.Blue(fmt.Sprintf("Started cluster build"))
 
-		do, err := ec.DescribeCluster(&eks.DescribeClusterInput{Name: aws.String(clusterp.ShortName)})
+		do, err := ec.DescribeCluster(&eks.DescribeClusterInput{Name: aws.String(clusterp.Name)})
 		if err != nil {
 			return err
 		}

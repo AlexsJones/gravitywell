@@ -2,18 +2,19 @@ APIVersion: "v1"
 Kind: "Application"
 Strategy:
   - Cluster:
-      FullName: "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}"
-      ShortName: "{{.clustername}}"
+      Name: "{{.clustername}}"
       Applications:
         - Application:
             Name: "kubernetes-mongodb-cluster"
             Namespace: "mongodb"
-            Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
-            #Optional tree reference selectors - use one at a time and follow format
-            # refs/heads/{branchname}
-            # refs/tags/{tagname}
-            # refs/remotes/
-            GitReference: refs/heads/master #Optional and this example just pulls master
+            VCS:
+              FileSystem: # Optional
+              Git: "git@github.com:AlexsJones/kubernetes-mongodb-cluster.git"
+              #Optional tree reference selectors - use one at a time and follow format
+              # refs/heads/{branchname}
+              # refs/tags/{tagname}
+              # refs/remotes/
+              GitReference: refs/heads/master #Optional and this example just pulls master
             ActionList:
               Executions:
                 - Execute:
