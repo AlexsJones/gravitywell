@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.34.0
+	github.com/AlexsJones/vortex v0.1.0-alpha // indirect
 	github.com/aws/aws-sdk-go v1.19.7
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dimiro1/banner v0.0.0-20161108151223-c2f858997d49
@@ -32,7 +33,6 @@ require (
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890 // indirect
-	golang.org/x/time v0.0.0-20161028155119-f51c12702a4d // indirect
 	google.golang.org/api v0.0.0-20181229000844-f26a60c56f14 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20181221175505-bd9b4fb69e2f
