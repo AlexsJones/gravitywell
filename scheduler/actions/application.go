@@ -32,12 +32,12 @@ func loadActionList(path string) kinds.ActionList {
 	return appc
 }
 func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt configuration.Options,
-	clusterName string, commandFlag configuration.CommandFlag, repoName string)  {
+	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
 
-	if execute.Kind =="" {
+	if execute.Kind == "" {
 		fmt.Printf(PrettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
-			deployment.VCS.Git,clusterName))
+			deployment.VCS.Git, clusterName))
 	}
 
 	if execute.Configuration == nil {

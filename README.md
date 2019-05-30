@@ -73,20 +73,36 @@ _This can be installed either via golang or as a binary also_
 
 _Lets take it for a spin using the gcp example_
 
+
+If you've looked at the templates you'll see a helmesque style of interpolation
 ```
-#If you've looked at the templates you'll see a helmesque style of interpolation
-# "gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
+"gke_{{.projectname}}_{{.projectregion}}_{{.clustername}}" we're going to override
+```
 
-# Build the cluster template
+Build the cluster template
+```
+vortex --output deployment/cluster --template examples/gcp/templates/cluster --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=gke_alex-example_us-east4_testcluster"
+```
+Build the example application templates
+```
 vortex --output deployment/applications --template examples/common/templates/application --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=gke_alex-example_us-east4_testcluster"
-# Build the example application templates
-vortex --output deployment/applications --template examples/common/templates/application --set "projectname=alex-example" --set "projectregion=us-east4" --set "clustername=gke_alex-example_us-east4_testcluster"
+```
+The deployment directory should look like this
+```
+deployment
+├── applications
+│   ├── apache_tika.yaml
+│   ├── mongodb.yaml
+│   └── zookeeper.yaml
+└── cluster
+    └── small.yaml
+```
 
+```
 gravitywell create -f deployment/
-
-# This will now start to provision any clusters that are required and deploy applications
-
 ```
+This will now start to provision any clusters that are required and deploy applications
+
 
 ## Running on Minikube
 

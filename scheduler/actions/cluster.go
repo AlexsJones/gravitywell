@@ -21,7 +21,6 @@ import (
 
 func NewMinikubeConfig() (*minikube.MiniKubeProvider, error) {
 
-
 	return nil, nil
 }
 func MinikubeClusterProcessor(minikubeprovider *minikube.MiniKubeProvider,
