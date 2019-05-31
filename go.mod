@@ -7,6 +7,7 @@ require (
 	github.com/AlexsJones/vortex v0.1.0-alpha // indirect
 	github.com/aws/aws-sdk-go v1.19.7
 	github.com/davecgh/go-spew v1.1.1
+	github.com/digitalocean/godo v1.15.0 // indirect
 	github.com/dimiro1/banner v0.0.0-20161108151223-c2f858997d49
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/color v1.7.0
@@ -31,10 +32,7 @@ require (
 	github.com/spf13/pflag v1.0.1 // indirect
 	go.opencensus.io v0.18.0 // indirect
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
-	golang.org/x/net v0.0.0-20181220203305-927f97764cc3 // indirect
-	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890 // indirect
 	google.golang.org/api v0.0.0-20181229000844-f26a60c56f14 // indirect
-	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20181221175505-bd9b4fb69e2f
 	google.golang.org/grpc v1.17.0 // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect

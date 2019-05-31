@@ -12,7 +12,7 @@ Strategy:
             Labels:
               type: "test"
             NodeConfiguration:
-              VMDriver: kvm2
+              VMDriver: hyperkit
               DiskSize: 30g
               Memory: 8192
               CPU: 4
