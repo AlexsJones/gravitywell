@@ -211,7 +211,14 @@ Strategy:
         - Application:
             Name: "kubernetes-apache-tika"
             Namespace: "tika"
-            Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+            VCS:
+               FileSystem: # Optional
+               Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+               #Optional tree reference selectors - use one at a time and follow format
+               # refs/heads/{branchname}
+               # refs/tags/{tagname}
+               # refs/remotes/
+              GitReference: refs/heads/master #Optional and this example just pulls master
             ActionList:
               Executions:
                 - Execute:
