@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/configuration"
 	"github.com/AlexsJones/gravitywell/kinds"
+	"github.com/AlexsJones/gravitywell/shared"
 	"github.com/AlexsJones/gravitywell/vcs"
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -35,7 +36,7 @@ func selectAndExecute(execute kinds.Execute, deployment kinds.Application, opt c
 	clusterName string, commandFlag configuration.CommandFlag, repoName string) {
 
 	if execute.Kind == "" {
-		fmt.Printf(PrettyPrint(deployment))
+		fmt.Printf(shared.PrettyPrint(deployment))
 		logger.Fatalf(fmt.Sprintf("kind missing from execute block: (Check file indentation)[%s][%s]",
 			deployment.VCS.Git, clusterName))
 	}

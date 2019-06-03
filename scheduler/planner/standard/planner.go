@@ -2,8 +2,8 @@ package standard
 
 import (
 	"github.com/AlexsJones/gravitywell/configuration"
-	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
+	"github.com/AlexsJones/gravitywell/shared"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -34,7 +34,7 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 
 		}
 	}
-	logger.Infof(actions.PrettyPrint(s.plan.clusterDeployments))
+	logger.Infof(shared.PrettyPrint(s.plan.clusterDeployments))
 	//At this point if there are no clusters, we set a flag to tell the plan to only run applications
 	if len(s.plan.clusterDeployments) == 0 {
 		logger.Info("No clusters found to deploy - skipping")
@@ -57,7 +57,7 @@ func (s StandardPlanner) GeneratePlan(configuration *configuration.Configuration
 		}
 	}
 	// -------------------------------------------------------------------------------------------
-	logger.Infof(actions.PrettyPrint(s.plan.clusterApplications))
+	logger.Infof(shared.PrettyPrint(s.plan.clusterApplications))
 	// -------------------------------------------------------------------------------------------
 	return s.plan, nil
 }
