@@ -1,0 +1,28 @@
+APIVersion: "v1"
+Kind: "Cluster"
+Strategy:
+  - Provider:
+      Name: "Digital Ocean"
+      Clusters:
+        - Cluster:
+            Name: "{{.clustername}}"
+            Project: "{{.projectname}}"
+            Region: "nyc1"
+            KubernetesVersion: "1.14.1-do.3"
+            Labels:
+              type: "test"
+            NodePools:
+              - NodePool:
+                  Name: "np1"
+                  Count: 1
+                  NodeType: "s-1vcpu-2gb"
+                  Labels:
+                    k8s-node-type: "test"
+            PostInstallHook:
+              - Execute:
+                  Path: "."
+                  Shell: "doctl kubernetes cluster kubeconfig save {{.clustername}}"
+            PostDeleteHook:
+              - Execute:
+                  Path: "."
+                  Shell: "pwd"

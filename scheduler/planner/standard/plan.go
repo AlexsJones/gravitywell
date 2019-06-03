@@ -136,6 +136,32 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 
 				}
 			}
+		case "digital ocean":
+			//Configure session
+			config, err := actions.NewDigitalOceanConfig()
+			if err != nil {
+				logger.Fatal(err)
+			}
+			for _, clusters := range p.providerClusterReference[k].Dependencies {
+				//Deploy cluster
+				err := actions.DigitalOceanClusterProcessor(config, p.commandFlag, clusters)
+				if err != nil {
+					logger.Fatal(err)
+					os.Exit(1)
+				}
+
+				if p.commandFlag == configuration.Delete {
+					logger.Info("Cluster deleted will not continue")
+					os.Exit(0)
+				}
+
+				//Deploy cluster applications
+				for _, application := range p.clusterApplications[clusters.Name] {
+					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
+					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
+
+				}
+			}
 		default:
 			logger.Warning(fmt.Sprintf("Provider %s unsupported", p.providerClusterReference[k].ProviderName))
 			p.statusWatcher <- &PlanStatus{ShouldHalt: true}
