@@ -1,4 +1,4 @@
-package actions
+package shared
 
 import "encoding/json"
 

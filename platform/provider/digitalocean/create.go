@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"fmt"
 	"github.com/AlexsJones/gravitywell/kinds"
+	"github.com/AlexsJones/gravitywell/shared"
 	"github.com/digitalocean/godo"
 	"github.com/fatih/color"
 	logger "github.com/sirupsen/logrus"
@@ -13,7 +14,7 @@ func convertLabelsIntoTags(labels map[string]string) []string {
 	var tags []string
 	if len(labels) > 0 {
 		for k, v := range labels {
-			composed := fmt.Sprintf("%%s", k, v)
+			composed := fmt.Sprintf("%s:%s", k, v)
 			tags = append(tags, composed)
 		}
 	}
@@ -29,7 +30,7 @@ func (g *DigitalOceanProvider) Create(clusterp kinds.ProviderCluster) error {
 		nodePool.Name = model.NodePool.Name
 		nodePool.Count = model.NodePool.Count
 		nodePool.Size = model.NodePool.NodeType
-		//	nodePool.Tags = convertLabelsIntoTags(model.NodePool.Labels)
+		nodePool.Tags = convertLabelsIntoTags(model.NodePool.Labels)
 		convertedNodePool = append(convertedNodePool, nodePool)
 	}
 
@@ -38,20 +39,23 @@ func (g *DigitalOceanProvider) Create(clusterp kinds.ProviderCluster) error {
 		RegionSlug:  clusterp.Region,
 		VersionSlug: clusterp.KubernetesVersion,
 		NodePools:   convertedNodePool,
-		//		Tags:        convertLabelsIntoTags(clusterp.Labels),
+		Tags:        convertLabelsIntoTags(clusterp.Labels),
 	}
 
-	_, resp, err := g.ClusterManagerClient.Kubernetes.Create(g.Context,
+	kls, resp, err := g.ClusterManagerClient.Kubernetes.Create(g.Context,
 		req)
 	if err != nil {
 		logger.Error(resp)
 		return err
 	}
 
+	logger.Info(shared.PrettyPrint(kls))
+
 	if resp.StatusCode == 201 {
 		for {
+			time.Sleep(time.Second)
 			clust, _, err :=
-				g.ClusterManagerClient.Kubernetes.Get(g.Context, clusterp.Name)
+				g.ClusterManagerClient.Kubernetes.Get(g.Context, kls.ID)
 			if err != nil {
 				continue
 			}
@@ -59,7 +63,6 @@ func (g *DigitalOceanProvider) Create(clusterp kinds.ProviderCluster) error {
 				color.Green("Cluster running")
 				return nil
 			}
-			time.Sleep(time.Second)
 		}
 	}
 	return nil
