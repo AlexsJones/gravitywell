@@ -9,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Release](https://img.shields.io/github/release/AlexsJones/gravitywell.svg)
 
+**Update** Now supports Digital Ocean API for cluster creation
 **Update** AWS API now in Alpha for AWS EKS - Still building a CFN for auto node pool creation. For decent results use a more mature tool for AWS such as [eksctl](https://github.com/weaveworks/eksctl)
 
 Gravitywell is designed to *create kubernetes clusters and deploy your applications.
@@ -18,9 +19,9 @@ It lets you store your entire container infrastructure as code.
 Supported providers:
 
 - [x] Google Cloud Platform
+- [x] Digital Ocean
 - [x] Minikube
 - [ ] Amazon Web Services (Only partially at this time)
-
 
 
 
@@ -289,3 +290,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Helm & terraform both great projects
 * kubicorn does alot of very cool stuff
 * https://eksctl.io/ was a fantastic reference for golang AWS sdk API
+
+## Special thanks
+
+<img src="resources/jetbrains.png" alt="jetbrains" width="200"/>
