@@ -55,6 +55,10 @@ _For Google Cloud Platform please set your service account for the right project
 
 `export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/alex-example-e28058e8985b.json`
 
+_For Digital Ocean please set the TOKEN_
+
+`export DIGITAL_OCEAN_TOKEN=30109aoimvaoim42oi2mg2`
+
 _For Amazon Web Services please set the aws profile name and region_
 
 `export AWS_DEFAULT_PROFILE=alexprod`
