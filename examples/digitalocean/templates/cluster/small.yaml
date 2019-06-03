@@ -25,4 +25,4 @@ Strategy:
             PostDeleteHook:
               - Execute:
                   Path: "."
-                  Shell: "pwd"
+                  Shell: "doctl kubernetes cluster kubeconfig remove {{.clustername}}"
