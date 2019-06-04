@@ -14,7 +14,7 @@ Strategy:
             NodePools:
               - NodePool:
                   Name: "np1"
-                  Count: 1
+                  Count: 3
                   NodeType: "s-1vcpu-2gb"
                   Labels:
                     k8s-node-type: "test"
@@ -22,11 +22,3 @@ Strategy:
               - Execute:
                   Path: "."
                   Shell: "doctl kubernetes cluster kubeconfig save {{.clustername}}"
-            PostDeleteHook:
-              - Execute:
-                  Path: "."
-<<<<<<< HEAD
-                  Shell: "pwd"
-=======
-                  Shell: "doctl kubernetes cluster kubeconfig remove {{.clustername}}"
->>>>>>> feature/digitalocean
