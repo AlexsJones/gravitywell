@@ -59,6 +59,8 @@ _For Digital Ocean please set the TOKEN_
 
 `export DIGITAL_OCEAN_TOKEN=30109aoimvaoim42oi2mg2`
 
+Digital ocean also requires additional tools for authentication found [here](https://github.com/digitalocean/doctl)
+
 _For Amazon Web Services please set the aws profile name and region_
 
 `export AWS_DEFAULT_PROFILE=alexprod`

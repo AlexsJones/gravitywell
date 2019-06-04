@@ -25,4 +25,8 @@ Strategy:
             PostDeleteHook:
               - Execute:
                   Path: "."
+<<<<<<< HEAD
                   Shell: "pwd"
+=======
+                  Shell: "doctl kubernetes cluster kubeconfig remove {{.clustername}}"
+>>>>>>> feature/digitalocean
