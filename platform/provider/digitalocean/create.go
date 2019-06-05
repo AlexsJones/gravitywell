@@ -59,6 +59,7 @@ func (g *DigitalOceanProvider) Create(clusterp kinds.ProviderCluster) error {
 			if err != nil {
 				continue
 			}
+			logger.Info(shared.PrettyPrint(kls))
 			if clust.Status.State == "running" {
 				color.Green("Cluster running")
 				color.Yellow("There is currently an issue where Digital Ocean nodes may not be instantly provisioned; deployments that Await may fail")
