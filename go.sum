@@ -44,8 +44,6 @@ github.com/google/go-querystring v1.0.0 h1:Xkwi/a1rcvNg1PPYe5vI8GbeBY/jrVuDX5ASu
 github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
 github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367 h1:ScAXWS+TR6MZKex+7Z8rneuSJH+FSDqd6ocQyl+ZHo4=
 github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=
-github.com/google/logger v1.0.1 h1:Jtq7/44yDwUXMaLTYgXFC31zpm6Oku7OI/k4//yVANQ=
-github.com/google/logger v1.0.1/go.mod h1:w7O8nrRr0xufejBlQMI83MXqRusvREoJdaAxV+CoAB4=
 github.com/googleapis/gax-go v0.0.0-20181219185031-c8a15bac9b9f h1:UagDZv2cTLFNxuFiG5WvbbxtKTwbLWec8QUnFNqS6Ho=
 github.com/googleapis/gax-go v0.0.0-20181219185031-c8a15bac9b9f/go.mod h1:5VvnLYVimBt+hOVlFtJDkYQHVmk4K27qHHioZjPbYAI=
 github.com/googleapis/gax-go/v2 v2.0.2 h1:/rNgUniLy2vDXiK2xyJOcirGpC3G99dtK1NWx26WZ8Y=

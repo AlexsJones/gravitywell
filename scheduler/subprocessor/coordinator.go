@@ -2,8 +2,8 @@ package subprocessor
 
 import (
 	"fmt"
-	"github.com/google/logger"
 	"github.com/satori/go.uuid"
+	logger "github.com/sirupsen/logrus"
 	"sync"
 )
 
