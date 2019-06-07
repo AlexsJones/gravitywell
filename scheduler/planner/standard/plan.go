@@ -49,6 +49,14 @@ func NewPlan(flag configuration.CommandFlag, opt configuration.Options) *Plan {
 	}
 }
 
+func (p *Plan) processApplications(clusterName string, applications []kinds.Application) {
+	//Deploy cluster applications
+	for _, application := range applications {
+		logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterName))
+		actions.ApplicationProcessor(p.commandFlag, p.opt, clusterName, application)
+	}
+}
+
 func (p *Plan) clusterFirstDeploymentPlan() {
 
 	for k, _ := range p.providerClusterReference {
@@ -73,14 +81,8 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-
 				//Deploy cluster applications
-				for _, application := range p.clusterApplications[clusters.Name] {
-
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
-
-				}
+				p.processApplications(clusters.Name, p.clusterApplications[clusters.Name])
 			}
 		case "amazon web services":
 			//Configure session
@@ -99,14 +101,8 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-
 				//Deploy cluster applications
-				for _, application := range p.clusterApplications[clusters.Name] {
-
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
-
-				}
+				p.processApplications(clusters.Name, p.clusterApplications[clusters.Name])
 			}
 		case "google cloud platform":
 			//Configure session
@@ -126,15 +122,8 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-
 				//Deploy cluster applications
-
-				for _, application := range p.clusterApplications[clusters.Name] {
-
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
-
-				}
+				p.processApplications(clusters.Name, p.clusterApplications[clusters.Name])
 			}
 		case "digital ocean":
 			//Configure session
@@ -154,13 +143,8 @@ func (p *Plan) clusterFirstDeploymentPlan() {
 					logger.Info("Cluster deleted will not continue")
 					os.Exit(0)
 				}
-
 				//Deploy cluster applications
-				for _, application := range p.clusterApplications[clusters.Name] {
-					logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusters.Name))
-					actions.ApplicationProcessor(p.commandFlag, p.opt, clusters.Name, application)
-
-				}
+				p.processApplications(clusters.Name, p.clusterApplications[clusters.Name])
 			}
 		default:
 			logger.Warning(fmt.Sprintf("Provider %s unsupported", p.providerClusterReference[k].ProviderName))
