@@ -8,7 +8,7 @@ import (
 
 func TestLoadMultipleFiles(t *testing.T) {
 
-	conf, e := configuration.NewConfigurationFromPath("./test_dir")
+	conf, e := configuration.NewConfigurationFromPath("./test_dir", []string{})
 	if e != nil {
 		fmt.Println(e.Error())
 		t.Fail()

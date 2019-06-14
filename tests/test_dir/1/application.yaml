@@ -1,15 +1,32 @@
 APIVersion: "v1"
 Kind: "Application"
 Strategy:
-    - Cluster:
-          Name: "gke_beamery-trials_us-east4_testclustera"
-          Applications:
-              - Application:
-                    Name: "kubernetes-apache-tika"
-                    Namespace: "tika"
-                    Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
-                    Action:
-                        - Execute:
-                              Shell: "./build_environment.sh default"
-                              Kubectl:
-                                  Path: deployment
+  - Cluster:
+      Name: "{{.clustername}}"
+      Applications:
+        - Application:
+            Name: "kubernetes-apache-tika"
+            Namespace: "tika"
+            VCS:
+              FileSystem: # Optional
+              Git: "git@github.com:AlexsJones/kubernetes-apache-tika.git"
+              #Optional tree reference selectors - use one at a time and follow format
+              # refs/heads/{branchname}
+              # refs/tags/{tagname}
+              # refs/remotes/
+              GitReference: refs/heads/master #Optional and this example just pulls master
+            ActionList:
+              Executions:
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: pwd
+                    Path: ../ #Optional value
+                - Execute:
+                  Kind: "Shell"
+                  Configuration:
+                    Command: ./build_environment.sh default
+                - Execute:
+                  Kind: "RunActionList"
+                  Configuration:
+                    Path: examples/common/templates/actionlist/actionlist-deployment.yaml
