@@ -12,4 +12,5 @@ type Options struct {
 	MaxBackOffDuration time.Duration
 	Force              bool
 	IgnoreFilter       []string
+	Parallelism        bool
 }

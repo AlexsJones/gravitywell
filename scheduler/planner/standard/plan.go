@@ -6,6 +6,7 @@ import (
 	"github.com/AlexsJones/gravitywell/kinds"
 	"github.com/AlexsJones/gravitywell/scheduler/actions"
 	"github.com/AlexsJones/gravitywell/scheduler/planner"
+	"github.com/AlexsJones/gravitywell/scheduler/subprocessor"
 	"github.com/fatih/color"
 	logger "github.com/sirupsen/logrus"
 	"os"
@@ -28,6 +29,7 @@ type Plan struct {
 	opt                      configuration.Options
 	//Sequence control
 	shouldDeployClusters bool
+	coordinator          *subprocessor.Coordinator
 }
 
 type PlanStatus struct {
@@ -46,17 +48,26 @@ func NewPlan(flag configuration.CommandFlag, opt configuration.Options) *Plan {
 		clusterApplications:      make(map[string][]kinds.Application),
 		commandFlag:              flag,
 		opt:                      opt,
+		coordinator:              subprocessor.NewCoordinator(),
 	}
 }
 
 func (p *Plan) processApplications(clusterName string, applications []kinds.Application) {
 	//Deploy cluster applications
 	for _, application := range applications {
-		logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterName))
-		actions.ApplicationProcessor(p.commandFlag, p.opt, clusterName, application)
+
+		f := func() {
+			logger.Info(fmt.Sprintf("Running deployment of %s for cluster %s", application.Name, clusterName))
+			actions.ApplicationProcessor(p.commandFlag, p.opt, clusterName, application)
+		}
+		if p.opt.Parallelism {
+			p.coordinator.ResourceChannel <- subprocessor.Resource{
+				Process: f}
+		} else {
+			f()
+		}
 	}
 }
-
 func (p *Plan) clusterFirstDeploymentPlan() {
 
 	for k, _ := range p.providerClusterReference {
@@ -182,6 +193,11 @@ func (p *Plan) run() {
 func (p *Plan) Run() planner.IPlanStatusWatcher {
 
 	go p.run()
+
+	if p.opt.Parallelism {
+		logger.Info("Enabled parallelism")
+		go p.coordinator.Run()
+	}
 
 	return p.statusWatcher
 }
