@@ -2,6 +2,10 @@
 
 <img src="https://github.com/ashleymcnamara/gophers/blob/master/SPACEGIRL_GOPHER.png?raw=true" alt="drawing" width="200"/>
 
+
+**This project is deprecated in favour of ClusterAPI or other excellent provisioning tools**
+
+
 ![ProjectStatus](https://img.shields.io/badge/project%20status-Alpha-yellow.svg)
 ![buildstatus](https://travis-ci.org/AlexsJones/gravitywell.svg?branch=master)
 
