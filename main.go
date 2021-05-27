@@ -36,6 +36,7 @@ var Opts struct {
 	Verbose      bool     `short:"v" long:"verbose" description:"Enable verbose logging"`
 	Force        bool     `short:"n" long:"force" description:"Force services to apply even if immutable"`
 	IgnoreFilter []string `short:"i" long:"ignore" description:"Ignore excepts any partial string to test and ignore paths/directories with e.g. --ignore=cluster --ignore=actionlist"`
+	Parallelism  bool     `short:"p" long:"parallelism" description:"Enable application deployment parallelism"`
 }
 
 func Usage() {
@@ -116,6 +117,7 @@ func main() {
 		DryRun:             Opts.DryRun,
 		Force:              Opts.Force,
 		IgnoreFilter:       Opts.IgnoreFilter,
+		Parallelism:        Opts.Parallelism,
 	}
 
 	if _, err := os.Stat(cf.TempVCSPath); os.IsNotExist(err) {

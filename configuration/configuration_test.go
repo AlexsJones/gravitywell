@@ -1,10 +1,12 @@
 package configuration
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestConfigurationBasic(t *testing.T) {
 
-	conf, err := NewConfigurationFromPath("../example-aws/templates")
+	conf, err := NewConfigurationFromPath("../examples/aws/templates", []string{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -15,15 +17,12 @@ func TestConfigurationBasic(t *testing.T) {
 }
 func TestConfigurationAdv(t *testing.T) {
 
-	conf, err := NewConfigurationFromPath("../example-gcp/templates")
+	conf, err := NewConfigurationFromPath("../examples/common/templates", []string{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(conf.ClusterKinds) != 1 {
-		t.Error()
-	}
-	if len(conf.ApplicationKinds) != 4 {
+	if len(conf.ApplicationKinds) != 3 {
 		t.Error()
 	}
 }
