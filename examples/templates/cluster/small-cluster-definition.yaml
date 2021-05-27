@@ -1,0 +1,28 @@
+---
+APIVersion: "v1"
+Kind: "Cluster"
+Strategy:
+- Cluster:
+    Name: "test"
+    Project: "{{.projectname}}"
+    Provider: [ "gce_test","aws_test" ]
+    Continant: [ "us","europe","asia" ]
+    Version: "1.11"
+    ZonePerRegion: 2
+    Labels:
+      type: "test"
+    NodePools:
+    - NodePool:
+        Name: "np1"
+        NodePerZone: 3
+        NodeType: "x-small"
+        Labels:
+          k8s-node-type: "test"
+    PostInstallHook:
+    - Execute:
+        Path: "."
+        Shell: "gcloud container clusters get-credentials {{.clustername}} --region={{.projectregion}} --project={{.projectname}}"
+    PostDeleteHook:
+    - Execute:
+        Path: "."
+        Shell: "pwd"

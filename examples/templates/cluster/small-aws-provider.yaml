@@ -1,0 +1,49 @@
+---
+APIVersion: v1
+Kind: Provider
+Metadata:
+  name: aws_test
+CloudProvider: aws
+Parameters:
+  locations:
+  - us:
+    - us-west2
+  - others:
+    - southamerica-east1
+    - northamerica-northeast1
+    - australia-southeast1
+  NodeType:
+    x-smal: "t2.nano"
+    small: "t2.micro"
+    mediem: "t2.medium"
+    large: "t2.large"
+    x-large: "t2.xlarge"
+    custom:
+      cpu: ""
+      memory: ""
+  Provisioning:
+---
+APIVersion: v1
+Kind: Provider
+Metadata:
+  name: aws_test_2
+CloudProvider: aws
+Parameters:
+  locations:
+  - europe:
+    - europe-north1
+    - europe-west3
+    - europe-west4
+  - asia:
+    - asia-east1
+    - asia-southeast1
+  NodeType:
+    x-smal: "t2.nano"
+    small: "m3.medium"
+    mediem: "m3.xlarge"
+    large: "m4.xlarge"
+    x-large: "m4.2xlarge"
+    custom:
+      cpu: ""
+      memory: ""
+  Provisioning:
